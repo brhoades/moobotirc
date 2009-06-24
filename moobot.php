@@ -75,7 +75,7 @@ function init()
       {
         //$test = find_servers( "TRUE" );
         $bstatus['cacheups']++;
-        exec( "php /srv/http/moobot/updatecache.php > /dev/null 2>&1 &" );
+        exec( "php /srv/http/moobot/updatecache.php > /dev/null &" );
         $CONFIG[ 'nextservertime' ] = time()+$CONFIG[ 'servertimeout' ];
         $con['cached'] = $bot->find_servers( "COUNTS" );
       }
@@ -116,8 +116,6 @@ function init()
             $bot->cmd_send( "JOIN ". $channels[$i]['name'] );
         }
         $firsttime = "FALSE";
-        //Skip the logs //msg Q@CServe.quakenet.org auth Aaron5367 lolpass
-        //fputs($con['socket'], "PRIVMSG NICKSERV GHOST ".$CONFIG['nick']." ".$CONFIG['pass']."\n\r");
         $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG['9pass']." \n\r" );
         $bot->cmd_send( "MODE ".$CONFIG['name']." +x \n\r" );
 
@@ -126,10 +124,7 @@ function init()
       
       if( substr( $con['buffer']['all'], 0, 15 ) == ":servercentral." )
         continue;
-      /*if( $con['buffer']['all'] == $con['buffer']['old'] )
-        continue;
-      else
-        $con['buffer']['old'] = $con['buffer']['all'];*/
+
 //****************
 //
 //COMMANDS
@@ -168,13 +163,10 @@ function init()
             break;
           }
         }
-        //:ikusari!~ikusari@99-195-146-130.dyn.centurytel.net PRIVMSG #knightsofreason :Aaron5367: skype me you whore
-        //Parse the string into what we need
         for( $i=0; $i<3; $i++ )
           unset( $bufarray[$i] );
         $command = ltrim( $bufarray['3'], ":%" );
         unset( $bufarray['3'] );
-        //$bufarray[4]  = ltrim( $bufarray[3], ":" );
         $bufarray = array_values( $bufarray );
         if( $channels[$chanid]['cmds'] == "FALSE" )		//hax
           $command = "channelhasdisabledcommands";
@@ -263,7 +255,7 @@ function init()
             if( $bufarray[0] == NULL )
             {
               $bot->talk( $channel, "Please use the following syntax:" );
-              $bot->talk( $channel, "%urban term (term number)" );
+              $bot->talk( $channel, "%urban term" );
               break;
             }
             
@@ -319,10 +311,7 @@ function init()
               for( $i=0; $i<count($def); $i++ )
                 $bot->talk( $channel, trim($def[$i]) );
             }
-            unset( $def );
-            unset( $count );
-            unset( $num );
-            unset( $term );
+            unset( $def, $count, $num, $term );
             break;
           case "help":
             $bot->talk( $channel, "Current bot commands are:" );
@@ -372,9 +361,7 @@ function init()
               $bot->talk( $channel, "Unknown arguments" );
               break;
             }
-            unset( $server );
-            unset( $serverinfo );
-            unset( $servername );
+            unset( $server, $serverinfo, $servername );
             $server = $bot->tremulous_get_players( $ip, $port );
             $serverinfo = $bot->get_server_settings( $ip, $port );
             $servername = $serverinfo['servername'];
@@ -385,10 +372,7 @@ function init()
               $bot->talk( $channel, "Unable to get a valid server name from $ip:$port" );
               break;
             }
-            unset( $map );
-            unset( $maxplayers );
-            unset( $players );
-            unset( $status );
+            unset( $map, $maxplayers, $players, $status );
             $map = $server['map'];
             $players = count( $server[ alien_players ]  ) + count( $server[ spec_players ]  ) + count( $server[ human_players ]  );
             $maxplayers = $serverinfo['maxplayers'];
@@ -414,17 +398,7 @@ function init()
               $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - $map - ($players/$maxplayers)" );
             else
               $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - OFFLINE" );
-          unset( $map );
-          unset( $server );
-          unset( $players );
-          unset( $maxplayers );
-          unset( $servername );
-          unset( $ip );
-          unset( $port );
-          unset( $status );
-          unset( $serverinfo );
-          unset( $set );
-          unset( $pset );
+          unset( $map, $servers, $players, $maxplayers, $servername, $ip, $port, $status, $serverinfo, $set, $pset );
           break;
           case "servers":
             $bufarray = $bufarray;
@@ -473,10 +447,7 @@ function init()
                 $servers[$i]['map'] = $map;
                 $servers[$i]['averageping'] = $averageping;
               }
-              unset( $map );
-              unset( $server );
-              unset( $players );
-              unset( $averageping );
+              unset( $map, $server, $players, $averageping );
             }
             
             //Make an array of the players for sorting
@@ -486,7 +457,7 @@ function init()
             //Sort!
             sort( $players );
             $players = array_reverse( $players );
-            //print_r($CONFIG['servers']);
+
             //Find out which player value belongs to which and print it out
             for( $i=0;$i<count($servers);$i++ )
             {
@@ -518,18 +489,7 @@ function init()
               else if( $status == "CRASHED" )
                 $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $name )." - CRASHED" );
             }
-            unset( $map );
-            unset( $server );
-            unset( $players );
-            unset( $maxplayers );
-            unset( $servername );
-            unset( $ip );
-            unset( $port );
-            unset( $servers );
-            unset( $serverval );
-            unset( $playernum );
-            unset( $serverinfo );
-            unset( $averageping );
+            unset( $map, $server, $players, $maxplayers, $servername, $ip, $port, $servers, $serverval, $playernum, $serverinfo, $averageping );
             break;
           case "find":
             $player = $bufarray['0'];
@@ -563,12 +523,7 @@ function init()
             }
             else
               $bot->talk( $channel, "No players with ".$player." in their name." );
-            unset( $name );
-            unset( $server );
-            unset( $team );
-            unset( $kills );
-            unset( $ping );
-            unset( $found );
+            unset( $name, $server, $team, $kills, $ping, $found );
             break;
           case "clan":
             $bot->talk( $channel, "Searching ".$con['cached']." cached server(s) for clan members..." );
@@ -593,12 +548,7 @@ function init()
             }
             else
               $bot->talk( $channel, "No clan members were found." );
-            unset( $name );
-            unset( $server );
-            unset( $team );
-            unset( $kills );
-            unset( $ping );
-            unset( $found );
+            unset( $name, $server, $team, $kills, $ping, $found );
             break;
           case "msgs":
           case "says":
@@ -660,7 +610,6 @@ function init()
             }
             break;
           case "rng":
-            //$bufarray['0'] = trim( $bufarray['0'] );
             srand();
             if( count( $bufarray ) == 0 )
             {
@@ -889,7 +838,6 @@ function init()
        }
        else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
        {
-         //:Aaron5367!~Aaron5367@99-195-146-130.dyn.centurytel.net JOIN #knightsofreason
          $parts = explode( " ", $con['buffer']['all'] );
          $name = explode( "!", $parts['0'] );
          $hostmask = $name[1];
@@ -917,7 +865,6 @@ function init()
         $urls = preg_grep( "@\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es)@", $bufarray );
         $urls = array_values( $urls );
         
-        //print_r( $urls );
         if( count( $urls ) > 3 )
           return;
         for( $i=0; $i<count($urls);$i++ )
@@ -949,11 +896,11 @@ function init()
             $bot->talk( $channel, "(".$url.") ".$titles[$i] );
           }
         }
-        unset( $titles );
+        unset( $titles, $urlarray, $urls, $url );
         unset( $urlarray );
         unset( $urls );
         unset( $url );
-      }//:Aaron5367!~Aaron5367@75-121-28-61.dyn.centurytel.net INVITE Moobot5367 #supersecretroom
+      }
       else if( preg_match( "/\:*.INVITE ".preg_quote( $CONFIG['nick'] )."/", $con['buffer']['all'] ) )
       {
         $bufarray = explode( " ", $con['buffer']['all'] );

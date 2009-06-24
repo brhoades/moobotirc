@@ -1073,86 +1073,17 @@ class bot
     }
   }
 
-  function config( )
-  {
-    global $channels, $admins, $privs, $ignores, $config, $con;
-    for( $i=0; $i<count($channels); $i++ )
-    {
-      if( $channels[$i]['svnmon'] == NULL )
-        $channels[$i]['svnmon'] = "TRUE";
-      if( $channels[$i]['log'] == NULL )
-        $channels[$i]['log'] = "TRUE";
-    }
-    
-    $file_handle = fopen( "dat", "r" );
-    while( !feof( $file_handle ) )
-    {
-      $line = fgets( $file_handle );
-      if( substr( $line, 0, 2 ) == "//" )
-        continue;
-        
-      if( substr( $line, 0, 1 ) == "/" )
-      {
-        if( substr( $line, 1, 2 ) == "1" )
-          $in = "priv";
-        else if( substr( $line, 1, 2 ) == "2" )
-          $in = "admin";
-        else if( substr( $line, 1, 2 ) == "3" )
-          $in = "ignore";
-        continue;
-      }
-      $line = explode($line, " ");
-      
-      if( $in == "priv" )
-      {
-        echo "Loading level ".$line[0]." with name ".$line[1];
-        $privs[$line[0]]['name'] = $line[1];
-      }
-      
-      if( $in == "admin" )
-      {
-        echo "Loading user ".$line[0]." with host ".$line[1]." and level ".$line[2];
-        $admins[$line[0]]['host'] = $line[1];
-        $admins[$line[0]]['level'] = $line[2];
-      }
-      
-      if( $in == "ignore" )
-      {
-        $ignores[$line[0]]['host'] = $line[1];
-        $ignores[$line[0]]['time'] = $line[2];
-      }
-      
-      unset($line);
-    }
-    fclose( $file_handle );
-
-    return;
-  }
-
   function check_admin( $hostmask )
   {
     global $CONFIG;
     $admins = $CONFIG['adminname'];
     for( $i=0;$i<count($admins);$i++ )
     {
-  /*    if( count($admins[$i]) > 1 )
-      {
-        $part['0'] = preg_quote( $admins[$i]['0'], "/" );
-        $part['1'] = preg_quote( $admins[$i]['1'], "/" );
-        $search = implode( ".*", $part );
-      }
-      else
-        $search = preg_quote( $admins[$i], "/" );
-      if( preg_match( "/$search/" , $admins[$i] ) !== FALSE )
+      if( $hostmask == $admins[$i] )
         return TRUE;
-    } */
-    
-    if( $hostmask == $admins[$i] )
-      return TRUE;
     }
     
     return FALSE;
-    
   }
 
   function call_vote( $string, $type, $caller, $channel )
@@ -1205,7 +1136,6 @@ class bot
 
     if( stripos( $con['buffer']['all'], "F1" ) || stripos( $con['buffer']['all'], "F2" ) )
     {
-      //:Aaron5367!~Aaron5367@Aaron5367.users.quakenet.org PRIVMSG #knightsofreason ::P
       $parts = explode( " ", $con['buffer']['all'] );
       $hostmask = ltrim( $parts['0'], ":" );
       $hostmaskchunk = explode( "!", $hostmask );
@@ -1279,7 +1209,6 @@ class bot
     $in = preg_replace( "/\^5/", "11", $in );
     $in = preg_replace( "/\^6/", "13", $in );
     $in = preg_replace( "/\^7/", "15", $in );
-  //	$in = preg_replace( "/\^.{1}/", "", $in );
     $in = preg_replace( "//", "", $in );
     return $in;
   }
@@ -1306,9 +1235,8 @@ class bot
   
   function urban_lookup( $term, $num )
   {
+    
     $page = ceil( $num/7 );
-
-
     $term = explode( " ", $term );
     $term = implode( "%20", $term );
     $web = file( "http://www.urbandictionary.com/define.php?page=$page&term=$term" );
@@ -1336,10 +1264,7 @@ class bot
       }
       $defs[$i] = $def3[$i];
     }
-    unset( $web );
-    unset( $def2 );
-    unset( $def1 );
-    unset( $def3 );
+    unset( $web, $def1, $def2, $def3 );
     
     if( $num > 7 )
       $lnum = $num % 7;
