@@ -21,31 +21,51 @@ along with Moobot.  If not, see <http://www.gnu.org/licenses/>.
 */
 $CONFIG = array();
 
-$CONFIG['server'] = 'irc.freenode.net'; // server name, like irc.freenode.net or quakenet.org
-$CONFIG['serverspam'] = 'servercentral.'; // The lines we should parse out have this, generally what is given in the MOTD
-$CONFIG['nick'] = 'Moobot5367'; // Nickname, what people will see in the IRC
-$CONFIG['port'] = 6667; // IRC port, 6667 should work
-$CONFIG['name'] = 'Moobot5367'; // Your offical name, like Aaron@hostname
-$CONFIG['version'] = 'Moobot v.4 by Aaron5367'; //Eventually to be updated to the SVN revision
-$CONFIG['adminname'][0] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
-$CONFIG['pathtoourself'] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobotlog &"; //To reexecute ourselves for rehashing
-$CONFIG['9pass'] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
-$CONFIG[ 'nextservertime' ] = time()-$CONFIG[ 'servertimeout' ];
-$CONFIG['file'] = "moobot.conf"; //Name of the config file, this one
+//We use constants as arrays with strings as the key mess up a lot
+define( "server", 0 );
+define( "serverspam", 1 );
+define( "nick", 2 );
+define( "port", 3 );
+define( "name", 4 );
+define( "version", 5 );
+define( "adminname", 6 );
+define( "pathtoourself", 7 );
+define( "nickpass", 8 );
+define( "nextservertime", 9 );
+define( "dbuser", 10 );
+define( "dbname", 11 );
+define( "dbpass", 12 );
+define( "chatspeaktimeout", 13 );
+define( "checkservtimeout", 14 );
+define( "svnmontimeout", 15 );
+define( "maxvotetime", 16 );
+define( "servertimeout", 17 );
+define( "svnmon", 17 );
+
+$CONFIG[server] = 'irc.freenode.net'; // server name, like irc.freenode.net or quakenet.org
+$CONFIG[serverspam] = 'servercentral.'; // The lines we should parse out have this, generally what is given in the MOTD
+$CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
+$CONFIG[port] = 6667; // IRC port, 6667 should work
+$CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
+$CONFIG[version] = 'Moobot v.4 by Aaron5367'; //Eventually to be updated to the SVN revision
+$CONFIG[adminname][0] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
+$CONFIG[pathtoourself] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobotlog &"; //To reexecute ourselves for rehashing
+$CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
+$CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];
+$CONFIG[svnmon] = TRUE;
 
 //MySQL info
-$CONFIG['dbuser'] = "databaseusername";
-$CONFIG['dbname'] = "databasename";
-$CONFIG['dbpass'] = "databasepassword";
+$CONFIG[dbuser] = "databaseusername";
+$CONFIG[dbname] = "databasename";
+$CONFIG[dbpass] = "databasepassword";
 
 //Timeout for speaking and server checking, in seconds
-$CONFIG['chatspeaktimeout'] = 2;
-$CONFIG['2checkservtimeout'] = 10;
-$svnmontimeout = 30;    //Time between SVN checks
+$CONFIG[chatspeaktimeout] = 2;
+$CONFIG[checkservtimeout] = 10;
+$CONFIG[svnmontimeout] = 30;    //Time between SVN checks
 $nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as we start
-$maxtimeout = 10; 
-$CONFIG['maxvotetime'] = 30; //How long votes last
-$CONFIG[ 'servertimeout' ] = 360; // Max time after not receiving a command from the server to reconnect
+$CONFIG[maxvotetime] = 30; //How long votes last
+$CONFIG[servertimeout] = 360; // Max time after not receiving a command from the server to reconnect
 
 //
 ///////////////////////////

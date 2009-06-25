@@ -23,35 +23,30 @@ along with Moobot.  If not, see <http://www.gnu.org/licenses/>.
 require( "moobot.conf" );
 require( "functions.php" );
 
-$dbcnx = mysql_connect( "localhost", $CONFIG['dbuser'], $CONFIG['dbpass'] );
-mysql_select_db( $CONFIG['dbname'], $dbcnx );
+$dbcnx = mysql_connect( "localhost", $CONFIG[dbuser], $CONFIG[dbpass] );
+mysql_select_db( $CONFIG[dbname], $dbcnx );
 $con = array();
 $alive = "TRUE";
 $bstatus['scrstarttime'] = time();
 
-if( $_GET['ctrl'] == NULL )
+while( $alive == "TRUE" )
 {
-  while( $alive == "TRUE" )
-  {
-    $bstatus['botstarttime'] = time();
-    init();
-  }
+  $bstatus['botstarttime'] = time();
+  init();
 }
 
 function init()
 {
-  global $con, $CONFIG, $servers, $maxtimeout, $channels, $admins, $privs, $ignores, $svnmontimeout, $svnmontime, $nextsvnmontime, $other, $bot, $bstatus; 
+  global $con, $CONFIG, $servers, $channels $nextsvnmontime, $other, $bot, $bstatus; 
   $firsttime = "TRUE";
-  $con['socket'] = fsockopen( $CONFIG['server'], $CONFIG['port'] );
+  $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port] );
 	$lasttime = time();
-  if (!$con['socket'] ) 
-  {
-    print("Could not connect to: ". $CONFIG['server'] ." on port ". $CONFIG['port'] );
-  }
+  if ( !$con['socket'] ) 
+    print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    $bot->cmd_send("USER ". $CONFIG['nick'] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG['name'] );
-    $bot->cmd_send("NICK ". $CONFIG['nick'] ." aaronh.servehttp.com");
+    $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
+    $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
     while( !feof($con['socket']) )
     {
       $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
@@ -60,11 +55,11 @@ function init()
 
       $bstatus['lines']++;
 
-      if( $CONFIG['nextservertime'] < time() )
+      if( $CONFIG[nextservertime] < time() )
       {
         $bstatus['cacheups']++;
         exec( "php /srv/http/moobot/updatecache.php > /dev/null &" );
-        $CONFIG['nextservertime'] = time()+$CONFIG['servertimeout'];
+        $CONFIG[nextservertime] = time()+$CONFIG[servertimeout];
         $con['cached'] = $bot->find_servers( "COUNTS" );
       }
       else if( time() % 15 )
@@ -104,11 +99,11 @@ function init()
             $bot->cmd_send( "JOIN ". $channels[$i]['name'] );
         }
         $firsttime = "FALSE";
-        $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG['9pass']." \n\r" );
-        $bot->cmd_send( "MODE ".$CONFIG['name']." +x \n\r" );
+        $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG[nickpass]." \n\r" );
+        $bot->cmd_send( "MODE ".$CONFIG[nick]." +x \n\r" );
       }
       
-      if( substr( $con['buffer']['all'], 0, 15 ) == ":servercentral." )
+      if( substr( $con['buffer']['all'], 0, 15 ) == $CONFIG[serverspam] )
         continue;
 
 //****************
@@ -161,7 +156,7 @@ function init()
             if( $bot->check_admin( $hostmask ) )
             {
               $bot->cmd_send( "QUIT :Killed by $name" );
-              exec("php ".$CONFIG['pathtoourself']);
+              exec( "php ".$CONFIG[pathtoourself] );
               die( "Restart time" );
             }
             else
@@ -209,14 +204,14 @@ function init()
           case "svnmon":
             if( $bot->check_admin( $hostmask ) )
             {
-              if( $CONFIG['svnmon'] == "TRUE" )
+              if( $CONFIG[svnmon] )
               {
-                $CONFIG['svnmon'] = "FALSE";
+                $CONFIG[svnmon] = FALSE;
                 $bot->talk( $channel, "SVN monitor is now on." );
               }
-              else if( $CONFIG['svnmon'] == "FALSE" )
+              else
               {
-                $CONFIG['svnmon'] = "TRUE";
+                $CONFIG[svnmon] = TRUE;
                 $bot->talk( $channel, "SVN monitor is now off." );
               }
               break;
@@ -638,7 +633,6 @@ function init()
             break;
           case "callvote":
             $type = $bufarray['0'];
-            //function call_vote( $string, $type, $caller, $channel )
             unset( $bufarray['0'] );
             $string = implode( " ", $bufarray );
             $bot->call_vote( $string, $type, $name, $channel );
@@ -796,19 +790,19 @@ function init()
        } 
        else if( stripos( $con['buffer']['all'], "(Nick collision from services.)" ) !== FALSE )
        {
-				 echo "Dying, nick collision";
+				 echo "Dying, nick collision.\r\n";
          return;
        }
-			 else if( $lasttime < ( time() - $maxtimeout*60 ) )
+			 else if( $lasttime < ( time() - $CONFIG['servertimeout'] ) )
 			 {
-				 echo "Dying, haven't recived a response in $maxtimeout minutes.";
+				 echo "Dying, haven't recived a response in $maxtimeout minutes.\r\n";
 				 return;
 			 }
        else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
        {
          $nameend = strpos( $con['buffer']['all'], "!", 1 )-1;
          $name = substr( $con['buffer']['all'], 1, $nameend);
-         $bot->cmd_send("PRIVMSG ".$name." :".$CONFIG['version']."");
+         $bot->cmd_send("PRIVMSG ".$name." :".$CONFIG[version]."");
        }
        else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
        {
@@ -817,12 +811,12 @@ function init()
          $hostmask = $name[1];
          $name = ltrim( $name['0'], ":" );
          $channel = $parts['2'];
-         if( $bot->check_admin( $hostmask ) && $name != $CONFIG['nick'] )
+         if( $bot->check_admin( $hostmask ) && $name != $CONFIG[nick] )
          {
            $bot->cmd_send( "MODE $channel +v $name" );
            $bot->cmd_send( "MODE $channel +o $name" );
          }
-         else if( $name != $CONFIG['nick'] )
+         else if( $name != $CONFIG[nick] )
            $bot->cmd_send( "MODE $channel +v $name" );
        }
       
@@ -872,7 +866,7 @@ function init()
         }
         unset( $titles, $urlarray, $urls, $url );
       }
-      else if( preg_match( "/\:*.INVITE ".preg_quote( $CONFIG['nick'] )."/", $con['buffer']['all'] ) )
+      else if( preg_match( "/\:*.INVITE ".preg_quote( $CONFIG[nick] )."/", $con['buffer']['all'] ) )
       {
         $bufarray = explode( " ", $con['buffer']['all'] );
         $channel = $bufarray['3'];
