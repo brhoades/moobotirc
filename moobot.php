@@ -22,9 +22,7 @@ along with Moobot.  If not, see <http://www.gnu.org/licenses/>.
 
 require( "moobot.conf" );
 require( "functions.php" );
-//
-//I highly recommend not editing beyond this point without PHP experience.
-//
+
 $dbcnx = mysql_connect( "localhost", $CONFIG['dbuser'], $CONFIG['dbpass'] );
 mysql_select_db( $CONFIG['dbname'], $dbcnx );
 $con = array();
@@ -40,12 +38,6 @@ if( $_GET['ctrl'] == NULL )
   }
 }
 
-if( $_GET['ctrl'] != NULL || $_COOKIE['username'] != NULL 
-    || $_COOKIE['password'] != NULL )
-{
-  //Room for control panel...
-}
-
 function init()
 {
   global $con, $CONFIG, $servers, $maxtimeout, $channels, $admins, $privs, $ignores, $svnmontimeout, $svnmontime, $nextsvnmontime, $other, $bot, $bstatus; 
@@ -58,9 +50,6 @@ function init()
   }
   else 
   {
-    //$con['stimes'] = 0;
-    //$con['lastspeaktime'] = time()-10;
-    //$firsttime = "FALSE";
     $bot->cmd_send("USER ". $CONFIG['nick'] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG['name'] );
     $bot->cmd_send("NICK ". $CONFIG['nick'] ." aaronh.servehttp.com");
     while( !feof($con['socket']) )
@@ -73,7 +62,6 @@ function init()
 
       if( $CONFIG[ 'nextservertime' ] < time() )
       {
-        //$test = find_servers( "TRUE" );
         $bstatus['cacheups']++;
         exec( "php /srv/http/moobot/updatecache.php > /dev/null &" );
         $CONFIG[ 'nextservertime' ] = time()+$CONFIG[ 'servertimeout' ];
@@ -118,8 +106,6 @@ function init()
         $firsttime = "FALSE";
         $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG['9pass']." \n\r" );
         $bot->cmd_send( "MODE ".$CONFIG['name']." +x \n\r" );
-
-        //config();
       }
       
       if( substr( $con['buffer']['all'], 0, 15 ) == ":servercentral." )
@@ -144,9 +130,7 @@ function init()
       $textarray = $text;
       $text = implode( " ", $text );
       if( stripos( $text, ":%" ) === FALSE )
-      {
         $text = ltrim( $text, ":" );
-      }
       else
       {
         unset( $textarray['0'] );
@@ -170,7 +154,6 @@ function init()
         $bufarray = array_values( $bufarray );
         if( $channels[$chanid]['cmds'] == "FALSE" )		//hax
           $command = "channelhasdisabledcommands";
-        echo  "$name, $command, $channel, \"$hostmask\"\n\t";
         $bstatus['cmds']++;
         switch( $command )
         {
@@ -263,9 +246,7 @@ function init()
             {
               $term = $bufarray[0];
               $def = $bot->urban_lookup( $term, 1 );
-              //$count = $def["COUNT"];
               print_r( $def );
-              //unset( $def["COUNT"] );
               if( count( $def ) > 5 )
               {
                 $bot->talk( $channel, "The definition is too long, you can view it at http://urbandictionary.com/define.php?term=$term" );
@@ -277,22 +258,9 @@ function init()
             }
             else
             {
-              //$termstuff = explode( " ", $bufarray );
-              //if( is_int( $term[ count($term)-1 ] ) )
-              //{
-              //  $num  = $termstuff[ count($termstuff)-1 ]; 
-              //  unset( $termstuff[ count($termstuff)-1 ] );
-              //}
-              //else
               $num = 1;
               $term = implode( " ", $bufarray );
-              //$num  = $termstuff[ count($termstuff)-1 ]; 
-              //$term = $bufarray[0];
-              //$num = $bufarray[1];
               $def = $bot->urban_lookup( $term, $num );
-              //print_r( $def );
-              //$count = $def["COUNT"];
-              //unset( $def["COUNT"] );
               if( count( $def ) > 5 )
               {
                 $max = 4;
@@ -585,7 +553,6 @@ function init()
               $rcon = $CONFIG['servers']['KOR'][1]['rcon'];
             }
             
-            //echo "IP:$ip, port:$port, message:$message, commands:$command";
             if( $command == "msgs" )
               $message2 = $bot->tremulous_rcon( $ip, $port, "m $target ^2$message", $rcon, "FALSE" );
             else if( $command == "says" )
@@ -739,7 +706,6 @@ function init()
             break;
           case "weather":
             $lugar = implode( " ", $bufarray );
-            echo "arg1 = $lugar\n<br />";
             $out = $bot->weather( $lugar );
             $wind = $out['wind'];
             $pressure = $out['pressure'];
@@ -826,21 +792,7 @@ function init()
 					mysql_query("INSERT INTO log (user,text,channel,time,lineid) VALUES (\"$name\",\"$text\",\"$channel\",\"$time\",\"$entryid\")");
         }
 				else if( $channels[$chanid]['log'] == "FALSE" )
-					print "Channel has disabled log submission.\r\n";
-/*        if( mysql_num_rows(mysql_query("SELECT * FROM users WHERE user=\"$name\"")) == 1 ) 
-        {
-          $words = mysql_query("SELECT wordcount FROM users WHERE user=\"$name\"")+count_words($text);
-          $char = mysql_query("SELECT charcount FROM users WHERE user=\"$name\"")+strlen($text);
-          mysql_query("UPDATE users SET wordcount=\"$words\" WHERE user=\"$name\"");
-          mysql_query("UPDATE users SET charcount=\"$char\" WHERE user=\"$name\"");
-        }
-        else if( mysql_num_rows(mysql_query("SELECT * FROM users WHERE user=\"$name\"")) == 0 )
-        {
-          $words = count_words($text);
-          $char = strlen($text);
-          mysql_query("INSERT INTO users (user,wordcount,charcount) VALUES (\"$name\",\"$words\",\"$char\")");
-        } */
-        //print "Submitting query... ". mysql_error()."\n\r";   
+					print "Channel has disabled log submission.\r\n"; 
        } 
        else if( stripos( $con['buffer']['all'], "(Nick collision from services.)" ) !== FALSE )
        {
@@ -919,9 +871,6 @@ function init()
           }
         }
         unset( $titles, $urlarray, $urls, $url );
-        unset( $urlarray );
-        unset( $urls );
-        unset( $url );
       }
       else if( preg_match( "/\:*.INVITE ".preg_quote( $CONFIG['nick'] )."/", $con['buffer']['all'] ) )
       {

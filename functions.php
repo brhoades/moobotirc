@@ -539,10 +539,8 @@ class bot
       //$info = get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
       //echo "Checking server ".$info[ 'servername' ]."<br />";
       $server[ $i ] = $bot->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-      print_r( $server[ $i ] );
       for( $h=0; $h < count( $server[ $i ][ alien_players ] ); $h++ )
       {
-        echo "Checking ".$server[ $i ][ alien_players ][ $h ][ 'name' ]." against ".$name."<br />";
         if( preg_match( "/$name/i", $server[ $i ][ alien_players ][ $h ][ 'name' ] ) )
         {
           $currid = count( $found );
@@ -555,7 +553,6 @@ class bot
       }
       for( $h=0; $h < count( $server[ $i ][ human_players ] ); $h++ )
       {
-        echo "Checking ".$server[ $i ][ human_players ][ $h ][ 'name' ]." against ".$name."<br />";
         if( preg_match( "/$name/i", $server[ $i ][ human_players ][ $h ][ 'name' ] ) )
         {
           $currid = count( $found );
@@ -568,7 +565,6 @@ class bot
       }
       for( $h=0; $h < count( $server[ $i ][ spec_players ] ); $h++ )
       {
-        echo "Checking ".$server[ $i ][ spec_players ][ $h ][ 'name' ]." against ".$name."<br />";
         if( preg_match( "/$name/i", $server[ $i ][ spec_players ][ $h ][ 'name' ] ) )
         {
           $currid = count( $found );
@@ -801,10 +797,7 @@ class bot
        unset( $tries );
 
         if( $svnout[1] == $thissvnlog )
-        {
-          echo "SVN: ".$svnout[1]." == $thissvnlog\n";
           continue;
-        }
         else
         {
           unset( $svnout2 );
@@ -832,10 +825,8 @@ class bot
           $k = 0;
           for( $i=0; $i<count($svnout2)-1; $i++ )
           {
-            //echo "$i\n";
             if( $i == 0 || $i == 1 || $i == 2 || $i == count($svnmon2)-1 )
               continue;
-            //echo "$i - ".$svnout2[$i]."\n";
             if( stripos( $svnmon2[$i], "----------" ) !== FALSE )
               continue;
             $message[$k] = $svnout2[$i];
@@ -869,9 +860,7 @@ class bot
               $added++;
             }
           }
-          //print_r( $file );
           $dirs = 1;
-          //for( $i=0; $i<count($file); $i++ )
           if( count( $file ) > 1 )
           {
             $dirs = 0;
@@ -883,10 +872,6 @@ class bot
               
               $dirs++;
               $dirlist[count($dirlist)] = $file[$j]['dirs'];
-              //$tempfile2 = $file[$j]['xdir']; 
-              //if( count($tempfile) != count($tempfile2) )
-              //  $dirs++;
-              //else if( $file[0]['dirs'] != 
             }
           }
           if( $dirs > count( $file ) )
@@ -923,9 +908,6 @@ class bot
             $string[1+$i] = $message[$i];
           }
           
-          //print_r( $string );
-          //print_r( $message );
-          //include( "/srv/http/moobot/moobot.conf" );
           for( $i=0; $i<count($channels); $i++ )
           {
             if( $channels[$i]['svnmon'] == "FALSE" )
@@ -1249,8 +1231,7 @@ class bot
     $web = file( "http://www.urbandictionary.com/define.php?page=$page&term=$term" );
     $test = preg_grep( "/".preg_quote("but these are close:")."/i", $web );
     $test2 = preg_grep( "/".preg_quote("isn't defined yet")."/i", $web );
-    //if( count( $test ) > 0 || count( $test2 ) > 0 )
-    //  break;
+    
     if( count( $test ) > 0 || count( $test2 ) > 0 )
       return( "Definition $num of $term not found!" );
     $web = implode( "\n", $web );
@@ -1263,12 +1244,9 @@ class bot
     {
       $def3[$i] = $def2[$i][0];
       $def3[$i] = explode( "<br/>", $def3[$i] );
-      //echo "Definition $i on page $page:<br />";
       for( $k=0; $k<count($def3[$i]); $k++ )
-      {
-        //echo $def3[$i][$k]."<br />";
         $def3[$i][$k] = html_entity_decode( strip_tags( $def3[$i][$k] ) );
-      }
+      
       $defs[$i] = $def3[$i];
     }
     unset( $web, $def1, $def2, $def3 );
@@ -1316,7 +1294,6 @@ class bot
         $servername = $backupname;
       if( $map == NULL && $maxplayers == NULL && $serverp == NULL && $serveri == NULL )
       {
-        echo "---OFFLINE---\n\r";
         $status[$i] = "^1OFFLINE";
         print_r( $serverp );
         print_r( $serveri );
@@ -1324,7 +1301,6 @@ class bot
       else if( $averageping >= 999 && $map != "" && $players >= 3 )
       {
         $status[$i] = "^1CRASHED";
-        echo "---CRASHED---";
         print_r( $serverp );
         print_r( $serveri );
       }
