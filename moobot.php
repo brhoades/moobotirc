@@ -684,7 +684,7 @@ function init()
             case "part":
             if( $bot->check_admin( $hostmask ) )
             {
-              $bot->cmd_send("PART ".$bufarray[0] );
+              $bot->cmd_send( "PART ".$bufarray[0] );
               if( $channel != $bufarray[0] )
                 $bot->talk( $channel, $name.": I have parted ".$bufarray[0] );
             }
@@ -736,6 +736,28 @@ function init()
             $lines = $bstatus['lines'];
             
             $bot->talk( $channel, "I've been up for $uptime, sent $cmdstoserv command(s) to the server, processed $lines line(s) of text, talked $talked time(s), ran $cmds command(s), snarfed $snarfs url(s), and contacted a tremulous server $servers time(s)." );
+            break;
+          case "weather":
+            $lugar = implode( " ", $bufarray );
+            echo "arg1 = $lugar\n<br />";
+            $out = $bot->weather( $lugar );
+            $wind = $out['wind'];
+            $pressure = $out['pressure'];
+            $advisories = $out['advisories'];
+            $clouds = $out['clouds'];
+            $humidity = $out['humidity'];
+            $place = $out['place'];
+            $temp = $out['temp'];
+            
+            if( $place != NULL && $wind != NULL && $humidity != NULL )
+            {
+              $bot->talk( $channel, "Weather report for: $place" );
+              $bot->talk( $channel, "Temp: $temp | Humidity: $humidity | Clouds: $clouds | Pressure: $pressure | Wind: $wind " );
+              if( $advisories != NULL )
+                $bot->talk( $channel, "Advisories: $advisories" );
+            }
+            else
+              $bot->talk( $channel, "That zip code/location was not found or was ambiguous." );
             break;
         }
       }

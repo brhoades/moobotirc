@@ -362,6 +362,13 @@ class other
     fclose( $hfile );
     return $result;
   }
+  
+  function replace( $replacewhat, $withwhat, $inwhat )
+  {
+    $inwhat = explode( $replacewhat, $inwhat );
+    $inwhat = implode( $withwhat, $inwhat );
+    return( $inwhat );
+  }
 }
 
 class bot
@@ -1342,6 +1349,62 @@ class bot
     }
     for( $i=0; $i<count($message); $i++ )
       $bot->talk( $channel, $message[$i] );
+  }
+  
+  function weather( $locale )
+  {
+    global $bot, $other;
+    if( is_int( $locale ) )
+      $weather = file( "http://www.weatherunderground.com/cgi-bin/findweather/getForecast?query=$locale" );
+    else
+    {
+      $locale = explode( " ", $locale );
+      $locale = implode( "+", $locale );
+      
+      $weather = file( "http://www.wunderground.com/cgi-bin/findweather/hdfForecast?query=$locale&searchType=WEATHER" );
+    }
+    for( $i=0; $i<count($weather); $i++ )
+    {
+      if( $place == NULL && stripos( trim( $weather[$i] ), "<td class=\"nobr full\">" ) !== FALSE )
+        $place = strip_tags( $weather[$i+1] );
+
+      if( $humidity == NULL && stripos( trim( $weather[$i] ), "<td>Humidity:</td>" ) !== FALSE )
+        $humidity = strip_tags( $weather[$i+1] );
+        
+      if( $wind == NULL && stripos( trim( $weather[$i] ), "<td>Wind:</td>" ) !== FALSE )
+        $wind = strip_tags( $weather[$i+3] );
+        
+      if( $pressure == NULL && stripos( trim( $weather[$i] ), "<td>Pressure:</td>" ) !== FALSE )
+        $pressure = strip_tags( $weather[$i+3] );
+        
+      if( $clouds == NULL && stripos( trim( $weather[$i] ), "<td class=\"vaT\">Clouds:</td>" ) !== FALSE )
+        $clouds = strip_tags( $weather[$i+3] );
+
+      if( $advisories == NULL && stripos( trim( $weather[$i] ), "<td class=\"full\">" ) !== FALSE
+          && stripos( trim( $weather[$i+1] ), "Active Advisory" ) !== FALSE )
+        $advisories = strip_tags( $weather[$i+2] );
+        
+      if( $temp == NULL && stripos( trim( $weather[$i] ), "<div style=\"font-size: 17px;\"><span class=\"pwsrt\"" ) !== FALSE )
+        $temp = strip_tags( $weather[$i+1] );
+        
+    }
+
+    $wind = $other->replace( "&nbsp;", " ", $wind );
+    $pressure = $other->replace( "&nbsp;", " ", $pressure );
+    $temp = $other->replace( "&nbsp;", " ", $temp );
+    $temp = $other->replace( "&#176;", "", $temp );
+    $advisories = $other->replace( "&nbsp;", "", $advisories );
+
+    //PACK!
+    $out['wind'] = trim( $wind );
+    $out['pressure'] = trim( $pressure );
+    $out['advisories'] = trim( $advisories );
+    $out['clouds'] = trim( $clouds );
+    $out['humidity'] = trim( $humidity );
+    $out['place'] = trim( $place );
+    $out['temp'] = trim( $temp );
+
+    return( $out );
   }
 
 }
