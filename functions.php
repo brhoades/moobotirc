@@ -756,7 +756,7 @@ class bot
         $out = $bot->tremulous_rcon( $server, $port, $command, $rcon, "TRUE" );
         echo "Retrying, no data recieved...\n<br />";
         if( $out != NULL )
-          return $out;
+          return $bot->tremulous_replace_colors_irc( $out );
         $tries++;
       }
     }
@@ -767,7 +767,7 @@ class bot
     echo "</pre>\n";
     $data = explode( "\n", $data_full );
     fclose($fp);
-    return $data;
+    return $bot->tremulous_replace_colors_irc( $data );
   }
 
 
