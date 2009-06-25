@@ -417,7 +417,6 @@ class bot
     stream_set_timeout( $fp, 1 );
     $data_full = fread( $fp, 10000 );
     $data_full = substr( $data_full, 19 );
-    //echo $data_full;
     $data = explode("\n", $data_full);
     fclose($fp);
     $server_data = explode("\\", $data[0]);
@@ -512,11 +511,6 @@ class bot
     fclose( $fp );
     for( $i=0; $i<count( $data_full ); $i++ )
     {
-      //if( ( $i % 2 ) )
-      //  echo $data_full[ $i ]." = ";
-      //else
-      //  echo $data_full[ $i ]."<br />\n";
-      
       if( $data_full[ $i ] == "sv_hostname" )
         $info[ 'servername' ] = trim( $bot->tremulous_replace_colors_irc( $data_full[ $i + 1 ] ) ); 
       if( $data_full[ $i ] == "sv_maxclients" )
@@ -536,8 +530,6 @@ class bot
     $name = preg_quote( $name ); //Search for everything
     for( $i=0; $i < count( $ipandport ); $i++ )
     {
-      //$info = get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-      //echo "Checking server ".$info[ 'servername' ]."<br />";
       $server[ $i ] = $bot->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
       for( $h=0; $h < count( $server[ $i ][ alien_players ] ); $h++ )
       {
@@ -569,7 +561,6 @@ class bot
         {
           $currid = count( $found );
           $found[ $currid ]['name'] = $server[ $i ][ spec_players ][ $h ][ 'colored_name' ];
-          //$found[ $currid ]['name'] = $server[ $i ][ spec_players ][ $h ][ 'kills' ];
           $found[ $currid ]['ping'] = $server[ $i ][ spec_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "spectators";
           $found[ $currid ]['server'] = $ipandport[ $i ][ 'name' ];
@@ -588,7 +579,6 @@ class bot
       echo "Opening cache...\n";
       $contents = fread( $handle, filesize( "/srv/http/moobot/cache" ) );
       fclose( $handle );
-      echo "Found ".count( unserialize( $contents ) )." servers";
       return unserialize( $contents );
     }
     else if( $forcenew == "COUNTS" )
@@ -612,21 +602,13 @@ class bot
     }
     else if( $forcenew == "TRUE" )
     {
+      //If the site is down we have to use the old list again :/
       if( !$other->url_exists( "http://tremmaster.quakedev.net/index.php" ) )
         return find_servers( "FALSE" );
-      //We're stuck with the old list until the server comes back up.
       $contents = file( "http://tremmaster.quakedev.net/index.php" );
-      //print_r( $contents );
       $contents = implode( "\n", $contents );
-      //exec( "cd /srv/http/moobot/ && rm index.php && wget http://tremmaster.quakedev.net/index.php" );
-      //$handle = fopen( "/srv/http/moobot/index.php", "r");
-      //$contents = fread( $handle, filesize( "/srv/http/moobot/index.php" ) );
-      //echo $contents;
-      //print_r( $contents );
-      //$contents = implode( "", $contents );
       $contents = strip_tags( $contents );
       $contents = explode( " ", $contents );
-      //fclose( $handle );
       for( $i=0; $i < count( $contents ); $i++ )
       {
         //if there is no line
@@ -680,9 +662,6 @@ class bot
           unset( $ipandport[ $i ] );
           continue; 
         }
-        //get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-        //echo "IP of ".$ipandport[ 0 ]." and port of ".$ipandport[ 1 ]."<br />\n";
-        //echo $contents[ $i ]."\n<br />";
       }
       if( count( $ipandport ) <= 1 )
       {

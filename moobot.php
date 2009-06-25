@@ -60,11 +60,11 @@ function init()
 
       $bstatus['lines']++;
 
-      if( $CONFIG[ 'nextservertime' ] < time() )
+      if( $CONFIG['nextservertime'] < time() )
       {
         $bstatus['cacheups']++;
         exec( "php /srv/http/moobot/updatecache.php > /dev/null &" );
-        $CONFIG[ 'nextservertime' ] = time()+$CONFIG[ 'servertimeout' ];
+        $CONFIG['nextservertime'] = time()+$CONFIG['servertimeout'];
         $con['cached'] = $bot->find_servers( "COUNTS" );
       }
       else if( time() % 15 )
