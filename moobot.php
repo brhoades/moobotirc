@@ -37,7 +37,7 @@ while( $alive == "TRUE" )
 
 function init()
 {
-  global $con, $CONFIG, $servers, $channels $nextsvnmontime, $other, $bot, $bstatus; 
+  global $con, $CONFIG, $servers, $channels, $nextsvnmontime, $other, $bot, $bstatus; 
   $firsttime = "TRUE";
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port] );
 	$lasttime = time();
@@ -84,6 +84,10 @@ function init()
       //
       $bot->runbuffers( );
       $bot->vote_check( );
+      //
+      //Loads data
+      //
+      $bot->readdata( &$con['data'] );
       //
       //
       //

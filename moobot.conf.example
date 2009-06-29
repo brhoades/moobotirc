@@ -41,9 +41,10 @@ define( "svnmontimeout", 15 );
 define( "maxvotetime", 16 );
 define( "servertimeout", 17 );
 define( "svnmon", 18 );
+define( "datafilelocation", 19 );
 
 $CONFIG[server] = 'irc.freenode.net'; // server name, like irc.freenode.net or quakenet.org
-$CONFIG[serverspam] = 'servercentral.'; // The lines we should parse out have this, generally what is given in the MOTD
+$CONFIG[serverspam] = ':- '; // The lines we should parse out have this, generally what is given in the MOTD
 $CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
 $CONFIG[port] = 6667; // IRC port, 6667 should work
 $CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
@@ -66,7 +67,7 @@ $CONFIG[svnmontimeout] = 30;    //Time between SVN checks
 $nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as we start
 $CONFIG[maxvotetime] = 30; //How long votes last
 $CONFIG[servertimeout] = 360; // Max time after not receiving a command from the server to reconnect
-
+$CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 //
 ///////////////////////////
 //        Servers        //
