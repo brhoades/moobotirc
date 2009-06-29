@@ -737,9 +737,6 @@ class bot
     }
     $data_full = substr( $data_full, 10 );
     //echo "data: ".$data_full\n;
-    echo "<pre>\n";
-    print_r( $data_full );
-    echo "</pre>\n";
     $data = explode( "\n", $data_full );
     fclose($fp);
     return $bot->tremulous_replace_colors_irc( $data );
@@ -1274,14 +1271,10 @@ class bot
       if( $map == NULL && $maxplayers == NULL && $serverp == NULL && $serveri == NULL )
       {
         $status[$i] = "^1OFFLINE";
-        print_r( $serverp );
-        print_r( $serveri );
       }
       else if( $averageping >= 999 && $map != "" && $players >= 3 )
       {
         $status[$i] = "^1CRASHED";
-        print_r( $serverp );
-        print_r( $serveri );
       }
       else
         $status[$i] = "^2ONLINE";
