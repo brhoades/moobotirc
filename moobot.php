@@ -46,15 +46,16 @@ function init()
     else if( $CONFIG[server] == 1 )
       $CONFIG[server] = "irc.quakenet.org";
   }
-  $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port] );
+  $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
 	$lasttime = time();
   if ( !$con['socket'] ) 
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
+    stream_set_timeout( $con['socket'], 0, 100 );
     $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
     $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
-    while( !feof($con['socket']) )
+    while( !feof( $con['socket'] ) )
     {
       $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
       if( $con['buffer']['all'] != NULL )
@@ -69,8 +70,6 @@ function init()
         $CONFIG[nextservertime] = time()+$CONFIG[servertimeout];
         $con['cached'] = $bot->find_servers( "COUNTS" );
       }
-      else if( time() % 15 )
-        $con['cached'] = $bot->find_servers( "COUNTS" );
 
       if( $nextsvnmon <= time() )
       {
@@ -80,11 +79,14 @@ function init()
         $bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
       }
       
-      if( substr( $con['buffer']['all'], 0, 6) == 'PING :' )
+      if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
       {
-        $bot->cmd_send( 'PONG :'.substr($con['buffer']['all'], 6 ) );
+        $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ) );
         $lasttime = time();
       }
+      
+      if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
+        continue;
       
       //
       //checks are here!
@@ -95,7 +97,7 @@ function init()
       //
       //
       
-      if( $firsttime == "TRUE" && stripos( $con['buffer']['all'], "/motd" ) )
+      if( $firsttime == "TRUE" && stripos( $con['buffer']['all'], "/motd" ) !== FALSE )
       {
         $max = count( $channels );
         for( $i=0; $i<$max; $i++ )
@@ -119,15 +121,11 @@ function init()
             $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." auth ".$CONFIG[nickpass]." \n\r" );
         }
       }
-      
-      if( substr( $con['buffer']['all'], 0, strlen( $CONFIG[serverspam] ) ) == $CONFIG[serverspam] )
-        continue;
-
-//****************
-//
-//COMMANDS
-//
-//****************
+      //****************
+      //
+      //COMMANDS
+      //
+      //****************
       
       $bufarray = explode( " ", $con['buffer']['all'] );
       $channel = $bufarray['2'];
