@@ -41,8 +41,11 @@ define( "svnmontimeout", 15 );
 define( "maxvotetime", 16 );
 define( "servertimeout", 17 );
 define( "svnmon", 18 );
+define( "nickserv", 19 );
 
-$CONFIG[server] = 'irc.freenode.net'; // server name, like irc.freenode.net or quakenet.org
+// server name, like irc.freenode.net
+//Use 0 for freenode, 1 for quakenet, and a server name for another
+$CONFIG[server] = 1;
 $CONFIG[serverspam] = 'servercentral.'; // The lines we should parse out have this, generally what is given in the MOTD
 $CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
 $CONFIG[port] = 6667; // IRC port, 6667 should work
@@ -53,6 +56,7 @@ $CONFIG[pathtoourself] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobot
 $CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
 $CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];
 $CONFIG[svnmon] = TRUE;
+$CONFIG[nickserv] = "nameofnickserver"; //Only needed if you aren't using a number for $CONFIG[server]
 
 //MySQL info
 $CONFIG[dbuser] = "databaseusername";
