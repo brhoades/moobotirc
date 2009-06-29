@@ -115,7 +115,7 @@ function init()
         }
       }
       
-      if( substr( $con['buffer']['all'], 0, 15 ) == $CONFIG[serverspam] )
+      if( substr( $con['buffer']['all'], 0, strlen( $CONFIG[serverspam] ) ) == $CONFIG[serverspam] )
         continue;
 
 //****************
