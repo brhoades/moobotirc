@@ -40,7 +40,7 @@ define( "checkservtimeout", 14 );
 define( "svnmontimeout", 15 );
 define( "maxvotetime", 16 );
 define( "servertimeout", 17 );
-define( "svnmon", 17 );
+define( "svnmon", 18 );
 
 $CONFIG[server] = 'irc.freenode.net'; // server name, like irc.freenode.net or quakenet.org
 $CONFIG[serverspam] = 'servercentral.'; // The lines we should parse out have this, generally what is given in the MOTD
