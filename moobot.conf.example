@@ -46,7 +46,7 @@ define( "nickserv", 19 );
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
 $CONFIG[server] = 1;
-$CONFIG[serverspam] = 'servercentral.'; // The lines we should parse out have this, generally what is given in the MOTD
+$CONFIG[serverspam] = ':- '; // The lines we should parse out have this, generally what is given in the MOTD
 $CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
 $CONFIG[port] = 6667; // IRC port, 6667 should work
 $CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
