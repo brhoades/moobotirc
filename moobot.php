@@ -91,6 +91,10 @@ function init()
       $bot->runbuffers( );
       $bot->vote_check( );
       //
+      //Loads data
+      //
+      $bot->readdata( &$con['data'] );
+      //
       //
       //
       
