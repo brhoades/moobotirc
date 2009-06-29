@@ -39,6 +39,11 @@ function init()
 {
   global $con, $CONFIG, $servers, $channels $nextsvnmontime, $other, $bot, $bstatus; 
   $firsttime = "TRUE";
+  if( $CONFIG[server] == 0 )
+    $CONFIG[server] = "irc.freenode.net";
+  else if( $CONFIG[server] == 1 )
+    $CONFIG[server] = "irc.quakenet.org";
+  
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port] );
 	$lasttime = time();
   if ( !$con['socket'] ) 
@@ -99,8 +104,15 @@ function init()
             $bot->cmd_send( "JOIN ". $channels[$i]['name'] );
         }
         $firsttime = "FALSE";
-        $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG[nickpass]." \n\r" );
-        $bot->cmd_send( "MODE ".$CONFIG[nick]." +x \n\r" );
+        if( $CONFIG[nickpass] != NULL )
+        {
+          if( $CONFIG[server] == 0 )
+            $bot->cmd_send( "PRIVMSG NickServ auth ".$CONFIG[nickpass]." \n\r" );
+          else if( $CONFIG[server] == 1 )
+            $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG[nickpass]." \n\r" );
+          else
+            $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." auth ".$CONFIG[nickpass]." \n\r" );
+        }
       }
       
       if( substr( $con['buffer']['all'], 0, 15 ) == $CONFIG[serverspam] )
