@@ -569,9 +569,9 @@ function init()
               break;
             }
             
-            if( count( $message2 ) > 5 )
+            if( count( $message2 ) > 5 && stripos( $channel, "#" ) !== FALSE )
             {
-              $bot->talk( $channel, "That returned more than 4 lines of text. It was executed, however." );
+              $bot->talk( $channel, "That returned more than 5 lines of text. It was executed, however. Feel free to try a PM." );
               break;
             }
             else
