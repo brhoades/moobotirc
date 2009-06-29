@@ -917,7 +917,7 @@ class bot
   {
     global $con, $time, $CONFIG, $buffers, $bstatus;
     
-    if( time() - $con['3lastspeaktime'] < $CONFIG['chatspeaktimeout'] || $con['stimes'] <= 3 )
+    if( time() - $con['3lastspeaktime'] < $CONFIG[chatspeaktimeout] || $con['stimes'] <= 3 )
     {
       fputs( $con['socket'], $command."\n\r" );
       $con['stimes']++;
@@ -934,17 +934,17 @@ class bot
   {
     global $bot, $con, $time, $buffers, $CONFIG, $bstatus;
     
-    if( time() - $con['3lastspeaktime'] >= $CONFIG['chatspeaktimeout'] && count($buffers) > 0 )
+    if( time() - $con['lastspeaktime'] >= $CONFIG[chatspeaktimeout] && count($buffers) > 0 )
     {
       $buffers = array_values( $buffers );
       fputs( $con['socket'], $buffers[0]."\n\r" );
       print ( date("[ d/m/y @ H:i:s ]") ."-> ". $buffers[0]. "\n\r" );
       unset( $buffers[0] );
-      $con['3lastspeaktime'] = time();
+      $con['lastspeaktime'] = time();
       $con['stimes']++;
       $bstatus['talked']++;
     }
-    else if( time() - $con['lastspeaktime'] >= $CONFIG['chatspeaktimeout'] + 2  && $con['stimes'] > 0 )
+    else if( time() - $con['lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
       $con['stimes'] = 0;
     return;
     
@@ -954,13 +954,13 @@ class bot
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
-    if( time() - $con['3lastspeaktime'] < $CONFIG['chatspeaktimeout'] || $con['stimes'] <= 3 )
+    if( time() - $con['lastspeaktime'] < $CONFIG['chatspeaktimeout'] || $con['stimes'] <= 3 )
     {
       if( $channel == $CONFIG['name'] )   //lets not and say we did
         return;
       fputs( $con['socket'], "PRIVMSG $channel :".$text."\n\r" );
       $con['stimes']++;
-      $con['3lastspeaktime'] = time();
+      $con['lastspeaktime'] = time();
       $bstatus['talked']++;
       print (date("[d/m/y @ H:i:s]") ."-> PRIVMSG $channel :".$text."\n\r");
     }
