@@ -954,7 +954,7 @@ class bot
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
-    if( time() - $con['lastspeaktime'] < $CONFIG['chatspeaktimeout'] || $con['stimes'] <= 3 )
+    if( time() - $con['lastspeaktime'] < $CONFIG[chatspeaktimeout] || $con['stimes'] <= 3 )
     {
       if( $channel == $CONFIG['name'] )   //lets not and say we did
         return;

@@ -85,9 +85,6 @@ function init()
         $lasttime = time();
       }
       
-      if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
-        continue;
-      
       //
       //checks are here!
       //
@@ -97,7 +94,8 @@ function init()
       //
       //
       
-      if( $firsttime == "TRUE" && stripos( $con['buffer']['all'], "/motd" ) !== FALSE )
+      if( $firsttime == "TRUE" && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
+          || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE ) )
       {
         $max = count( $channels );
         for( $i=0; $i<$max; $i++ )
@@ -121,6 +119,11 @@ function init()
             $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." auth ".$CONFIG[nickpass]." \n\r" );
         }
       }
+
+      if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
+        continue;
+        
+        
       //****************
       //
       //COMMANDS
