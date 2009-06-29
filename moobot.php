@@ -841,9 +841,6 @@ function init()
           $url = ltrim( $urls[$i], ":" );
           $titles[$i] = $bot->snarf_url( $url );
           $urlarray[$i] = explode( "/", $url );
-          echo "<pre>";
-          print_r( $urlarray[$i] );
-          echo "</pre>";
           if( count( $urlarray[$i] ) > 1 && ( stripos( $url, "http://" ) !== FALSE || stripos( $url, "ftp://" ) !== FALSE || stripos( $url, "https://" ) !== FALSE ) )
           {
             for( $j=0; $j<count($urlarray[$i]);$j++ )
