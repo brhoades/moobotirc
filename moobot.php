@@ -37,13 +37,15 @@ while( $alive == "TRUE" )
 
 function init()
 {
-  global $con, $CONFIG, $servers, $channels $nextsvnmontime, $other, $bot, $bstatus; 
+  global $con, $CONFIG, $servers, $channels, $nextsvnmontime, $other, $bot, $bstatus; 
   $firsttime = "TRUE";
-  if( $CONFIG[server] == 0 )
-    $CONFIG[server] = "irc.freenode.net";
-  else if( $CONFIG[server] == 1 )
-    $CONFIG[server] = "irc.quakenet.org";
-  
+  if( is_int( $CONFIG[server] ) )
+  {
+    if( $CONFIG[server] == 0 )
+      $CONFIG[server] = "irc.freenode.net";
+    else if( $CONFIG[server] == 1 )
+      $CONFIG[server] = "irc.quakenet.org";
+  }
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port] );
 	$lasttime = time();
   if ( !$con['socket'] ) 
@@ -106,10 +108,13 @@ function init()
         $firsttime = "FALSE";
         if( $CONFIG[nickpass] != NULL )
         {
-          if( $CONFIG[server] == 0 )
-            $bot->cmd_send( "PRIVMSG NickServ auth ".$CONFIG[nickpass]." \n\r" );
-          else if( $CONFIG[server] == 1 )
-            $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG[nickpass]." \n\r" );
+          if( is_int( $CONFIG[nickpass] ) )
+          {
+            if( $CONFIG[server] == 0 )
+              $bot->cmd_send( "PRIVMSG NickServ auth ".$CONFIG[nickpass]." \n\r" );
+            else if( $CONFIG[server] == 1 )
+              $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG[nickpass]." \n\r" );
+          }
           else
             $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." auth ".$CONFIG[nickpass]." \n\r" );
         }
@@ -802,9 +807,9 @@ function init()
 				 echo "Dying, nick collision.\r\n";
          return;
        }
-			 else if( $lasttime < ( time() - $CONFIG['servertimeout'] ) )
+			 else if( $lasttime < ( time() - $CONFIG[servertimeout] ) )
 			 {
-				 echo "Dying, haven't recived a response in $maxtimeout minutes.\r\n";
+				 echo "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n";
 				 return;
 			 }
        else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
@@ -872,7 +877,7 @@ function init()
         }
         unset( $titles, $urlarray, $urls, $url );
       }
-      else if( preg_match( "/\:*.INVITE ".preg_quote( $CONFIG[nick] )."/", $con['buffer']['all'] ) )
+      else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {
         $bufarray = explode( " ", $con['buffer']['all'] );
         $channel = $bufarray['3'];
