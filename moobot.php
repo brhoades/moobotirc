@@ -253,7 +253,6 @@ function init()
             {
               $term = $bufarray[0];
               $def = $bot->urban_lookup( $term, 1 );
-              print_r( $def );
               if( count( $def ) > 5 )
               {
                 $bot->talk( $channel, "The definition is too long, you can view it at http://urbandictionary.com/define.php?term=$term" );
@@ -470,9 +469,7 @@ function init()
             $player = $bufarray['0'];
             $bot->talk( $channel, "Searching ".$con['cached']." cached server(s) for \"$player\"..." );
             $found = $bot->find_player( $player );
-            echo count($found)."\n";
-            print_r($found);
-
+            
             if( count( $found ) > 10 )
             {
               $bot->talk( $channel, "Your search returned ".count( $found )." results, please be more specific with your search." );
