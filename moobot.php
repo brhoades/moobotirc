@@ -790,7 +790,7 @@ function init()
         }
         
       }
-      else if( stripos($con['buffer']['all'], " :", 10 ) !== FALSE )
+      /*else if( stripos($con['buffer']['all'], " :", 10 ) !== FALSE )
       {
         $start = strpos( $con['buffer']['all'], ":", 1 )+1;
         $text = $other->sanitize2($other->sanitize(substr( $con['buffer']['all'], $start )));
@@ -802,7 +802,7 @@ function init()
         }
 				else if( $channels[$chanid]['log'] == "FALSE" )
 					print "Channel has disabled log submission.\r\n"; 
-       } 
+       } */
        else if( stripos( $con['buffer']['all'], "(Nick collision from services.)" ) !== FALSE )
        {
 				 echo "Dying, nick collision.\r\n";
@@ -881,7 +881,7 @@ function init()
       else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {
         $bufarray = explode( " ", $con['buffer']['all'] );
-        $channel = $bufarray['3'];
+        $channel = $bufarray['2'];
         $bot->cmd_send( "JOIN $channel" );
       }
     }
