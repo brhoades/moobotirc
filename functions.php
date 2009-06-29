@@ -1354,6 +1354,48 @@ class bot
 
     return( $out );
   }
+  
+  function readdata( $datavar )
+  {
+    global $config, $bot;
+    
+    $newdata = file( $CONFIG[datafilelocation] );
+    
+    if( $newdata == serialize( $datavar ) )
+      return;
+    
+    $newdata = unserialize( $newdata );
+    
+    //Current data file is newer
+    if( $newdata['time'] <= $datavar )
+    {
+      $bot->writedata( $datavar );
+    }
+    else
+    {
+      $fh = fopen( $CONFIG[datafilelocation], "r" );
+      $datavar = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
+      fclose( $fh );
+    }
+    
+    //Not needed, but you never know...
+    return( $datavar );
+  }
+  
+  function writedata( $datavar )
+  {
+    global $config, $bot;
+    
+    $olddata = file( $CONFIG[datafilelocation] );
+    
+    if( $olddata == serialize( $datavar ) )
+      return;
+      
+    $datavar['time'] = time();
+    $fh = fopen( $CONFIG[datafilelocation], "w" );
+    fwrite( $fh, $datavar );
+    fclose( $fh );
+  }
 
 }
 ?>

@@ -41,7 +41,8 @@ define( "svnmontimeout", 15 );
 define( "maxvotetime", 16 );
 define( "servertimeout", 17 );
 define( "svnmon", 18 );
-define( "nickserv", 19 );
+define( "datafilelocation", 19 );
+define( "nickserv", 20 );
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
@@ -70,7 +71,7 @@ $CONFIG[svnmontimeout] = 30;    //Time between SVN checks
 $nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as we start
 $CONFIG[maxvotetime] = 30; //How long votes last
 $CONFIG[servertimeout] = 360; // Max time after not receiving a command from the server to reconnect
-
+$CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 //
 ///////////////////////////
 //        Servers        //
