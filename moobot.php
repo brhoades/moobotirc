@@ -880,8 +880,7 @@ function init()
       }
       else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {
-        $bufarray = explode( " ", $con['buffer']['all'] );
-        $channel = $bufarray['2'];
+        $channel = $bufarray['3'];
         $bot->cmd_send( "JOIN $channel" );
       }
     }
