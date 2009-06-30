@@ -574,26 +574,15 @@ class bot
   {
     global $bot, $other;
     if( $forcenew == "FALSE" )
-    {
-      $handle = fopen( "/srv/http/moobot/cache", "r" );
-      echo "Opening cache...\n";
-      $contents = fread( $handle, filesize( "/srv/http/moobot/cache" ) );
-      fclose( $handle );
-      return unserialize( $contents );
-    }
+      return $con['data'][servercache];
     else if( $forcenew == "COUNTS" )
     {
-      $handle = fopen( "/srv/http/moobot/cache", "r" );
-      $contents = fread( $handle, filesize( "/srv/http/moobot/cache" ) );
-      fclose( $handle );
-      return( count( unserialize( $contents ) ) );
+      return( count( $con['data'][servercache] ) );
     }
     else if( $forcenew == "COUNTP" )
     {
-      $handle = fopen( "/srv/http/moobot/cache", "r" );
-      $contents = unserialize( fread( $handle, filesize( "/srv/http/moobot/cache" ) ) );
+      $contents = $con['data'][servercache];
       $count = 0;
-      fclose( $handle );
       for( $i=0; $i<count($contents); $i++ )
       {
         $thisserver[ $i ] = $bot->tremulous_get_players( $contents[ $i ][ 0 ], $contents[ $i ][ 1 ] );
@@ -669,13 +658,9 @@ class bot
         while( count( $ipandport ) <= 1)
           $ipandport = find_servers( "TRUE" );
       }
-      exec( "echo \"\" > /srv/http/moobot/cache" );  
-      $handle = fopen( "/srv/http/moobot/cache", "w" );
       $ipandport = array_values( $ipandport );
-      fputs( $handle, serialize( $ipandport ) );
-      fclose( $handle );
-      //if( find_servers( "COUNTS" ) <= 1 )
-        //find_servers( "TRUE" );
+      $con['data'][servercache] = $ipandport;
+      $bot->writedata( $con['data'] );
       return $ipandport;
     }
   }
@@ -945,7 +930,6 @@ class bot
     else if( time() - $con['lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
       $con['stimes'] = 0;
     return;
-    
   }
 
   function talk( $channel, $text ) 
@@ -1039,7 +1023,7 @@ class bot
   function check_admin( $hostmask )
   {
     global $CONFIG;
-    $admins = $CONFIG['adminname'];
+    $admins = $CONFIG[adminname];
     for( $i=0;$i<count($admins);$i++ )
     {
       if( $hostmask == $admins[$i] )
@@ -1366,9 +1350,7 @@ class bot
     
     //Current data file is newer
     if( $newdata['time'] <= $datavar )
-    {
       $bot->writedata( $datavar );
-    }
     else
     {
       $fh = fopen( $CONFIG[datafilelocation], "r" );
