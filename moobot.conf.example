@@ -1,0 +1,203 @@
+<?php
+/*
+
+Moobot is Copyright 2008-2009 Billy "Aaron5367" Rhoades
+
+This file is part of Moobot.
+
+Moobot is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Moobot is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Moobot.  If not, see <http://www.gnu.org/licenses/>.  
+ 
+*/
+$CONFIG = array();
+
+//We use constants as arrays with strings as the key mess up a lot
+define( "server", 0 );
+define( "serverspam", 1 );
+define( "nick", 2 );
+define( "port", 3 );
+define( "name", 4 );
+define( "version", 5 );
+define( "adminname", 6 );
+define( "pathtoourself", 7 );
+define( "nickpass", 8 );
+define( "dbuser", 10 );
+define( "dbname", 11 );
+define( "dbpass", 12 );
+define( "chatspeaktimeout", 13 );
+define( "checkservtimeout", 14 );
+define( "svnmontimeout", 15 );
+define( "maxvotetime", 16 );
+define( "servertimeout", 17 );
+define( "svnmon", 18 );
+define( "nickserv", 19 );
+
+// server name, like irc.freenode.net
+//Use 0 for freenode, 1 for quakenet, and a server name for another
+$CONFIG[server] = 1;
+$CONFIG[serverspam] = ':- '; // The lines we should parse out have this, generally what is given in the MOTD
+$CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
+$CONFIG[port] = 6667; // IRC port, 6667 should work
+$CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
+$CONFIG[version] = 'Moobot v.4 by Aaron5367'; //Eventually to be updated to the SVN revision
+$CONFIG[adminname][0] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
+$CONFIG[pathtoourself] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobotlog &"; //To reexecute ourselves for rehashing
+$CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
+$CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];
+$CONFIG[svnmon] = TRUE;
+$CONFIG[nickserv] = "nameofnickserver"; //Only needed if you aren't using a number for $CONFIG[server]
+
+//MySQL info
+$CONFIG[dbuser] = "databaseusername";
+$CONFIG[dbname] = "databasename";
+$CONFIG[dbpass] = "databasepassword";
+
+//Timeout for speaking and server checking, in seconds
+$CONFIG[chatspeaktimeout] = 2;
+$CONFIG[checkservtimeout] = 10;
+$CONFIG[svnmontimeout] = 30;    //Time between SVN checks
+$nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as we start
+$CONFIG[maxvotetime] = 30; //How long votes last
+$CONFIG[servertimeout] = 360; // Max time after not receiving a command from the server to reconnect
+
+//
+///////////////////////////
+//        Servers        //
+///////////////////////////
+//
+//KoR//
+//
+//Tremulous servers
+//
+/*$CONFIG['servers']['KOR'][0]['ip']  = "64.92.167.138";
+$CONFIG['servers']['KOR'][0]['port']  = "30800";
+$CONFIG['servers']['KOR'][0]['bakname']  = "^0AAA ^2|KoR| KoRx";
+$CONFIG['servers']['KOR'][1]['ip']  = "64.92.167.138";
+$CONFIG['servers']['KOR'][1]['port']  = "30740";
+$CONFIG['servers']['KOR'][1]['bakname']  = "^0AAA ^2|KoR| Layouts";
+$CONFIG['servers']['KOR'][2]['ip']  = "64.92.167.138";
+$CONFIG['servers']['KOR'][2]['port']  = "30720";
+$CONFIG['servers']['KOR'][2]['bakname']  = "^0AAA ^2K^7nights ^2o^7f ^2R^7eason.org";
+$CONFIG['servers']['KOR'][3]['ip']  = "64.92.167.138";
+$CONFIG['servers']['KOR'][3]['port']  = "30750";
+$CONFIG['servers']['KOR'][3]['bakname']  = "^0AAAAAA ^2|KoR| Scrim Server";
+$CONFIG['servers']['KOR'][4]['ip']  = "64.92.167.138";
+$CONFIG['servers']['KOR'][4]['port']  = "30801";
+$CONFIG['servers']['KOR'][4]['bakname']  = "^0AAA ^2|KoR| KoRx Test";*/
+$CONFIG['servers']['KOR'][0]['ip']  = "72.249.126.151";
+$CONFIG['servers']['KOR'][0]['port']  = "30900";
+$CONFIG['servers']['KOR'][0]['bakname']  = "^0AAA ^2|KoR| KoRx 1";
+$CONFIG['servers']['KOR'][0]['rcon'] = "lolrconhere";
+$CONFIG['servers']['KOR'][1]['ip']  = "72.249.126.151";
+$CONFIG['servers']['KOR'][1]['port']  = "31100";
+$CONFIG['servers']['KOR'][1]['bakname']  = "^0AAA ^2|KoR| KoRx 2";
+$CONFIG['servers']['KOR'][1]['rcon'] = "lolrconhere";
+
+
+//MG//
+$CONFIG['servers']['MG'][0]['ip'] = "67.222.136.105";
+$CONFIG['servers']['MG'][0]['port'] = "30720";
+$CONFIG['servers']['MG'][0]['bakname'] = "^1}MG{ ^2Development Server";
+$CONFIG['servers']['MG'][1]['ip'] = "67.222.136.105";
+$CONFIG['servers']['MG'][1]['port'] = "30721";
+$CONFIG['servers']['MG'][1]['bakname'] = "^1}MG{ ^2Development Server 2";
+$CONFIG['servers']['MG'][2]['ip'] = "62.75.216.230";
+$CONFIG['servers']['MG'][2]['port'] = "30720";
+$CONFIG['servers']['MG'][2]['bakname'] = "^1}MG{ ^2Euro Development Server";
+$CONFIG['servers']['MG'][3]['ip'] = "67.222.136.106";
+$CONFIG['servers']['MG'][3]['port'] = "30720";
+$CONFIG['servers']['MG'][3]['bakname'] = "^1Pure^4Tremulous Large";
+$CONFIG['servers']['MG'][4]['ip'] = "67.222.136.106";
+$CONFIG['servers']['MG'][4]['port'] = "30721";
+$CONFIG['servers']['MG'][4]['bakname'] = "^1Pure^4Tremulous Medium";
+$CONFIG['servers']['MG'][5]['ip'] = "67.222.136.106";
+$CONFIG['servers']['MG'][5]['port'] = "30722";
+$CONFIG['servers']['MG'][5]['bakname'] = "^1Pure^4Tremulous Small";
+//RK//
+$CONFIG['servers']['RK'][0]['ip'] = "99.198.111.122";
+$CONFIG['servers']['RK'][0]['port'] = "30720";
+$CONFIG['servers']['RK'][0]['bakname'] = "^1.:RK:. Main";
+$CONFIG['servers']['RK'][1]['ip'] = "99.198.111.122";
+$CONFIG['servers']['RK'][1]['port'] = "30740";
+$CONFIG['servers']['RK'][1]['bakname'] = "^1.:RK:. Scrim Server";
+$CONFIG['servers']['RK'][2]['ip'] = "99.198.111.122";
+$CONFIG['servers']['RK'][2]['port'] = "31720";
+$CONFIG['servers']['RK'][2]['bakname'] = "^1.:RK:. Dev Trepidus";
+//SoH//
+$CONFIG['servers']['SOH']['ip'] = "99.244.15.235";
+$CONFIG['servers']['SOH']['port'] = "63914";
+$CONFIG['servers']['SOH']['bakname'] = "^1|^7SoH^1| ^7Clan ^1Server";
+//X//
+$CONFIG['servers']['X']['ip'] = "74.86.23.18";
+$CONFIG['servers']['X']['port'] = "50000";
+$CONFIG['servers']['X']['bakname'] = "^5X";
+//uBP//
+$CONFIG['servers']['UBP']['ip'] = "174.132.18.155";
+$CONFIG['servers']['UBP']['port'] = "30720";
+$CONFIG['servers']['UBP']['bakname'] = "^2Unlimited BP";
+//AA//
+$CONFIG['servers']['AA']['ip'] = "69.9.170.50";
+$CONFIG['servers']['AA']['port'] = "30720";
+$CONFIG['servers']['AA']['bakname'] = "^7AA";
+//A<3//
+$CONFIG['servers']['A<3']['ip'] = "89.46.37.242";
+$CONFIG['servers']['A<3']['port'] = "65535";
+$CONFIG['servers']['A<3']['bakname'] = "^7A^1<3";
+
+///////////////////////////
+//  CONFIGS PER CHANNEL  //
+///////////////////////////
+//
+//	DEFAULTS
+//	$channels[#]['name'] = NULL;
+//	$channels[#]['password'] = NULL;
+//	$channels[#]['svnmon'] = TRUE;
+//	$channels[#]['log'] = TRUE;
+//	$channels[#]['cmds'] = TRUE;
+//	
+///////////////////////////
+//Channels we connect to go here
+//
+
+$channels[0]['name'] = '#knightsofreason';
+//$channels[0]['svnmon'] = "FALSE";
+$channels[1]['name'] = '##Aaron5367';
+$channels[2]['name'] = '#KoRx';
+$channels[3]['name'] = '##Metal';
+$channels[3]['svnmon'] = "FALSE";
+$channels[4]['name'] = '##ProfessorF';
+$channels[4]['svnmon'] = "FALSE";
+//$channels[5]['name'] = '#KoRx';
+$channels[5]['name'] = '#KoR-CO';
+$channels[5]['svnmon'] = "FALSE";
+$channels[5]['log'] = "FALSE";
+$channels[6]['name'] = '#randomkeywhacking';
+$channels[6]['svnmon'] = "FALSE";
+$channels[7]['name'] = '#Jaiimc';
+$channels[7]['svnmon'] = "FALSE";
+$channels[8]['name'] = '#supersecretroom';
+$channels[8]['svnmon'] = "FALSE";
+$channels[8]['log'] = "FALSE";
+$channels[8]['password'] = "SSR";
+//$channels[0]['name'] = '##Aaron5367';
+
+//$channels = array_values( $channels );
+//^^^ Uncomment if your array values (ie $channels[THESE] ) are out of order ^^^ //
+
+//svn repos to check
+$svnservers[0]['name'] = "KoRx";
+$svnservers[0]['url'] = "http://korx.googlecode.com/svn/trunk/";
+$svnservers[1]['name'] = "Trem-KoR";
+$svnservers[1]['url'] = "http://trem-kor.googlecode.com/svn/trunk/";
+
+?>
