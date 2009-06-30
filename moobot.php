@@ -63,20 +63,12 @@ function init()
 
       $bstatus['lines']++;
 
-      if( $CONFIG[nextservertime] < time() )
-      {
-        $bstatus['cacheups']++;
-        exec( "php /srv/http/moobot/updatecache.php > /dev/null &" );
-        $CONFIG[nextservertime] = time()+$CONFIG[servertimeout];
-        $con['cached'] = $bot->find_servers( "COUNTS" );
-      }
-
       if( $nextsvnmon <= time() )
       {
         $bot->svnmon();
         $nextsvnmon = time() + $svnmontimeout; 
         $bstatus['svnchecks']++;
-        $bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
+        //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
       }
       
       if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
@@ -84,15 +76,6 @@ function init()
         $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ) );
         $lasttime = time();
       }
-      
-      //
-      //checks are here!
-      //
-      $bot->runbuffers( );
-      $bot->vote_check( );
-      //
-      //
-      //
       
       if( $firsttime == "TRUE" && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
           || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE ) )
@@ -122,7 +105,15 @@ function init()
 
       if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
         continue;
-        
+
+      //
+      //checks are here!
+      //
+      $bot->runbuffers( );
+      $bot->vote_check( );
+      //
+      //
+      //
         
       //****************
       //
@@ -473,7 +464,8 @@ function init()
             break;
           case "find":
             $player = $bufarray['0'];
-            $bot->talk( $channel, "Searching ".$con['cached']." cached server(s) for \"$player\"..." );
+            $con['cached'] = count( $bot->find_servers() );
+            $bot->talk( $channel, "Searching ".$con['cached']." server(s) for \"$player\"..." );
             $found = $bot->find_player( $player );
             
             if( count( $found ) > 10 )
@@ -504,7 +496,8 @@ function init()
             unset( $name, $server, $team, $kills, $ping, $found );
             break;
           case "clan":
-            $bot->talk( $channel, "Searching ".$con['cached']." cached server(s) for clan members..." );
+            $con['cached'] = count( $bot->find_servers() );
+            $bot->talk( $channel, "Searching ".$con['cached']." server(s) for clan members..." );
             $found = $bot->find_player( "|KoR|" );
             
             if( count( $found ) > 0 )

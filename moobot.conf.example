@@ -31,7 +31,6 @@ define( "version", 5 );
 define( "adminname", 6 );
 define( "pathtoourself", 7 );
 define( "nickpass", 8 );
-define( "nextservertime", 9 );
 define( "dbuser", 10 );
 define( "dbname", 11 );
 define( "dbpass", 12 );
