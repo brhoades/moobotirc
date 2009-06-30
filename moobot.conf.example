@@ -32,7 +32,6 @@ define( "version", 5 );
 define( "adminname", 6 );
 define( "pathtoourself", 7 );
 define( "nickpass", 8 );
-define( "nextservertime", 9 );
 define( "dbuser", 10 );
 define( "dbname", 11 );
 define( "dbpass", 12 );
@@ -47,7 +46,6 @@ define( "nickserv", 20 );
 
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );
-define( "servercache", 1 );
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another

@@ -525,7 +525,7 @@ class bot
   function find_player( $name )
   {
     global $bot, $other;
-    $ipandport = $bot->find_servers( "FALSE" );
+    $ipandport = $bot->find_servers( );
     echo count( $ipandport );
     $name = preg_quote( $name ); //Search for everything
     for( $i=0; $i < count( $ipandport ); $i++ )
@@ -540,7 +540,8 @@ class bot
           $found[ $currid ]['kills'] = $server[ $i ][ alien_players ][ $h ][ 'kills' ];
           $found[ $currid ]['ping'] = $server[ $i ][ alien_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "aliens";
-          $found[ $currid ]['server'] = $ipandport[ $i ][ 'name' ];
+          $serveri = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+          $found[ $currid ]['server'] = $serveri['servername'];
         }
       }
       for( $h=0; $h < count( $server[ $i ][ human_players ] ); $h++ )
@@ -552,7 +553,8 @@ class bot
           $found[ $currid ]['kills'] = $server[ $i ][ human_players ][ $h ][ 'kills' ];
           $found[ $currid ]['ping'] = $server[ $i ][ human_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "humans";
-          $found[ $currid ]['server'] = $ipandport[ $i ][ 'name' ];
+          $serveri = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+          $found[ $currid ]['server'] = $serveri['servername'];
         }
       }
       for( $h=0; $h < count( $server[ $i ][ spec_players ] ); $h++ )
@@ -563,106 +565,26 @@ class bot
           $found[ $currid ]['name'] = $server[ $i ][ spec_players ][ $h ][ 'colored_name' ];
           $found[ $currid ]['ping'] = $server[ $i ][ spec_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "spectators";
-          $found[ $currid ]['server'] = $ipandport[ $i ][ 'name' ];
+          $serveri = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+          $found[ $currid ]['server'] = $serveri['servername'];
         }
       }
     }
     return $found;
   }
 
-  function find_servers( $forcenew )
+  function find_servers( )
   {
-    global $bot, $other;
-    if( $forcenew == "FALSE" )
-      return $con['data'][servercache];
-    else if( $forcenew == "COUNTS" )
+    global $bot;
+    $ipsandports = $bot->tremulous_getserverlist( );
+    for( $i = 0; $i < count( $ipsandports ); $i++ )
     {
-      return( count( $con['data'][servercache] ) );
+      $ip = $ipsandports[$i][ 'ip' ];
+      $port = $ipsandports[$i][ 'port' ];
+      $ipandport[$i][0] = $ip;
+      $ipandport[$i][1] = $port;
     }
-    else if( $forcenew == "COUNTP" )
-    {
-      $contents = $con['data'][servercache];
-      $count = 0;
-      for( $i=0; $i<count($contents); $i++ )
-      {
-        $thisserver[ $i ] = $bot->tremulous_get_players( $contents[ $i ][ 0 ], $contents[ $i ][ 1 ] );
-        $count = $count + count( $thisserver[ $i ][ alien_players ]  ) + count( $thisserver[ $i ][ spec_players ]  ) + count( $thisserver[ $i ][ human_players ]  );
-      }
-    }
-    else if( $forcenew == "TRUE" )
-    {
-      //If the site is down we have to use the old list again :/
-      if( !$other->url_exists( "http://tremmaster.quakedev.net/index.php" ) )
-        return find_servers( "FALSE" );
-      $contents = file( "http://tremmaster.quakedev.net/index.php" );
-      $contents = implode( "\n", $contents );
-      $contents = strip_tags( $contents );
-      $contents = explode( " ", $contents );
-      for( $i=0; $i < count( $contents ); $i++ )
-      {
-        //if there is no line
-        if( $contents[ $i ] == NULL )
-        {
-          unset( $contents[ $i ] );
-          continue;
-        }
-        //If there is no port
-        if( stripos( $contents[ $i ], ":" ) === FALSE )
-        {
-          unset( $contents[ $i ] );
-          continue;
-        }
-        $ipandport[ $i ] = explode( ":", $contents[ $i ] );
-        //Check if there are letters in the ip or port
-        if( preg_match( "/[a-zA-Z]/", $ipandport[ $i ][ 0 ] ) != NULL 
-            || preg_match( "/[a-zA-Z]/", $ipandport[ $i ][ 1 ] ) != NULL )
-        {
-          unset( $contents[ $i ] );
-          unset( $ipandport[ $i ] );
-          continue; 
-        }
-        if( $ipandport[ $i ][ 0 ] == NULL || $ipandport[ $i ][ 1 ] == NULL )
-        {
-          unset( $contents[ $i ] );
-          unset( $ipandport[ $i ] );
-          continue;
-        }
-        if( $ipandport[ $i ][ 1 ] <= 20 )
-        {
-          unset( $contents[ $i ] );
-          unset( $ipandport[ $i ] );
-          continue;
-        }
-        //if we can't contact the server/here is no map running
-        $thisserver[ $i ] = $bot->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-        if( $thisserver[ $i ][ 'map' ] == NULL || $thisserver[ $i ][ 'map' ] == "" )
-        {
-          unset( $contents[ $i ] );
-          unset( $ipandport[ $i ] );
-          continue; 
-        }
-        //Pack the server name, it doesn't change too often
-        $name = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-        $ipandport[ $i ][ 'name' ] = $name[ 'servername' ];
-        //if the server is empty, or if it's a KoR server we exclude this
-        if( count( $thisserver[ $i ][ 'alien_players' ]  ) + count( $thisserver[ $i ][ 'spec_players' ]  ) + count( $thisserver[ $i ][ 'human_players' ]  ) <= 0 ) 
-        {
-          unset( $contents[ $i ] );
-          unset( $ipandport[ $i ] );
-          continue; 
-        }
-      }
-      if( count( $ipandport ) <= 1 )
-      {
-        unset( $ipandport );
-        while( count( $ipandport ) <= 1)
-          $ipandport = find_servers( "TRUE" );
-      }
-      $ipandport = array_values( $ipandport );
-      $con['data'][servercache] = $ipandport;
-      $bot->writedata( $con['data'] );
-      return $ipandport;
-    }
+    return( $ipandport );
   }
 
   function average_ping( $server )
@@ -1375,6 +1297,75 @@ class bot
     $fh = fopen( $CONFIG[datafilelocation], "w" );
     fwrite( $fh, $datavar );
     fclose( $fh );
+  }
+
+  function tremulous_getserverlist( )
+  {
+    $server = "master.tremulous.net";
+    $port = 30710;
+    $shortserver = "";
+    //$status_str = "xxxxgetservers 69 full empty\n";
+    $status_str = "xxxxgetservers 69 full\n";
+    $return_str = "xxxxgetserversResponse";
+    $end_str = "EOTxxx";
+    for( $i = 0; $i < 4; $i++ ) $status_str[$i] = pack("v", 0xff);
+    for( $i = 0; $i < 4; $i++ ) $return_str[$i] = pack("v", 0xff);
+    for( $i = 3; $i < 6; $i++ ) $end_str[$i] = pack("v", 0x00);
+
+    $fp = fsockopen( "udp://".$server, $port, &$errno, &$errstr, 2 );   // Opens connection to server
+    socket_set_timeout( $fp, 1 );  // Socket Timeout
+
+    if (!$fp)
+    {
+      echo "$errstr ($errno)<br>\n";
+    }
+    else
+    {
+      $i = fwrite( $fp, $status_str );
+
+      // Read all available data from socket
+      do
+      {
+        $data = fread( $fp, 8192 );
+        if( strlen( $data ) == 0 )
+          break;
+        $packets[] = $data;
+      } while( true );
+      foreach( $packets as $packet )
+      {
+        $servers_raw = explode( "\\", $packet );
+        foreach( $servers_raw as $server_raw )
+        {
+          if( $return_str == $server_raw )
+            continue;
+          if( $end_str == $server_raw )
+            continue;
+          if( strlen( $server_raw ) != 6 )
+          {
+            if( strlen( $shortserver ) > 0 )
+            {
+              $server_raw = $shortserver."\\".$server_raw;
+              $shortserver = "";
+            }
+            else
+            {
+              $shortserver = $server_raw;
+              continue;
+            }
+          }
+          //get the port
+          $tempstring = substr( $server_raw, 4, 2 );
+          $tempint = unpack( "nint", $tempstring );
+          $serverport = $tempint['int'];
+          
+          //get the ip
+          $tempstring = substr ( $server_raw , 0, 4 );
+          $serverip = ord( $tempstring[0] ).".".ord( $tempstring[1] ).".".ord( $tempstring[2] ).".".ord( $tempstring[3] );
+          $server_list[]= array( 'ip' => $serverip, 'port' => $serverport );
+        }
+      }
+    }
+    return $server_list;
   }
 
 }
