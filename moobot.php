@@ -801,11 +801,11 @@ function init()
 				 echo "Dying, nick collision.\r\n";
          return;
        }
-			 else if( $lasttime < ( time() - $CONFIG[servertimeout] ) )
+			 /*else if( $lasttime < ( time() - $CONFIG[servertimeout] ) )
 			 {
 				 echo "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n";
 				 return;
-			 }
+			 }*/
        else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
        {
          $nameend = strpos( $con['buffer']['all'], "!", 1 )-1;
