@@ -61,6 +61,14 @@ function init()
       if( $con['buffer']['all'] != NULL )
         print date("[ d/m/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
 
+      //
+      //Loads data
+      //
+      $bot->readdata( &$con['data'] );
+      //
+      //
+      //
+      
       $bstatus['lines']++;
 
       if( $CONFIG[nextservertime] < time() )
@@ -90,10 +98,6 @@ function init()
       //
       $bot->runbuffers( );
       $bot->vote_check( );
-      //
-      //Loads data
-      //
-      $bot->readdata( &$con['data'] );
       //
       //
       //

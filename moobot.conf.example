@@ -22,6 +22,7 @@ along with Moobot.  If not, see <http://www.gnu.org/licenses/>.
 $CONFIG = array();
 
 //We use constants as arrays with strings as the key mess up a lot
+//these are for the $CONFIG array
 define( "server", 0 );
 define( "serverspam", 1 );
 define( "nick", 2 );
@@ -43,6 +44,9 @@ define( "servertimeout", 17 );
 define( "svnmon", 18 );
 define( "datafilelocation", 19 );
 define( "nickserv", 20 );
+
+//more constants, for the $con['data'] array
+define( "svnstuffs", 0 );
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
