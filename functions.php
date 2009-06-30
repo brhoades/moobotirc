@@ -736,7 +736,7 @@ class bot
       }
     }
     $data_full = substr( $data_full, 10 );
-    //echo "data: ".$data_full\n;
+
     $data = explode( "\n", $data_full );
     fclose($fp);
     return $bot->tremulous_replace_colors_irc( $data );
@@ -745,14 +745,13 @@ class bot
 
   function svnmon( )
   {
-    global $con, $CONFIG, $channels, $bot, $svnservers ;
+    global $con, $CONFIG, $channels, $bot, $svnservers;
 
     if( $CONFIG['svnmon'] == "FALSE" )
       return;
-    //$date = date("Y-m-j_H:i:s");
-    //echo $date.": Starting SVNmon\n";
-     $svnlogout = file_get_contents( "/srv/http/moobot/svnlog" );
-     $svnlogout = unserialize( $svnlogout );
+
+     $svnlogout = $con['data'][svnstuffs];
+
      for( $c=0; $c<count($svnservers); $c++ )
      {
        unset( $svnurl, $tries, $writeme, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
@@ -783,10 +782,9 @@ class bot
             exec( "svn log -l 1  $svnurl", $svnout2 );
           }
           $svnlogout[$c] = $svnout[1];
-          $writeme = serialize( $svnlogout );
-          $fh = fopen( "/srv/http/moobot/svnlog", "w" );
-          fwrite( $fh, $writeme );
-          fclose( $fh );
+          
+          $bot->writedata( $con['data'] );
+
           $svnarray = explode( " | ", $svnout['1'] );
           $rev = $svnarray['0'];
           $revnum = ltrim( $rev, "r" );
