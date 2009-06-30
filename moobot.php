@@ -61,6 +61,14 @@ function init()
       if( $con['buffer']['all'] != NULL )
         print date("[ d/m/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
 
+      //
+      //Loads data
+      //
+      $bot->readdata( &$con['data'] );
+      //
+      //
+      //
+      
       $bstatus['lines']++;
 
       if( $nextsvnmon <= time() )
