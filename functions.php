@@ -643,7 +643,7 @@ class bot
       }
     }
     $data_full = substr( $data_full, 10 );
-    //echo "data: ".$data_full\n;
+
     $data = explode( "\n", $data_full );
     fclose($fp);
     return $bot->tremulous_replace_colors_irc( $data );
@@ -652,172 +652,170 @@ class bot
 
   function svnmon( )
   {
-    global $con, $CONFIG, $channels, $bot, $svnservers ;
+    global $con, $CONFIG, $channels, $bot, $svnservers;
 
     if( $CONFIG['svnmon'] == "FALSE" )
       return;
-    //$date = date("Y-m-j_H:i:s");
-    //echo $date.": Starting SVNmon\n";
-     $svnlogout = file_get_contents( "/srv/http/moobot/svnlog" );
-     $svnlogout = unserialize( $svnlogout );
-     for( $c=0; $c<count($svnservers); $c++ )
-     {
-       unset( $svnurl, $tries, $writeme, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
-       $svnurl = $svnservers[$c]['url'];
-       $thissvnlog = $svnlogout[$c];
-       exec( "svn log -l 1 -q  $svnurl", $svnout );
-       while( count($svnout) == 0 && $tries < 3 )
-       {
-         unset($svnout);
-         exec("svn log -l 1 -q  $svnurl", $svnout);
-         $tries++;
-       }
-       if( count( $svnout ) == 0 )
-       {
-         echo "SVN: Couldn't check $svnurl\n"; 
-         continue;
-       }
-       unset( $tries );
 
-        if( $svnout[1] == $thissvnlog )
-          continue;
-        else
+   $svnlogout = $con['data'][svnstuffs];
+
+   for( $c=0; $c<count($svnservers); $c++ )
+   {
+     unset( $svnurl, $tries, $writeme, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
+     $svnurl = $svnservers[$c]['url'];
+     $thissvnlog = $svnlogout[$c];
+     exec( "svn log -l 1 -q  $svnurl", $svnout );
+     while( count($svnout) == 0 && $tries < 3 )
+     {
+       unset($svnout);
+       exec( "svn log -l 1 -q  $svnurl", $svnout );
+       $tries++;
+     }
+     if( count( $svnout ) == 0 )
+     {
+       echo "SVN: Couldn't check $svnurl\n"; 
+       continue;
+     }
+     unset( $tries );
+
+      if( $svnout[1] == $thissvnlog )
+        continue;
+      else
+      {
+        unset( $svnout2 );
+        while( count($svnout2) == 0 || $svnout2 == NULL )
         {
           unset( $svnout2 );
-          while( count($svnout2) == 0 || $svnout2 == NULL )
-          {
-            unset( $svnout2 );
-            exec( "svn log -l 1  $svnurl", $svnout2 );
-          }
-          $svnlogout[$c] = $svnout[1];
-          $writeme = serialize( $svnlogout );
-          $fh = fopen( "/srv/http/moobot/svnlog", "w" );
-          fwrite( $fh, $writeme );
-          fclose( $fh );
-          $svnarray = explode( " | ", $svnout['1'] );
-          $rev = $svnarray['0'];
-          $revnum = ltrim( $rev, "r" );
-          $revold = $revnum-1; //for now
-          $committer = $svnarray['1'];
-          while( count($svnout3) == 0 )
-          {
-              unset($svnout3);
-              exec("svn diff -r$revold:$revnum $svnurl", $svnout3);
-          }
-          $diffsize = count($svnout3);
-          $k = 0;
-          for( $i=0; $i<count($svnout2)-1; $i++ )
-          {
-            if( $i == 0 || $i == 1 || $i == 2 || $i == count($svnmon2)-1 )
-              continue;
-            if( stripos( $svnmon2[$i], "----------" ) !== FALSE )
-              continue;
-            $message[$k] = $svnout2[$i];
-            $k++;
-          }
+          exec( "svn log -l 1  $svnurl", $svnout2 );
+        }
+        $svnlogout[$c] = $svnout[1];
+        
+        $bot->writedata( $con['data'] );
 
-          $svnarray = $svnout3;      
-          for( $i=0; $i<count($svnout3); $i++ )
+        $svnarray = explode( " | ", $svnout['1'] );
+        $rev = $svnarray['0'];
+        $revnum = ltrim( $rev, "r" );
+        $revold = $revnum-1; //for now
+        $committer = $svnarray['1'];
+        while( count($svnout3) == 0 )
+        {
+            unset($svnout3);
+            exec("svn diff -r$revold:$revnum $svnurl", $svnout3);
+        }
+        $diffsize = count($svnout3);
+        $k = 0;
+        for( $i=0; $i<count($svnout2)-1; $i++ )
+        {
+          if( $i == 0 || $i == 1 || $i == 2 || $i == count($svnmon2)-1 )
+            continue;
+          if( stripos( $svnmon2[$i], "----------" ) !== FALSE )
+            continue;
+          $message[$k] = $svnout2[$i];
+          $k++;
+        }
+
+        $svnarray = $svnout3;      
+        for( $i=0; $i<count($svnout3); $i++ )
+        {
+          if( stripos( $svnarray[$i], "Index: " ) !== FALSE )
           {
-            if( stripos( $svnarray[$i], "Index: " ) !== FALSE )
-            {
-              $fileid = count($file);
-              $file[$fileid]['fullname'] = substr( $svnarray[$i], 7 );
-              $file[$fileid]['xdir'] = explode( "/", $file[$fileid]['fullname'] );
-              $file[$fileid]['filename'] = $file[$fileid]['xdir'][count( $file[$fileid]['xdir'] ) - 1 ];
-              unset( $file[$fileid]['xdir'][count( $file[$fileid]['xdir'] ) - 1 ] );
-              $file[$fileid]['xdir'] = array_values( $file[$fileid]['xdir'] );
-              $file[$fileid]['dirs'] = implode( "/", $file[$fileid]['xdir'] );
-              $infile = "TRUE";
-            }
-            if( $infile == "TRUE" && stripos( $svnarray[$i], "+++" ) )
-            {
-              $file[$fileid]['type'] = "mod";
-              $infile = "FALSE";
-              $modded++;
-            }
-            if( $infile == "TRUE" && stripos( $svnarray[$i], "Added" ) )
-            {
-              $file[$fileid]['type'] = "add";
-              $infile = "FALSE";
-              $added++;
-            }
+            $fileid = count($file);
+            $file[$fileid]['fullname'] = substr( $svnarray[$i], 7 );
+            $file[$fileid]['xdir'] = explode( "/", $file[$fileid]['fullname'] );
+            $file[$fileid]['filename'] = $file[$fileid]['xdir'][count( $file[$fileid]['xdir'] ) - 1 ];
+            unset( $file[$fileid]['xdir'][count( $file[$fileid]['xdir'] ) - 1 ] );
+            $file[$fileid]['xdir'] = array_values( $file[$fileid]['xdir'] );
+            $file[$fileid]['dirs'] = implode( "/", $file[$fileid]['xdir'] );
+            $infile = "TRUE";
           }
-          $dirs = 1;
-          if( count( $file ) > 1 )
+          if( $infile == "TRUE" && stripos( $svnarray[$i], "+++" ) )
           {
-            $dirs = 0;
-            for( $j=0; $j<(count($file)); $j++ )
-            {
-              if( array_search( $file[$j]['dirs'], $dirlist ) !== FALSE )
-                continue;
-              //ELSE
-              
-              $dirs++;
-              $dirlist[count($dirlist)] = $file[$j]['dirs'];
-            }
+            $file[$fileid]['type'] = "mod";
+            $infile = "FALSE";
+            $modded++;
           }
-          if( $dirs > count( $file ) )
-            $dirs = count( $file );
-          if( $dirs == 1 && count($file) == 2 )
+          if( $infile == "TRUE" && stripos( $svnarray[$i], "Added" ) )
           {
-            $tempfile = $file[0]['dirs'];
-            $files = "in ".$tempfile." : ".$file[0]['filename']." and ".$file[1]['filename'];
+            $file[$fileid]['type'] = "add";
+            $infile = "FALSE";
+            $added++;
           }
-          else if( $dirs == 1 && count($file) <= 5 && count($file) > 2 )
+        }
+        $dirs = 1;
+        if( count( $file ) > 1 )
+        {
+          $dirs = 0;
+          for( $j=0; $j<(count($file)); $j++ )
           {
-            for( $i=0;$i<count($file);$i++ )
-            {
-              $tempfile = $file[0]['dirs'];
-              if( $i == 1 )
-                $files = "in ".$tempfile." : ".$file[$i]['filename'];
-              else if( $i < count($file) )
-                $files = $files.", ".$file[$i]['filename'];
-              else if( $i == count($file) )
-                $files = $files.", and ".$file[$i]['filename'];
-            }
-          }
-          else if( $dirs > 1 )
-            $files = "(".count($file)." files in $dirs directories)";
-          else if( count( $file ) == 1 && $dirs == 1 )
-          {
-            $tempfile = $file[0]['dirs'];
-            $files = "in ".$tempfile." : ".$file[0]['filename'];
-          }
-            
-          $string[0] = $committer." * ".$rev." ".$files;
-          for( $i=0; $i<count($message); $i++ )
-          {
-            $string[1+$i] = $message[$i];
-          }
-          
-          for( $i=0; $i<count($channels); $i++ )
-          {
-            if( $channels[$i]['svnmon'] == "FALSE" )
+            if( array_search( $file[$j]['dirs'], $dirlist ) !== FALSE )
               continue;
-              
-            $bot->talk( $channels[$i]['name'], $svnservers[$c]['name']." SVN update:" );
-            for( $j=0; $j<count($string); $j++ )
-            {
-              if( $string[$j] == "\n" || $string[$j] == NULL )
-                continue;
-              $bot->talk( $channels[$i]['name'], $string[$j] );
-            }
+            //ELSE
+            
+            $dirs++;
+            $dirlist[count($dirlist)] = $file[$j]['dirs'];
           }
-          for( $j=0; $j<count($CONFIG['servers']['KOR']); $j++ )
+        }
+        if( $dirs > count( $file ) )
+          $dirs = count( $file );
+        if( $dirs == 1 && count($file) == 2 )
+        {
+          $tempfile = $file[0]['dirs'];
+          $files = "in ".$tempfile." : ".$file[0]['filename']." and ".$file[1]['filename'];
+        }
+        else if( $dirs == 1 && count($file) <= 5 && count($file) > 2 )
+        {
+          for( $i=0;$i<count($file);$i++ )
           {
-            unset( $thisserver );
-            $thisserver = $CONFIG['servers']['KOR'][$j];
-            $bot->tremulous_rcon( $thisserver['ip'], $thisserver['port'], "!print ".$svnservers[$c]['name']." SVN Update:", $thisserver['rcon'] );
-            for( $k=0; $k<count($string); $k++ )
-            {
-              if( $string[$k] == "\n" || $string[$k] == NULL )
-                continue;
-              $bot->tremulous_rcon( $thisserver['ip'], $thisserver['port'], "!print ".$string[$k], $thisserver['rcon'] );
-            }
+            $tempfile = $file[0]['dirs'];
+            if( $i == 1 )
+              $files = "in ".$tempfile." : ".$file[$i]['filename'];
+            else if( $i < count($file) )
+              $files = $files.", ".$file[$i]['filename'];
+            else if( $i == count($file) )
+              $files = $files.", and ".$file[$i]['filename'];
+          }
+        }
+        else if( $dirs > 1 )
+          $files = "(".count($file)." files in $dirs directories)";
+        else if( count( $file ) == 1 && $dirs == 1 )
+        {
+          $tempfile = $file[0]['dirs'];
+          $files = "in ".$tempfile." : ".$file[0]['filename'];
+        }
+          
+        $string[0] = $committer." * ".$rev." ".$files;
+        for( $i=0; $i<count($message); $i++ )
+        {
+          $string[1+$i] = $message[$i];
+        }
+        
+        for( $i=0; $i<count($channels); $i++ )
+        {
+          if( $channels[$i]['svnmon'] == "FALSE" )
+            continue;
+            
+          $bot->talk( $channels[$i]['name'], $svnservers[$c]['name']." SVN update:" );
+          for( $j=0; $j<count($string); $j++ )
+          {
+            if( $string[$j] == "\n" || $string[$j] == NULL )
+              continue;
+            $bot->talk( $channels[$i]['name'], $string[$j] );
+          }
+        }
+        for( $j=0; $j<count($CONFIG['servers']['KOR']); $j++ )
+        {
+          unset( $thisserver );
+          $thisserver = $CONFIG['servers']['KOR'][$j];
+          $bot->tremulous_rcon( $thisserver['ip'], $thisserver['port'], "!print ".$svnservers[$c]['name']." SVN Update:", $thisserver['rcon'] );
+          for( $k=0; $k<count($string); $k++ )
+          {
+            if( $string[$k] == "\n" || $string[$k] == NULL )
+              continue;
+            $bot->tremulous_rcon( $thisserver['ip'], $thisserver['port'], "!print ".$string[$k], $thisserver['rcon'] );
           }
         }
       }
+    }
   }
 
   function cmd_send( $command )
@@ -854,7 +852,6 @@ class bot
     else if( time() - $con['lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
       $con['stimes'] = 0;
     return;
-    
   }
 
   function talk( $channel, $text ) 
@@ -948,7 +945,7 @@ class bot
   function check_admin( $hostmask )
   {
     global $CONFIG;
-    $admins = $CONFIG['adminname'];
+    $admins = $CONFIG[adminname];
     for( $i=0;$i<count($admins);$i++ )
     {
       if( $hostmask == $admins[$i] )
@@ -1260,6 +1257,46 @@ class bot
     $out['temp'] = trim( $temp );
 
     return( $out );
+  }
+  
+  function readdata( $datavar )
+  {
+    global $config, $bot;
+    
+    $newdata = file( $CONFIG[datafilelocation] );
+    
+    if( $newdata == serialize( $datavar ) )
+      return;
+    
+    $newdata = unserialize( $newdata );
+    
+    //Current data file is newer
+    if( $newdata['time'] <= $datavar )
+      $bot->writedata( $datavar );
+    else
+    {
+      $fh = fopen( $CONFIG[datafilelocation], "r" );
+      $datavar = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
+      fclose( $fh );
+    }
+    
+    //Not needed, but you never know...
+    return( $datavar );
+  }
+  
+  function writedata( $datavar )
+  {
+    global $config, $bot;
+    
+    $olddata = file( $CONFIG[datafilelocation] );
+    
+    if( $olddata == serialize( $datavar ) )
+      return;
+      
+    $datavar['time'] = time();
+    $fh = fopen( $CONFIG[datafilelocation], "w" );
+    fwrite( $fh, $datavar );
+    fclose( $fh );
   }
 
   function tremulous_getserverlist( )
