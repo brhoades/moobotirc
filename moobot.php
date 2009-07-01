@@ -46,13 +46,14 @@ function init()
     else if( $CONFIG[server] == 1 )
       $CONFIG[server] = "irc.quakenet.org";
   }
+  $CONFIG[server] = gethostbyname( $CONFIG[server] );
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
 	$lasttime = time();
   if ( !$con['socket'] ) 
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    stream_set_timeout( $con['socket'], 0, 100 );
+    stream_set_timeout( $con['socket'], 1, 0 );
     $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
     $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
     while( !feof( $con['socket'] ) )
