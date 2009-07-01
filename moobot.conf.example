@@ -201,9 +201,11 @@ $channels[8]['password'] = "SSR";
 //^^^ Uncomment if your array values (ie $channels[THESE] ) are out of order ^^^ //
 
 //svn repos to check
-$svnservers[0]['name'] = "KoRx";
-$svnservers[0]['url'] = "http://korx.googlecode.com/svn/trunk/";
-$svnservers[1]['name'] = "Trem-KoR";
-$svnservers[1]['url'] = "http://trem-kor.googlecode.com/svn/trunk/";
+$svnservers[0]['name'] = "Trem-KoR";
+$svnservers[0]['url'] = "http://trem-kor.googlecode.com/svn/trunk/";
 
+$hgservers[0]['name'] = "KoRx";
+$hgservers[0]['loc'] = "/srv/http/korx/";
+$hgservers[1]['name'] = "Moobot";
+$hgservers[1]['loc'] = "/srv/http/moobotirc/";
 ?>
