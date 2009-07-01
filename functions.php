@@ -659,15 +659,15 @@ class bot
 
    for( $c=0; $c<count($svnservers); $c++ )
    {
-     unset( $svnurl, $tries, $writeme, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
+     unset( $svnurl, $tries, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
      $svnurl = $svnservers[$c]['url'];
      $thissvnlog = $con['data'][svnstuffs][$c];
-     exec( "svn log -l 1 -q  $svnurl", $svnout );
+     exec( "svn log -l1  $svnurl", $svnout );
      $tries = 0;
      while( count( $svnout ) == 0 && $tries < 3 )
      {
        unset( $svnout );
-       exec( "svn log -l1 -q  $svnurl", $svnout );
+       exec( "svn log -l1 $svnurl", $svnout );
        $tries++;
      }
      if( count( $svnout ) == 0 )
@@ -682,14 +682,9 @@ class bot
         continue;
       else
       {
-        unset( $svnout2 );
-        while( count($svnout2) == 0 || $svnout2 == NULL )
-        {
-          unset( $svnout2 );
-          exec( "svn log -l1  $svnurl", $svnout2 );
-        }
-        $svnlogout[$c] = $svnout2[1];
-        $con['data'][svnstuffs][$c] = $svnout2[1];
+        $svnout2 = $svnout;
+        $svnlogout[$c] = $svnout[1];
+        $con['data'][svnstuffs][$c] = $svnout[1];
         
         $bot->writedata( $con['data'] );
 
@@ -915,7 +910,7 @@ class bot
       $con['stimes']++;
       $bstatus['talked']++;
     }
-    else if( time() - $con['lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
+    else if( time() - $con['3lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
       $con['stimes'] = 0;
     return;
   }
@@ -1341,6 +1336,8 @@ class bot
     //Current data file is newer
     if( $newdata['time'] <= $datavar['time'] )
       $bot->writedata( $datavar );
+    else
+      $datavar = $newdata;
     
     //Not needed, but you never know...
     return( $datavar );

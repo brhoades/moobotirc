@@ -48,12 +48,13 @@ function init()
   }
   $CONFIG[server] = gethostbyname( $CONFIG[server] );
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
+  stream_set_blocking( $con['socket'], 0 );
 	$lasttime = time();
   if ( !$con['socket'] ) 
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    stream_set_timeout( $con['socket'], 1, 0 );
+    stream_set_timeout( $con['socket'], 0, 100 );
     $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
     $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
     while( !feof( $con['socket'] ) )
@@ -65,7 +66,7 @@ function init()
       //
       //Loads data
       //
-      $bot->readdata( &$con['data'] );
+      $con['data'] = $bot->readdata( $con['data'] );
       //
       //
       //
@@ -113,9 +114,6 @@ function init()
         }
       }
 
-      if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
-        continue;
-
       //
       //checks are here!
       //
@@ -124,7 +122,10 @@ function init()
       //
       //
       //
-        
+
+      if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
+        continue;        
+
       //****************
       //
       //COMMANDS
