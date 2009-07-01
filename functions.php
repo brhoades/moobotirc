@@ -652,31 +652,31 @@ class bot
 
   function svnmon( )
   {
-    global $con, $CONFIG, $channels, $bot, $svnservers;
+    global $con, $CONFIG, $channels, $bot, $svnservers, $nextsvnmon;
 
     if( $CONFIG['svnmon'] == "FALSE" )
       return;
-
-   $svnlogout = $con['data'][svnstuffs];
 
    for( $c=0; $c<count($svnservers); $c++ )
    {
      unset( $svnurl, $tries, $writeme, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
      $svnurl = $svnservers[$c]['url'];
-     $thissvnlog = $svnlogout[$c];
+     $thissvnlog = $con['data'][svnstuffs][$c];
      exec( "svn log -l 1 -q  $svnurl", $svnout );
-     while( count($svnout) == 0 && $tries < 3 )
+     $tries = 0;
+     while( count( $svnout ) == 0 && $tries < 3 )
      {
-       unset($svnout);
-       exec( "svn log -l 1 -q  $svnurl", $svnout );
+       unset( $svnout );
+       exec( "svn log -l1 -q  $svnurl", $svnout );
        $tries++;
      }
      if( count( $svnout ) == 0 )
      {
        echo "SVN: Couldn't check $svnurl\n"; 
+       $nextsvnmon += 60;
        continue;
      }
-     unset( $tries );
+     $tries = 0;
 
       if( $svnout[1] == $thissvnlog )
         continue;
@@ -686,9 +686,10 @@ class bot
         while( count($svnout2) == 0 || $svnout2 == NULL )
         {
           unset( $svnout2 );
-          exec( "svn log -l 1  $svnurl", $svnout2 );
+          exec( "svn log -l1  $svnurl", $svnout2 );
         }
-        $svnlogout[$c] = $svnout[1];
+        $svnlogout[$c] = $svnout2[1];
+        $con['data'][svnstuffs][$c] = $svnout2[1];
         
         $bot->writedata( $con['data'] );
 
@@ -802,7 +803,7 @@ class bot
             $bot->talk( $channels[$i]['name'], $string[$j] );
           }
         }
-        for( $j=0; $j<count($CONFIG['servers']['KOR']); $j++ )
+        /*for( $j=0; $j<count($CONFIG['servers']['KOR']); $j++ )
         {
           unset( $thisserver );
           $thisserver = $CONFIG['servers']['KOR'][$j];
@@ -813,6 +814,71 @@ class bot
               continue;
             $bot->tremulous_rcon( $thisserver['ip'], $thisserver['port'], "!print ".$string[$k], $thisserver['rcon'] );
           }
+        }*/
+      }
+    }
+  }
+  
+  function hgmon( )
+  {
+    global $bot, $con, $hgservers;
+    define( "MAX_REPORT", 10 );
+    //max number of commits at a time
+    for( $i = 0; $i < count( $hgservers ); $i++ )
+    {
+      //here for a reason!
+      $data = $con['data'][hgstuffs];
+      $thisdata = $data[$i];
+  
+      //check stuff
+      exec( "hg pull -u ".$hgservers[$i]['loc'] );
+      exec( "hg log -l1 -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}\" ".$hgservers[$i]['loc'], $whatitsays );
+      
+      $whatitsays = implode( "<br />", $whatitsays );
+      
+      if( $whatitsays == $thisdata )
+        return;
+      
+      $con['data'][hgstuffs][$i] = $whatitsays;
+      $bot->writedata( $con['data'] );
+      
+      for( $k = 2; $k < MAX_REPORT+2; $k++ )
+      {
+        unset( $stufftoreport );
+        exec( "hg log -l$k -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}<cibr>\" ".$hgservers[$i]['loc'], $stufftoreport );
+        if( stripos( $tryingtofind, $thisdata ) !== FALSE )
+          break;
+      }
+      if( $k == MAX_REPORT + 2 )
+      {
+        //this is our first time
+        continue;
+      }
+      
+      $stufftoreport = implode( "<br />", $stufftoreport );
+      $stufftoreport = explode( "<cibr>", $stufftoreport );
+      
+      for( $k = 0; $k < count( $stufftoreport ); $k++ )
+      {
+        $thiscommit = explode( " ||| ", $stufftoreport[$k] );
+        $rev = $thiscommit[0];
+        $cset = $thiscommit[1];
+        $author = $thiscommit[2];
+        $branches = $thiscommit[3];
+        $descr = $thiscommit[4];
+        $descr = explode( "<br />", $descr );
+        
+        //go through the channels and see if they want to hear from us
+        for( $j = 0; $j < count( $channels ); $j++ )
+        {
+          $si = explode( ",", $channel[$j]['hgmon'] );
+          if( array_search( $i, $si ) === FALSE )
+            continue;
+          
+          $bot->talk( $channel[$j]['name'], $hgservers[$i]['name']." HG update:" );
+          $bot->talk( $channel[$j]['name'], "$author * r$rev:$cset " );
+          for( $l = 0; $l < count( $descr ); $l++ )
+            $bot->talk( $channel[$j]['name'], $descr[$l] );
         }
       }
     }
@@ -1261,9 +1327,11 @@ class bot
   
   function readdata( $datavar )
   {
-    global $config, $bot;
+    global $CONFIG, $con, $bot;
     
-    $newdata = file( $CONFIG[datafilelocation] );
+    $fh = fopen( $CONFIG[datafilelocation], "r" );
+    $newdata = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
+    fclose( $fh );
     
     if( $newdata == serialize( $datavar ) )
       return;
@@ -1271,14 +1339,8 @@ class bot
     $newdata = unserialize( $newdata );
     
     //Current data file is newer
-    if( $newdata['time'] <= $datavar )
+    if( $newdata['time'] <= $datavar['time'] )
       $bot->writedata( $datavar );
-    else
-    {
-      $fh = fopen( $CONFIG[datafilelocation], "r" );
-      $datavar = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
-      fclose( $fh );
-    }
     
     //Not needed, but you never know...
     return( $datavar );
@@ -1286,16 +1348,20 @@ class bot
   
   function writedata( $datavar )
   {
-    global $config, $bot;
+    global $CONFIG, $bot, $con;
     
-    $olddata = file( $CONFIG[datafilelocation] );
+    $fh = fopen( $CONFIG[datafilelocation], "r" );
+    $olddata = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
+    fclose( $fh );
     
     if( $olddata == serialize( $datavar ) )
       return;
       
-    $datavar['time'] = time();
+    $time = time();
+    $con['data']['time'] = $time;
+    $datavar['time'] = $time;
     $fh = fopen( $CONFIG[datafilelocation], "w" );
-    fwrite( $fh, $datavar );
+    fwrite( $fh, serialize( $datavar ) );
     fclose( $fh );
   }
 

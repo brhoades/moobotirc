@@ -71,12 +71,13 @@ function init()
       
       $bstatus['lines']++;
 
-      if( $nextsvnmon <= time() )
+      if( $nextsvnmon <= time() && $firsttime == "FALSE" )
       {
-        $bot->svnmon();
         $nextsvnmon = time() + $svnmontimeout; 
+        $bot->svnmon();
         $bstatus['svnchecks']++;
         //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
+        $bot->hgmon();
       }
       
       if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
