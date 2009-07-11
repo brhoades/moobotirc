@@ -76,10 +76,10 @@ function init()
       if( $nextsvnmon <= time() && $firsttime == "FALSE" )
       {
         $nextsvnmon = time() + $svnmontimeout; 
-        $bot->svnmon();
+        //$bot->svnmon();
         $bstatus['svnchecks']++;
         //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
-        $bot->hgmon();
+        //$bot->hgmon();
       }
       
       if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
@@ -151,6 +151,8 @@ function init()
         unset( $textarray['0'] );
         $textarray = array_values( $textarray );
       }
+      if( $channel == $CONFIG[nick] )         //Private Message
+        $channel = $name;
         
       if( stripos( $text, ":%" ) !== FALSE )
       {
@@ -579,7 +581,7 @@ function init()
               break;
             }
             
-            if( count( $message2 ) > 5 && stripos( $channel, "#" ) !== FALSE )
+            if( count( $message2 ) > 5 )
             {
               $bot->talk( $channel, "That returned more than 5 lines of text. It was executed, however. Feel free to try a PM." );
               break;
@@ -852,27 +854,20 @@ function init()
         $urls = preg_grep( "@\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es)@", $bufarray );
         $urls = array_values( $urls );
         
-        if( count( $urls ) > 3 )
-          return;
+        if( count( $urls ) > 2 )
+          continue;
         for( $i=0; $i<count($urls);$i++ )
         {
           $url = trim( $urls[$i], "\x00..\x1F" );
           $url = ltrim( $urls[$i], ":" );
           $titles[$i] = $bot->snarf_url( $url );
-          $urlarray[$i] = explode( "/", $url );
-          if( count( $urlarray[$i] ) > 1 && ( stripos( $url, "http://" ) !== FALSE || stripos( $url, "ftp://" ) !== FALSE || stripos( $url, "https://" ) !== FALSE ) )
+          $urlar = explode( "/", $url );
+          
+          for( $j=0; $j<count($urlar); $j++ )
           {
-            for( $j=0; $j<count($urlarray[$i]);$j++ )
-            {
-              if( $urlarray[$i][$j] == NULL && stripos( $urlarray[$i][$j-1], ":" ) && $j > 0 )
-              {
-                $url = $urlarray[$i][$j+1];
-                break;
-              }
-            }
+            if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es)/i", $urlar[$j] ) != NULL )
+              $url = $urlar[$j];
           }
-          else
-            $url = $titles[$i];
             
           if( $url != NULL && $titles[$i] != NULL )
           {

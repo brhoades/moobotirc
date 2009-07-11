@@ -656,9 +656,9 @@ class bot
 
     if( $CONFIG['svnmon'] == "FALSE" )
       return;
-
-   for( $c=0; $c<count($svnservers); $c++ )
-   {
+    
+    for( $c=0; $c<count($svnservers); $c++ )
+    {
      unset( $svnurl, $tries, $thissvnlog, $svnout, $svnout2, $committer, $message, $string, $svnout3, $thisserver );
      $svnurl = $svnservers[$c]['url'];
      $thissvnlog = $con['data'][svnstuffs][$c];
@@ -682,21 +682,23 @@ class bot
         continue;
       else
       {
+        echo $svnout[1]." != '$thissvnlog'";
+        print_r( $con['data'] );
         $svnout2 = $svnout;
         $svnlogout[$c] = $svnout[1];
         $con['data'][svnstuffs][$c] = $svnout[1];
         
         $bot->writedata( $con['data'] );
 
-        $svnarray = explode( " | ", $svnout['1'] );
+        $svnarray = explode( " | ", $svnout[1] );
         $rev = $svnarray['0'];
         $revnum = ltrim( $rev, "r" );
         $revold = $revnum-1; //for now
         $committer = $svnarray['1'];
-        while( count($svnout3) == 0 )
+        while( count( $svnout3 ) == 0 )
         {
-            unset($svnout3);
-            exec("svn diff -r$revold:$revnum $svnurl", $svnout3);
+            unset( $svnout3 );
+            exec( "svn diff -r$revold:$revnum $svnurl", $svnout3 );
         }
         $diffsize = count($svnout3);
         $k = 0;
@@ -822,8 +824,7 @@ class bot
     for( $i = 0; $i < count( $hgservers ); $i++ )
     {
       //here for a reason!
-      $data = $con['data'][hgstuffs];
-      $thisdata = $data[$i];
+      $thisdata = $con['data'][hgstuffs][$i];
   
       //check stuff
       exec( "hg pull -u ".$hgservers[$i]['loc'] );
@@ -832,7 +833,7 @@ class bot
       $whatitsays = implode( "<br />", $whatitsays );
       
       if( $whatitsays == $thisdata )
-        return;
+        continue;
       
       $con['data'][hgstuffs][$i] = $whatitsays;
       $bot->writedata( $con['data'] );
@@ -841,16 +842,21 @@ class bot
       {
         unset( $stufftoreport );
         exec( "hg log -l$k -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}<cibr>\" ".$hgservers[$i]['loc'], $stufftoreport );
-        if( stripos( $tryingtofind, $thisdata ) !== FALSE )
+        if( is_array( $stufftoreport ) )
+          $stufftoreport = implode( "<br />" );
+        echo "Searching for '$thisdata' in '$stufftoreport'...\n";
+        if( stripos( $stufftoreport, $thisdata ) !== FALSE )
           break;
       }
       if( $k == MAX_REPORT + 2 )
       {
         //this is our first time
+        echo "Initial setup on hgmon detected.\n";
         continue;
       }
       
-      $stufftoreport = implode( "<br />", $stufftoreport );
+      echo "HG UPDATE!!!\n";
+      //$stufftoreport = implode( "<br />", $stufftoreport );
       $stufftoreport = explode( "<cibr>", $stufftoreport );
       
       for( $k = 0; $k < count( $stufftoreport ); $k++ )
@@ -867,11 +873,12 @@ class bot
         for( $j = 0; $j < count( $channels ); $j++ )
         {
           $si = explode( ",", $channel[$j]['hgmon'] );
-          if( array_search( $i, $si ) === FALSE )
+          if( $channel[$j]['hgmon'] != $i
+              && array_search( $i, $si ) === FALSE )
             continue;
           
           $bot->talk( $channel[$j]['name'], $hgservers[$i]['name']." HG update:" );
-          $bot->talk( $channel[$j]['name'], "$author * r$rev:$cset " );
+          $bot->talk( $channel[$j]['name'], "$author * $branches * r$rev:$cset " );
           for( $l = 0; $l < count( $descr ); $l++ )
             $bot->talk( $channel[$j]['name'], $descr[$l] );
         }
@@ -883,11 +890,11 @@ class bot
   {
     global $con, $time, $CONFIG, $buffers, $bstatus;
     
-    if( time() - $con['3lastspeaktime'] < $CONFIG[chatspeaktimeout] || $con['stimes'] <= 3 )
+    if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
       fputs( $con['socket'], $command."\n\r" );
       $con['stimes']++;
-      $con['3lastspeaktime'] = time();
+      $con[lastspeaktime] = time();
       $bstatus['commandstoserv']++;
       print ( date("[ d/m/y @ H:i:s ]") ."-> ". $command. "\n\r" );
     }
@@ -900,18 +907,18 @@ class bot
   {
     global $bot, $con, $time, $buffers, $CONFIG, $bstatus;
     
-    if( time() - $con['3lastspeaktime'] >= $CONFIG[chatspeaktimeout] && count( $buffers ) > 0 )
+    if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] && count( $buffers ) > 0 )
     {
       $buffers = array_values( $buffers );
       fputs( $con['socket'], $buffers[0]."\n\r" );
       print ( date("[ d/m/y @ H:i:s ]") ."-> ".$buffers[0]."\n\r" );
       unset( $buffers[0] );
-      $con['3lastspeaktime'] = time();
+      $con[lastspeaktime] = time();
       $con['stimes']++;
       $bstatus['talked']++;
     }
-    else if( time() - $con['3lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
-      $con['stimes'] = 0;
+    //else if( time() - $con['3lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
+    //  $con['stimes'] = 0;
     return;
   }
 
@@ -919,13 +926,11 @@ class bot
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
-    if( time() - $con['3lastspeaktime'] < $CONFIG[chatspeaktimeout] || $con['stimes'] <= 3 )
+    if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] ) // || $con['stimes'] <= 3 )
     {
-      if( $channel == $CONFIG['name'] )   //lets not and say we did
-        return;
       fputs( $con['socket'], "PRIVMSG $channel :".$text."\n\r" );
       $con['stimes']++;
-      $con['3lastspeaktime'] = time();
+      $con[lastspeaktime] = time();
       $bstatus['talked']++;
       print (date("[d/m/y @ H:i:s]") ."-> PRIVMSG $channel :".$text."\n\r");
     }
@@ -1329,17 +1334,21 @@ class bot
     fclose( $fh );
     
     if( $newdata == serialize( $datavar ) )
-      return;
-    
+      return( $datavar );
+
     $newdata = unserialize( $newdata );
     
-    //Current data file is newer
-    if( $newdata['time'] <= $datavar['time'] )
-      $bot->writedata( $datavar );
-    else
+    if( $datavar['time'] != NULL && $newdata['time'] != NULL )
+    {
+      if( $newdata['time'] <= $datavar['time'] )
+        echo "Our data is newer?";
+      else
+        $datavar = $newdata;
+    }
+    else 
       $datavar = $newdata;
-    
-    //Not needed, but you never know...
+
+    $con['data'] = $datavar;
     return( $datavar );
   }
   
