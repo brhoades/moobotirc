@@ -369,6 +369,101 @@ class other
     $inwhat = implode( $withwhat, $inwhat );
     return( $inwhat );
   }
+  
+  function can_vote( $levelarray, $votetype )
+  {
+    for( $i=0; $i<count($levelarray); $i++ )
+    {
+      $thislevel = $levelarray[$i];
+      if( $votetype == IN_CLAN_VOTE && $thislevel == CLAN_MEMBER )
+        return TRUE;
+      else if( $votetype == VIP_MOD_VOTE 
+               && ( $thislevel == VIP_OPERATOR || $thislevel == MODERATOR 
+                    || $thislevel == GLOBAL_MODERATOR || $thislevel == ADMINISTRATOR ) )
+        return TRUE;
+      else if( $votetype == VIP_OP_VOTE
+                && ( $thislevel == MODERATOR || $thislevel == GLOBAL_MODERATOR 
+                     || $thislevel == ADMINISTRATOR ) )
+        return TRUE;
+      else if( $votetype == TYPICAL_PROMOTION_VOTE
+                && ( $thislevel == GLOBAL_MODERATOR || $thislevel == ADMINISTRATOR ) )
+        return TRUE;
+      else if( $votetype == GMOD_PROMOTION_VOTE && $thislevel == ADMINISTRATOR )
+        return TRUE;
+      else if( $votetype == DEMOTION_VOTE 
+               && ( $thislevel == ADMINISTRATOR || $thislevel == GLOBAL_MODERATOR ) )
+        return TRUE;
+      else if( $votetype == OTHER && $thislevel == CLAN_MEMBER )
+        return TRUE;
+      else if( $votettype == VIP_MOD_OP_OVERRIDE_VOTE
+                && ( $thislevel == MODERATOR || $thislevel == GLOBAL_MODERATOR 
+                     || $thislevel == ADMINISTRATOR ) )
+        return TRUE;
+    }
+    return FALSE;
+  }
+  
+  function level_test( $level, $array )
+  {
+    if( array_search( $level, $array ) !== FALSE )
+      return TRUE;
+    else
+      return FALSE;
+  }
+
+  function array_search_recursive( $needle, $haystack, $strict=FALSE, $path=array( ) )
+  {
+    if( !is_array( $haystack ) ) 
+        return FALSE;
+ 
+    foreach( $haystack as $key => $val ) 
+    {
+      if( is_array( $val ) && $subPath = array_search_recursive( $needle, $val, $strict, $path ) ) 
+      {
+        $path = array_merge( $path, array( $key ), $subPath );
+        return TRUE;
+      } 
+      else if( ( !$strict && $val == $needle) || ( $strict && $val === $needle ) ) 
+      {
+        $path[] = $key;
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+  
+  function filesize_range( $filesize, $size = NULL )
+  {
+    if( $size != NULL )
+    {
+      $size = strtolower( $size );
+      if( $size == "tb" )
+        $size = 4;
+      else if( $size == "gb" )
+        $size = 3;
+      else if( $size == "mb" )
+        $size = 2;
+      else if( $size == "kb" )
+        $size = 1;
+      else if( $size == "b" )
+        return $filesize;
+      
+      return( $filesize / ( 1024^$size ) );
+    }
+    
+    if( $filesize > 0 && $filesize < 1024 )
+      $out = $filesize." B";
+    else if( $filesize >= 1024 && $filesize < pow( 1024, 2 ) )
+      $out = round( ( $filesize/1024 ), 2 )." KiB";
+    else if( $filesize >= pow( 1024, 2 ) && $filesize < pow( 1024, 3 ) )
+      $out = round( ( $filesize / pow( 1024, 2 ) ), 2 )." MiB";
+    else if( $filesize >= pow( 1024, 3 ) && $filesize < pow( 1024, 4 ) )
+      $out = round( ( $filesize / pow( 1024, 3 ) ), 2 )." GiB";
+    else if( $filesize >= pow( 1024, 4 ) )
+      $out = round( ( $filesize / pow( 1024, 4 ) ), 2 )." TiB";
+    
+    return( $out );
+  }
 }
 
 class bot
@@ -1150,21 +1245,39 @@ class bot
   
   function snarf_url( $url )
   {
+    global $other, $bot;
     if( stripos( $url, "http://" ) === FALSE && stripos( $url, "ftp://" ) === FALSE && stripos( $url, "https://" ) === FALSE )
       $url = "http://".$url;
-    $urlf = file( $url );
-    if( $urlf == NULL )
-      return;
     
-    $i = preg_grep( "/<title>.*<\/title>/i", $urlf );
-    $i = array_values( $i );
-    $i = $i[0];
+    $head = get_headers( $url, 1 );
+    $type = $head[ "Content-Type" ];
+    if( is_array( explode( " ", $type ) ) )
+    {
+      $type = explode( " ", $type );
+      $type = $type[0];
+    }
+    $type = rtrim( $type, ";" );
+    $size = $head[ "Content-Length" ];
+    
+    if( $type != "text/html" && $type != "text/xhtml" )
+      $title[0] = $type." file (".$other->filesize_range( $size ).")";
+    else
+    {
+      $urlf = file( $url );
+      if( $urlf == NULL )
+        return;
       
-    $title = explode( "<title>", $i );
-    $title = explode( "</title>", $title[1] );
+      $i = preg_grep( "/<title>.*<\/title>/i", $urlf );
+      $i = array_values( $i );
+      $i = $i[0];
+        
+      $title = explode( "<title>", $i );
+      $title = explode( "</title>", $title[1] );
+    }
 
     //Our title will be the first value of $title
     $title = html_entity_decode( strip_tags( $title[0] ) );
+    unset( $i, $urlf, $url );
     return $title;
   }
   
@@ -1384,7 +1497,7 @@ class bot
     for( $i = 0; $i < 4; $i++ ) $return_str[$i] = pack("v", 0xff);
     for( $i = 3; $i < 6; $i++ ) $end_str[$i] = pack("v", 0x00);
 
-    $fp = fsockopen( "udp://".$server, $port, &$errno, &$errstr, 2 );   // Opens connection to server
+    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );   // Opens connection to server
     socket_set_timeout( $fp, 1 );  // Socket Timeout
 
     if (!$fp)
