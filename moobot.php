@@ -865,7 +865,7 @@ function init()
           
           for( $j=0; $j<count($urlar); $j++ )
           {
-            if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es)/i", $urlar[$j] ) != NULL )
+            if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|cz|es)/i", $urlar[$j] ) != NULL )
               $url = $urlar[$j];
           }
             
