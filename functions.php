@@ -705,38 +705,43 @@ class bot
     return(round($pingtotal/$count));
   }
 
-  function tremulous_rcon( $server, $port, $command, $rcon, $cbf = FALSE ) 
+  function tremulous_rcon( $server, $port, $command, $rcon, $cbf = FALSE, $colors = TRUE ) 
   {
     global $bstatus, $bot;
     if( $server == NULL )
       return( "Error, the IP argument was empty." );
     else if( $port == NULL )
       return( "Error, the port argument was empty." );
-    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
+    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );
     if( !$fp )
     {
       while( !$fp && $tries<3 )
       {
-        $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
+        $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );
         $tries++;
-        echo "Retrying, no connection established...\n<br />";
+        echo "Retrying, no connection established...\n";
       }
       if( !$fp )
-        return "Error connecting";
+        return "Error connecting\n";
     }
     $bstatus['trem']++;
     $status_str = "xxxxrcon ".$rcon." $command";
-    for($i=0;$i<4;$i++) $status_str[$i] = pack("v", 0xff);
-    fwrite($fp, $status_str);
+    for($i=0;$i<4;$i++) 
+      $status_str[$i] = pack("v", 0xff);
+    fwrite( $fp, $status_str );
+    socket_set_timeout($fp, 1);
+    $k=1;
     do
     {
-      $data = fread( $fp, 8192 );
+      $data = fread( $fp, 8*1024 );
       if( strlen( $data ) == 0 )
         break;
       $data_full[] = $data;
+      unset( $data );
+      $k++;
     } while( true );
-    socket_set_timeout($fp, 1);
-    stream_set_timeout($fp, 1);
+    fclose( $fp );
+    //stream_set_timeout($fp, 1);
     /*if( $data_full == NULL && $cbf != "TRUE" )
     {
       while( $tries < 2 )
@@ -752,10 +757,11 @@ class bot
     $data_full = substr( $data_full, 10 );
 
     $data = explode( "\n", $data_full );
-    fclose($fp);
-    return $bot->tremulous_replace_colors_irc( $data );
+    if( $colors )
+      return $bot->tremulous_replace_colors_irc( $data );
+    else
+      return $data;
   }
-
 
   function svnmon( )
   {
