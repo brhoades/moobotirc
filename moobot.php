@@ -48,7 +48,7 @@ function init()
   }
   $CONFIG[server] = gethostbyname( $CONFIG[server] );
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
-  stream_set_blocking( $con['socket'], 0 );
+  //stream_set_blocking( $con['socket'], 0 );
 	$lasttime = time();
   if ( !$con['socket'] ) 
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
@@ -94,6 +94,16 @@ function init()
         $max = count( $channels );
         for( $i=0; $i<$max; $i++ )
         {
+          //might as well set the default here
+          if( $channels[$i]['svnmon'] == NULL )
+            $channels[$i]['svnmon']  = FALSE;
+          if( $channels[$i]['log'] == NULL )
+            $channels[$i]['log']  = TRUE;
+          if( $channels[$i]['cmds'] == NULL )
+            $channels[$i]['cmds']  = TRUE;
+          if( $channels[$i]['autoopvoice'] == NULL )
+            $channels[$i]['autoopvoice']  = FALSE;
+          
           if( $channels[$i]['password'] != NULL )
             $bot->cmd_send( "JOIN ". $channels[$i]['name'] ." ". $channels[$i]['password'] );
           else
@@ -105,13 +115,14 @@ function init()
           if( is_int( $CONFIG[nickpass] ) )
           {
             if( $CONFIG[server] == 0 )
-              $bot->cmd_send( "PRIVMSG NickServ auth ".$CONFIG[nickpass]." \n\r" );
+              $bot->cmd_send( "PRIVMSG NickServ :AUTH ".$CONFIG[nickpass], TRUE );
             else if( $CONFIG[server] == 1 )
-              $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org auth ".$CONFIG[nickpass]." \n\r" );
+              $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE );
           }
           else
-            $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." auth ".$CONFIG[nickpass]." \n\r" );
+            $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE );
         }
+        $bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
       }
 
       //
@@ -131,7 +142,9 @@ function init()
       //COMMANDS
       //
       //****************
-      
+
+      $start = strpos( $con['buffer']['all'], ":", 1 )+1;
+      $text = substr( $con['buffer']['all'], $start );
       $bufarray = explode( " ", $con['buffer']['all'] );
       $channel = $bufarray['2'];
       $hostmaskchunk = ltrim( $bufarray['0'], ":" );
@@ -169,7 +182,7 @@ function init()
         $command = ltrim( $bufarray['3'], ":%" );
         unset( $bufarray['3'] );
         $bufarray = array_values( $bufarray );
-        if( $channels[$chanid]['cmds'] == "FALSE" )		//hax
+        if( $channels[$chanid]['cmds'] == FALSE && $command != "cmd" )		//hax
           $command = "channelhasdisabledcommands";
         $bstatus['cmds']++;
         switch( $command )
@@ -299,7 +312,7 @@ function init()
             break;
           case "help":
             $bot->talk( $channel, "Current bot commands are:" );
-            $bot->talk( $channel, "svnmon(A), rehash(A), part(A), join(A), msg(A), voice/unmute(A), devoice/mute(A), passvote(A), cancelvote(A), op(A), deop(A), logstatus, userstatus, uptime, sysinfo, randquote, rot13, google, urban, help, and status." );
+            $bot->talk( $channel, "cmds(A), autoop/autovoice(A), svnmon(A), rehash(A), part(A), join(A), msg(A), voice/unmute(A), devoice/mute(A), passvote(A), cancelvote(A), op(A), deop(A), logstatus, userstatus, uptime, sysinfo, randquote, rot13, google, urban, help, and status." );
             $bot->talk( $channel, "Current tremulous commands are:" );
             $bot->talk( $channel, "msgs(A), clan, servers, server, and find" );
             break;
@@ -666,7 +679,13 @@ function init()
             case "part":
             if( $bot->check_admin( $hostmask ) )
             {
-              $bot->cmd_send( "PART ".$bufarray[0] );
+              $channel = $bufarray[0];
+              if( $bufarray[1] != NULL )
+              {
+                unset( $bufarray[0] );
+                $pmessage = implode( " ", $bufarray );                
+              }
+              $bot->cmd_send( "PART $channel :$pmessage" );
               if( $channel != $bufarray[0] )
                 $bot->talk( $channel, $name.": I have parted ".$bufarray[0] );
             }
@@ -740,6 +759,52 @@ function init()
             else
               $bot->talk( $channel, "That zip code/location was not found or was ambiguous." );
             break;
+            case "invite":
+              if( $bot->check_admin( $hostmask ) )
+              {
+                //$bot->cmd( "INVITE ".$bufarray[0]." ".$channel );
+                $bot->cmd( "INVITE ".$channel." ".$bufarray[0] );
+                $bot->talk( $channel, "Invited" );
+              }
+              else
+                $bot->talk( $channel, "You do not have permission to use that command." );
+            break;
+            case "autovoice":
+            case "autoop":
+              if( $bot->check_admin( $hostmask ) )
+              {
+                if( $channels[$chanid]['autoopvoice'] != TRUE )
+                {
+                  $channels[$chanid]['autoopvoice'] = TRUE; 
+                  $bot->talk( $channel, "Auto Op and Voice enabled" );
+                }
+                else
+                {
+                  $channels[$chanid]['autoopvoice'] = FALSE; 
+                  $bot->talk( $channel, "Auto Op and Voice disabled" );
+                }
+              }
+              else
+                $bot->talk( $channel, "You do not have permission to use that command." );
+            break;
+            case "cmds":
+              if( $bot->check_admin( $hostmask ) )
+              {
+                if( $channels[$chanid]['cmds'] != TRUE )
+                {
+                  $channels[$chanid]['cmds'] = TRUE; 
+                  $bot->talk( $channel, "Commands enabled" );
+                }
+                else
+                {
+                  $channels[$chanid]['cmds'] = FALSE; 
+                  $bot->talk( $channel, "Commands disabled" );
+                }
+              }
+              else
+                $bot->talk( $channel, "You do not have permission to use that command." );
+              break;
+            
         }
       }
       else if( stripos( $text, " is " ) !== FALSE || stripos( $text, " are " ) !== FALSE )
@@ -827,31 +892,35 @@ function init()
        }
        else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
        {
-         $parts = explode( " ", $con['buffer']['all'] );
-         $name = explode( "!", $parts['0'] );
-         $hostmask = $name[1];
-         $name = ltrim( $name['0'], ":" );
-         $channel = $parts['2'];
-         if( $bot->check_admin( $hostmask ) && $name != $CONFIG[nick] )
-         {
-           $bot->cmd_send( "MODE $channel +v $name" );
-           $bot->cmd_send( "MODE $channel +o $name" );
-         }
-         else if( $name != $CONFIG[nick] )
-           $bot->cmd_send( "MODE $channel +v $name" );
+        for( $i=0; $i<count( $channels ); $i++ )
+        {
+          if( $channels[$i]['name'] == $channel )
+            $chanid = $i;
+        }
+        if( $channels[$chanid]['autoopvoice'] == TRUE )
+        {
+           $parts = explode( " ", $con['buffer']['all'] );
+           $name = explode( "!", $parts['0'] );
+           $hostmask = $name[1];
+           $name = ltrim( $name['0'], ":" );
+           $channel = $parts['2'];
+           if( $bot->check_admin( $hostmask ) && $name != $CONFIG[nick] )
+           {
+             $bot->cmd_send( "MODE $channel +v $name" );
+             $bot->cmd_send( "MODE $channel +o $name" );
+           }
+           else if( $name != $CONFIG[nick] )
+             $bot->cmd_send( "MODE $channel +v $name" );
+        }
        }
-      
-      $start = strpos( $con['buffer']['all'], ":", 1 )+1;
-      $text = substr( $con['buffer']['all'], $start );
-        
-      if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es)/i", $text ) != NULL )
+       else if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es|cz)/i", $text ) != NULL )
       {
         $bufarray = explode( " ", $con['buffer']['all'] );
         $channel = $bufarray['2'];
         for( $i=0; $i<3; $i++ )
           unset( $bufarray[$i] );
         $bufarray = array_values( $bufarray );
-        $urls = preg_grep( "@\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es)@", $bufarray );
+        $urls = preg_grep( "@\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es|cz)@", $bufarray );
         $urls = array_values( $urls );
         
         if( count( $urls ) > 2 )
@@ -876,11 +945,13 @@ function init()
           }
         }
         unset( $titles, $urlarray, $urls, $url );
-      }
+      } //:Aaron5367!~Aaron5367@Aaron5367.users.quakenet.org INVITE Moobot5367 #kor-ao
       else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {
         $channel = $bufarray['3'];
-        $bot->cmd_send( "JOIN $channel" );
+        if( stripos( $channel, "#" ) !== FALSE )
+          $bot->cmd_send( "JOIN $channel" );
+        echo "Invite to $channel recieved\n";
       }
     }
   }

@@ -434,6 +434,11 @@ class other
   
   function filesize_range( $filesize, $size = NULL )
   {
+    if( !is_int( $filesize ) )
+    {
+      echo "Error, a bad argument was inserted into filesize_range, ".$filesize;
+      return;
+    }
     if( $size != NULL )
     {
       $size = strtolower( $size );
@@ -981,13 +986,16 @@ class bot
     }
   }
 
-  function cmd_send( $command )
+  function cmd_send( $command, $end = FALSE )
   {
     global $con, $time, $CONFIG, $buffers, $bstatus;
     
     if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
-      fputs( $con['socket'], $command."\n\r" );
+      if( !$end )
+        fputs( $con['socket'], $command."\n\r" );
+      else
+        fputs( $con['socket'], $command );
       $con['stimes']++;
       $con[lastspeaktime] = time();
       $bstatus['commandstoserv']++;
@@ -1251,16 +1259,41 @@ class bot
     
     $head = get_headers( $url, 1 );
     $type = $head[ "Content-Type" ];
-    if( is_array( explode( " ", $type ) ) )
+    if( is_array( $type ) )
     {
-      $type = explode( " ", $type );
-      $type = $type[0];
+      for( $i = 0; $i < count( $type ); $i++ )
+      {
+        if( stripos( $type[$i], "text/html" ) !== FALSE )
+        {
+          $type = "text/html"; 
+          break;
+        }
+        else if( stripos( $type[$i], ";" ) !== FALSE )
+        {
+          $type = $type[$i];
+          break;
+        }
+      }
     }
     $type = rtrim( $type, ";" );
     $size = $head[ "Content-Length" ];
+    if( $size == NULL )
+      $size = "Unknown size";
     
-    if( $type != "text/html" && $type != "text/xhtml" )
+    if( stripos( $head[0], "403" ) !== FALSE )
+      $title[0] = "403, Forbidden";
+    else if( stripos( $head[0], "404" ) !== FALSE )
+      $title[0] = "404, File Not Found";
+    else if( stripos( $head[0], "401" ) !== FALSE )
+      $title[0] = "401, Unauthorized";
+    else if( stripos( $head[0], "405" ) !== FALSE )
+      $title[0] = "405, Method Not Allowed";
+    else if( stripos( $head[0], "408" ) !== FALSE )
+      $title[0] = "408, Request Timeout";
+    else if( stripos( $type,  "text/html" ) === FALSE && stripos( $type, "text/xhtml" ) === FALSE && is_int( $size ) )
       $title[0] = $type." file (".$other->filesize_range( $size ).")";
+    else if( !is_int( $size ) )
+      $title[0] = $type." file (".$size.")";
     else
     {
       $urlf = file( $url );
