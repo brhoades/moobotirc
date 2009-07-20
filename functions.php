@@ -705,7 +705,7 @@ class bot
     return(round($pingtotal/$count));
   }
 
-  function tremulous_rcon( $server, $port, $command, $rcon, $cbf ) 
+  function tremulous_rcon( $server, $port, $command, $rcon, $cbf = FALSE ) 
   {
     global $bstatus, $bot;
     if( $server == NULL )
@@ -728,20 +728,27 @@ class bot
     $status_str = "xxxxrcon ".$rcon." $command";
     for($i=0;$i<4;$i++) $status_str[$i] = pack("v", 0xff);
     fwrite($fp, $status_str);
+    do
+    {
+      $data = fread( $fp, 8192 );
+      if( strlen( $data ) == 0 )
+        break;
+      $data_full[] = $data;
+    } while( true );
     socket_set_timeout($fp, 1);
     stream_set_timeout($fp, 1);
-    $data_full = fread($fp, 1024*8);
-    if( $data_full == NULL && $cbf != "TRUE" )
+    /*if( $data_full == NULL && $cbf != "TRUE" )
     {
       while( $tries < 2 )
       {
         $out = $bot->tremulous_rcon( $server, $port, $command, $rcon, "TRUE" );
-        echo "Retrying, no data recieved...\n<br />";
+        echo "Retrying, no data recieved...\n";
         if( $out != NULL )
           return $bot->tremulous_replace_colors_irc( $out );
         $tries++;
       }
-    }
+    }*/
+    $data_full = implode( "\n", $data_full );
     $data_full = substr( $data_full, 10 );
 
     $data = explode( "\n", $data_full );
