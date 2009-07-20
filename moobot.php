@@ -763,7 +763,7 @@ function init()
               if( $bot->check_admin( $hostmask ) )
               {
                 //$bot->cmd( "INVITE ".$bufarray[0]." ".$channel );
-                $bot->cmd( "INVITE ".$channel." ".$bufarray[0] );
+                $bot->cmd_send( "INVITE ".$channel." ".$bufarray[0] );
                 $bot->talk( $channel, "Invited" );
               }
               else
