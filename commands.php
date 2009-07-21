@@ -157,7 +157,7 @@ class commands
   
   function rehash( )
   {
-    global $bot;
+    global $bot, $name;
     
     $bot->cmd_send( "QUIT :Killed by $name" );
     exec( "php ".$CONFIG[pathtoourself] );
@@ -266,13 +266,57 @@ class commands
   
   function help( )
   {
+    global $commandtree, $con, $name, $textarray, $bot, $hostmask;
     
-    return;
+    if( !$textarray[0] )
+    {
+        $numcmds = count( $commandtree );
+        $alwcmds = 0;
+
+        $k=0;
+        for( $i=0; $i<count( $commandtree ); $i++ )
+        {
+          if( ( $commandtree[$i][2] == TRUE && $bot->check_admin( $hostmask ) )
+                || $commandtree[$i][2] != TRUE )
+          {
+            $alwcmds++;
+            $cmdarray[$k] = "%".$commandtree[$i][0];
+            $k++;
+          }
+        }
+        $out[0] = "You are currently allowed to use $alwcmds/$numcmds of all the commands.";
+        for( $i=0; $i<count( $cmdarray ); $i++ )
+        {
+          if( $i == 0 )
+            $out[1] = $cmdarray[$k];
+          else
+            $out[1] .= " ".$cmdarray[$k];
+        }
+      }
+      else
+      {
+        for( $i=0; $i<count( $commandtree ); $i++ )
+        {
+          if( $commandtree[$i][0] == $command )
+          {
+            $out[0] = "%$command: ".$commandtree[$i][3];
+            if( $commandtree[$i][4] != NULL )
+              $out[1] = $commandtree[$i][4];
+            else
+              $out[1] = "No Arguments Required or Allowed";
+          }
+        }
+        if( $out == NULL )
+          $out[0] = "%$command: Not found!";
+      }
+      
+      for( $i=0; $i<count( $out ); $i++ )
+        $bot->talk( $name, $out[$i] );
   }
   
   function server( )
   {
-    global $con, $bot, $bufarray;
+    global $con, $bot, $bufarray, $name;
     
     if( count( $bufarray ) <= 0 )
     {
@@ -510,7 +554,7 @@ class commands
   
   function server_command( )
   {
-    global $textarray, $command, $bot;
+    global $textarray, $command, $bot, $name;
     
     $serveralias = $textarray['0'];
     unset( $textarray['0'] );
@@ -620,7 +664,7 @@ class commands
   
   function part( )
   {
-    global $bot, $bufarray, $con;
+    global $bot, $bufarray, $con, $name;
     
     $channel = $bufarray[0];
     if( $bufarray[1] != NULL )
