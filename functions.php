@@ -1146,7 +1146,7 @@ class bot
       return;
     }
     //If there's already a vote being called
-    if( $con['vote']['inprogress'] == "TRUE" )
+    if( $con['vote']['inprogress'] == TRUE )
     {
       $bot->talk( $channel, "$caller: Sorry, but a vote is already in progress." );
       return;
@@ -1180,7 +1180,7 @@ class bot
   {
     global $CONFIG, $con, $bot, $other;
     
-    if( $con['vote']['inprogress'] != "TRUE" )
+    if( $con['vote']['inprogress'] != TRUE )
       return;
 
     if( stripos( $con['buffer']['all'], "F1" ) || stripos( $con['buffer']['all'], "F2" ) )
@@ -1204,11 +1204,11 @@ class bot
       {
         if( $con['vote']['voters'][$i] == $hostmask )
         {
-          $voted = "TRUE";
+          $voted = TRUE;
           break;
         }
       }
-      if( $voted == "TRUE" )
+      if( $voted == TRUE )
       {
         $bot->talk( $channel, "$name: You've already voted" );
         return;
@@ -1233,7 +1233,7 @@ class bot
         $bot->talk( $con['vote']['channel'], $bot->tremulous_replace_colors_irc("^2Vote Passed ^0(^2Y^0:$yeses ^1N^0:$noes, ".round(($yespercent*100))."%)"));
       else
         $bot->talk( $con['vote']['channel'], $bot->tremulous_replace_colors_irc("^1Vote Failed ^0(^2Y^0:$yeses ^1N^0:$noes, ".round(($yespercent*100))."%)"));
-      $con['vote']['inprogress'] = "FALSE";
+      $con['vote']['inprogress'] = FALSE;
     }
     
   }
