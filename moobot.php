@@ -192,6 +192,7 @@ function init()
         $con['command'] = $command;
         unset( $bufarray['3'] );
         $bufarray = array_values( $bufarray );
+        $con['bufarray'] = $bufarray;
         if( $channels[$chanid]['cmds'] == FALSE && $command != "cmd" )		//hax
           continue;
         $bstatus['cmds']++;
