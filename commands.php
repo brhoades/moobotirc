@@ -272,7 +272,7 @@ class commands
   {
     global $commandtree, $con, $bot;
     
-    if( !$textarray[1] )
+    if( !$textarray[0] )
     {
         $numcmds = count( $commandtree );
         $alwcmds = 0;
@@ -301,17 +301,18 @@ class commands
       {
         for( $i=0; $i<count( $commandtree ); $i++ )
         {
-          if( $commandtree[$i][0] == $textarray[1] )
+          if( $commandtree[$i][0] == $textarray[0] )
           {
-            $out[0] = "%".$textarray[1]." ".$commandtree[$i][3];
+            rtrim( $textarray, "%" );
+            $out[0] = "%".$textarray[0]." ".$commandtree[$i][3];
             if( $commandtree[$i][4] != NULL )
               $out[1] = $commandtree[$i][4];
             else
-              $out[1] = "No Arguments Required or Allowed";
+              $out[1] = "No arguments required or allowed.";
           }
         }
         if( $out == NULL )
-          $out[0] = "%".$textarray[1].": Not found!";
+          $out[0] = "%".$textarray[0].": Not found!";
       }
       
       for( $i=0; $i<count( $out ); $i++ )
