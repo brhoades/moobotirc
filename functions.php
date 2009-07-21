@@ -1003,6 +1003,8 @@ class bot
     
     if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
+      if( $con['name'] == $CONFIG[nick] )
+        return; //lets not and say we did
       if( !$end )
         fputs( $con['socket'], $command."\n\r" );
       else
@@ -1042,6 +1044,8 @@ class bot
     
     if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] ) // || $con['stimes'] <= 3 )
     {
+      if( $con['name'] == $CONFIG[nick] )
+        return; //lets not and say we did
       fputs( $con['socket'], "PRIVMSG $channel :".$text."\n\r" );
       $con['stimes']++;
       $con[lastspeaktime] = time();

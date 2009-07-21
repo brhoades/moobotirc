@@ -147,6 +147,11 @@ array(
     ("ccmds", "\$commands->invite();", TRUE,
       "Toggles command usage in this channel.",
       ""
+    ),
+    array
+    ("weather", "\$commands->weather();", FALSE,
+      "Returns a weather report from weatherunderground.",
+      "[zipcode|cityname]"
     )
 );
 
@@ -157,9 +162,9 @@ class commands
   
   function rehash( )
   {
-    global $bot, $name;
+    global $bot, $con;
     
-    $bot->cmd_send( "QUIT :Killed by $name" );
+    $bot->cmd_send( "QUIT :Killed by ".$con['name'] );
     exec( "php ".$CONFIG[pathtoourself] );
     sleep( 1 );
     die( "Restart time" );
@@ -184,7 +189,7 @@ class commands
   
   function svnmon( )
   {
-    global $bot, $CONFIG;
+    global $bot, $CONFIG, $con;
     
     if( $CONFIG[svnmon] )
     {
@@ -200,35 +205,34 @@ class commands
   
   function rot13( )
   {
-    global $bot, $bufarray, $con;
+    global $bot, $con;
     
-    $newtext = str_rot13( trim( implode( " ", $bufarray ) ) );
+    $newtext = str_rot13( trim( implode( " ", $con['bufarray'] ) ) );
     $bot->talk( $con['channel'] , $newtext );
   }
   
   function google( )
   {
-    global $bufarray, $con, $bot;
+    global $con, $bot;
     
-    $url = trim( implode( "+", $bufarray ) );
+    $url = trim( implode( "+", $con['textarray'] ) );
     $bot->talk( $con['channel'], "http://letmegooglethatforyou.com/?q=$url" );
-    break;
   }
   
   function urban( )
   {
-    global $bot, $bufarray, $con;
+    global $bot, $con;
     
-    if( $bufarray[0] == NULL )
+    if( $con['bufarray'][0] == NULL )
     {
       $bot->talk( $con['channel'], "Please use the following syntax:" );
       $bot->talk( $con['channel'], "%urban term" );
       return;
     }
     
-    if( $bufarray[1] == NULL )
+    if( $con['bufarray'][1] == NULL )
     {
-      $term = $bufarray[0];
+      $term = $con['bufarray'][0];
       $def = $bot->urban_lookup( $term, 1 );
       if( count( $def ) > 5 )
       {
@@ -242,7 +246,7 @@ class commands
     else
     {
       $num = 1;
-      $term = implode( " ", $bufarray );
+      $term = implode( " ", $con['bufarray'] );
       $def = $bot->urban_lookup( $term, $num );
       if( count( $def ) > 5 )
       {
@@ -256,7 +260,7 @@ class commands
           $bot->talk( $con['channel'], "You can view the rest of the definition here: http://urbandictionary.com/define.php?page=$page&term=$term" );
         else
           $bot->talk( $con['channel'], "You can view the rest of the definition here: http://urbandictionary.com/define.php?term=$term" );
-        break;
+          return;
       }
       $bot->talk( $con['channel'], "Definition of $term:" );
       for( $i=0; $i<count($def); $i++ )
@@ -266,9 +270,11 @@ class commands
   
   function help( )
   {
-    global $commandtree, $con, $name, $textarray, $bot, $hostmask;
+    global $commandtree, $con, $bot;
     
-    if( !$textarray[0] )
+    $hostmask = $con['hostmask'];
+    $name = $con['name'];
+    if( !$con['textarray'][1] )
     {
         $numcmds = count( $commandtree );
         $alwcmds = 0;
@@ -276,7 +282,7 @@ class commands
         $k=0;
         for( $i=0; $i<count( $commandtree ); $i++ )
         {
-          if( ( $commandtree[$i][2] == TRUE && $bot->check_admin( $hostmask ) )
+          if( ( $commandtree[$i][2] == TRUE && $bot->check_admin( $con['hostmask'] ) )
                 || $commandtree[$i][2] != TRUE )
           {
             $alwcmds++;
@@ -288,18 +294,18 @@ class commands
         for( $i=0; $i<count( $cmdarray ); $i++ )
         {
           if( $i == 0 )
-            $out[1] = $cmdarray[$k];
+            $out[1] = $cmdarray[$i];
           else
-            $out[1] .= " ".$cmdarray[$k];
+            $out[1] .= " ".$cmdarray[$i];
         }
       }
       else
       {
         for( $i=0; $i<count( $commandtree ); $i++ )
         {
-          if( $commandtree[$i][0] == $command )
+          if( $commandtree[$i][0] == $con['textarray'][1] )
           {
-            $out[0] = "%$command: ".$commandtree[$i][3];
+            $out[0] = "%".$con['textarray'][1]." ".$commandtree[$i][3];
             if( $commandtree[$i][4] != NULL )
               $out[1] = $commandtree[$i][4];
             else
@@ -307,7 +313,7 @@ class commands
           }
         }
         if( $out == NULL )
-          $out[0] = "%$command: Not found!";
+          $out[0] = "%".$con['textarray'][1].": Not found!";
       }
       
       for( $i=0; $i<count( $out ); $i++ )
@@ -316,16 +322,16 @@ class commands
   
   function server( )
   {
-    global $con, $bot, $bufarray, $name;
+    global $con, $bot;
     
-    if( count( $bufarray ) <= 0 )
+    if( count( $con['bufarray'] ) <= 0 )
     {
-      $bot->talk( $con['channel'], $name.": Please specify a server and port or an alias with this command." );
+      $bot->talk( $con['channel'], $con['name'].": Please specify a server and port or an alias with this command." );
       return;
     }
-    else if( count( $bufarray ) == 1 && stripos( $bufarray[0], ":" ) === FALSE )
+    else if( count( $con['bufarray'] ) == 1 && stripos( $con['bufarray'][0], ":" ) === FALSE )
     { 
-      $set = $bufarray[0];
+      $set = $con['bufarray'][0];
       if( !array_key_exists( strtoupper($set), $CONFIG['servers'] ) )
       {
         $bot->talk( $con['channel'], "I don't have any server stored for the alias $set, try one of the following:" );
@@ -337,20 +343,20 @@ class commands
       $port = $CONFIG['servers'][$set]['port'];
       $backupname = $CONFIG['servers'][$set]['bakname'];
     }
-    else if( count( $bufarray ) == 1 && stripos( $bufarray[0], ":" ) !== FALSE )
+    else if( count( $con['bufarray'] ) == 1 && stripos( $con['bufarray'][0], ":" ) !== FALSE )
     {
-      $bufarray = explode( ":", $bufarray[0] );
-      $ip = $bufarray[0];
-      $port = $bufarray[1];
+      $con['bufarray'] = explode( ":", $con['bufarray'][0] );
+      $ip = $con['bufarray'][0];
+      $port = $con['bufarray'][1];
     }
-    else if( count( $bufarray ) == 2 )
+    else if( count( $con['bufarray'] ) == 2 )
     {
-      $ip = $bufarray[0];
-      $port = $bufarray[1];
+      $ip = $con['bufarray'][0];
+      $port = $con['bufarray'][1];
     }
-    else if( count( $bufarray ) > 2 )
+    else if( count( $con['bufarray'] ) > 2 )
     {
-      $bot->talk( $con['channel'], "Too many arguments (".count($bufarray).")." );
+      $bot->talk( $con['channel'], "Too many arguments (".count($con['bufarray']).")." );
       return;
     }
     else
@@ -397,13 +403,13 @@ class commands
   
   function servers( )
   {
-    global $con, $bot, $bufarray;
+    global $con, $bot;
     
-    if( $bufarray[0] == NULL || $bufarray[0] == "" )
+    if( $con['bufarray'][0] == NULL || $con['bufarray'][0] == "" )
       $set = "KOR";
     else
     {
-      $pset = $bufarray[0];
+      $pset = $con['bufarray'][0];
       if( !array_key_exists( strtoupper($pset), $CONFIG['servers'] ) )
       {
         $bot->talk( $con['channel'], "I don't have any servers stored for $pset, try one of the following:" );
@@ -490,9 +496,9 @@ class commands
   
   function find( )
   {
-    global $con, $bufarray, $bot;
+    global $con, $bot;
     
-    $player = $bufarray['0'];
+    $player = $con['bufarray']['0'];
     $con['cached'] = count( $bot->find_servers() );
     $bot->talk( $con['channel'], "Searching ".$con['cached']." server(s) for \"$player\"..." );
     $found = $bot->find_player( $player );
@@ -554,17 +560,19 @@ class commands
   
   function server_command( )
   {
-    global $textarray, $command, $bot, $name;
+    global $bot, $name;
     
-    $serveralias = $textarray['0'];
-    unset( $textarray['0'] );
+    $command = $con['command'];
+    $name = $con['name'];
+    $serveralias = $con['textarray']['0'];
+    unset( $con['textarray']['0'] );
     if( $command == "msgs" )
     {
-      $target = $textarray['1'];
-      unset( $textarray['1'] );
+      $target = $con['textarray']['1'];
+      unset( $con['textarray']['1'] );
     }
-    $textarray = array_values( $textarray );
-    $message = implode( " ", $textarray );
+    $con['textarray'] = array_values( $con['textarray'] );
+    $message = implode( " ", $con['textarray'] );
     if( $serveralias != "korx1" && $serveralias != "korx2" )
     {
       $bot->talk( $con['channel'], "The alias $serveralias is not known, please use korx1 or korx2." );
@@ -592,13 +600,13 @@ class commands
     else
     {
       $bot->talk( $con['channel'], "$name: Please use commands, no variable modifications please." );
-      break;
+      return;
     }
     
     if( count( $message2 ) > 5 )
     {
       $bot->talk( $con['channel'], "That returned more than 5 lines of text. It was executed, however. Feel free to try a PM." );
-      break;
+      return;
     }
     else
     {
@@ -609,51 +617,53 @@ class commands
   
   function join( )
   {
-    global $bot, $bufarray, $con;
+    global $bot,  $con;
     
-    $bot->cmd_send("JOIN ".$bufarray[ 0 ] );
-    $bot->talk( $con['channel'], $name.": ".$bufarray[0]." has been joined." );
+    $bot->cmd_send("JOIN ".$con['bufarray'][ 0 ] );
+    $bot->talk( $con['channel'], $name.": ".$con['bufarray'][0]." has been joined." );
   }
   
   function mute( )
   {
-    global $bot, $bufarray, $con, $command;
+    global $bot, $con;
     
-    if( $bufarray[0] == NULL )
+    $command = $con['command'];
+    if( $con['bufarray'][0] == NULL )
     {
       $bot->talk( $con['channel'], "Please specify a valid target." );
       return;
     }
     
     if( $command == "mute" )
-      $bot->cmd_send( "MODE ".$con['channel']." +v ".$bufarray[0] );
+      $bot->cmd_send( "MODE ".$con['channel']." +v ".$con['bufarray'][0] );
     else 
-      $bot->cmd_send( "MODE ".$con['channel']." +v ".$bufarray[0] );
+      $bot->cmd_send( "MODE ".$con['channel']." +v ".$con['bufarray'][0] );
   }
   
   function op( )
   {
-    global $con, $command, $bufarray, $bot; 
+    global $con, $bot; 
     
-    if( $bufarray[0] == NULL )
+    $command = $con['command'];
+    if( $con['bufarray'][0] == NULL )
     {
       $bot->talk( $con['channel'], "Please specify a valid target." );
       return;
     }
     
     if( $command == "op" )
-      $bot->cmd_send( "MODE $channel +o ".$bufarray[0] );
+      $bot->cmd_send( "MODE $channel +o ".$con['bufarray'][0] );
     else
-      $bot->cmd_send( "MODE $channel -o ".$bufarray[0] );
+      $bot->cmd_send( "MODE $channel -o ".$con['bufarray'][0] );
   }
   
   function callvote( )
   {
-    global $bufarray, $con, $bot;
+    global $con, $bot;
     
-    $type = $bufarray['0'];
-    unset( $bufarray['0'] );
-    $string = implode( " ", $bufarray );
+    $type = $con['bufarray']['0'];
+    unset( $con['bufarray']['0'] );
+    $string = implode( " ", $con['bufarray'] );
     if( stripos( $con['channel'], "#" ) === FALSE )
     {
       $bot->talk( $con['channel'], "Sorry, but please only use callvote in a channel." );
@@ -664,33 +674,36 @@ class commands
   
   function part( )
   {
-    global $bot, $bufarray, $con, $name;
+    global $bot, $con;
     
-    $channel = $bufarray[0];
-    if( $bufarray[1] != NULL )
+    $name = $con['name'];
+    $channel = $con['bufarray'][0];
+    if( $con['bufarray'][1] != NULL )
     {
-      unset( $bufarray[0] );
-      $pmessage = implode( " ", $bufarray );                
+      unset( $con['bufarray'][0] );
+      $pmessage = implode( " ", $con['bufarray'] );                
     }
     $bot->cmd_send( "PART $channel :$pmessage" );
-    if( $channel != $bufarray[0] )
-      $bot->talk( $con['channel'], $name.": I have parted ".$bufarray[0] );
+    if( $channel != $con['bufarray'][0] )
+      $bot->talk( $con['channel'], $name.": I have parted ".$con['bufarray'][0] );
   }
   
   function msg( )
   {
-    global $con, $bufarray, $bot;
+    global $con, $bot;
     
-    $target = $bufarray['0'];
-    unset( $bufarray['0'] );
-    $text = implode( " ", $bufarray );
+    $target = $con['bufarray']['0'];
+    unset( $con['bufarray']['0'] );
+    $text = implode( " ", $con['bufarray'] );
     $bot->talk( $target, $text );
     $bot->talk( $con['channel'], "Message sent to $target" );
   }
   
   function finishvote( )
   {
-    global $con, $bot, $command;
+    global $con, $bot;
+    
+    $command = $con['command'];
     if( $con['vote']['inprogress'] == FALSE )
     {
       $bot->talk( $con['channel'], "There is no vote currently in progress." );
@@ -727,14 +740,14 @@ class commands
     $lines = $bstatus['lines'];
     
     $bot->talk( $con['channel'], "I've been up for $uptime, sent $cmdstoserv command(s) to the server, processed $lines line(s) of text, talked $talked time(s), ran $cmds command(s), snarfed $snarfs url(s), and contacted a tremulous server $servers time(s)." );
-    break;
+    return;
   }
   
   function weather( )
   {
-    global $bufarray, $bot, $con;
+    global $bot, $con;
     
-    $lugar = implode( " ", $bufarray );
+    $lugar = implode( " ", $con['bufarray'] );
     $out = $bot->weather( $lugar );
     $wind = $out['wind'];
     $pressure = $out['pressure'];
@@ -757,22 +770,23 @@ class commands
   
   function invite( )
   {
-    global $con, $bufarray, $bot;
+    global $con, $bot;
     
-    if( $bufarray[0] == NULL )
+    if( $con['bufarray'][0] == NULL )
     {
       $bot->talk( $con['channel'], "Please specify a valid target for this command." );
       return;
     }
 
-    $bot->cmd_send( "INVITE ".$channel." ".$bufarray[0] );
+    $bot->cmd_send( "INVITE ".$channel." ".$con['bufarray'][0] );
     $bot->talk( $con['channel'], "Invited" );
   }
   
   function autoop( )
   {
-    global $chanid, $con, $bot, $channels;
+    global $con, $bot, $channels;
     
+    $chanid = $con['chanid'];
     if( $channels[$chanid]['autoopvoice'] != TRUE )
     {
       $channels[$chanid]['autoopvoice'] = TRUE; 
@@ -787,8 +801,9 @@ class commands
   
   function ccmds( )
   {
-    global $channels, $bot, $con, $chanid;
+    global $channels, $bot, $con;
     
+    $chanid = $con['chanid'];
     if( $channels[$chanid]['cmds'] != TRUE )
     {
       $channels[$chanid]['cmds'] = TRUE; 
