@@ -332,6 +332,8 @@ function init()
         {
           $url = trim( $urls[$i], "\x00..\x1F" );
           $url = ltrim( $urls[$i], ":" );
+          if( stripos( $url, "@" ) !== FALSE )
+            continue;
           $titles[$i] = $bot->snarf_url( $url );
           $urlar = explode( "/", $url );
           
