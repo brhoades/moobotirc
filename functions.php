@@ -55,8 +55,6 @@ class other
     $user = mysql_fetch_array(mysql_query("SELECT * FROM users WHERE username='$username'"));
 
     echo mysql_error();
-    //if( $username == NULL )
-    //  $error = "No username or password data found.";
 
     if( $password != $user['password'] || mysql_error() != NULL )
       $error = "Invalid Username/Password";
@@ -1171,7 +1169,7 @@ class bot
     unset( $con['vote'] );
     $con['vote']['starttime'] = time();
     $con['vote']['endtime'] = time()+$CONFIG['maxvotetime'];
-    $con['vote']['inprogress'] = "TRUE";
+    $con['vote']['inprogress'] = TRUE;
     $con['vote']['percenttopass'] = ".5";
     $con['vote']['channel'] = $channel;
     $con['vote']['yes'] = 0;
@@ -1598,6 +1596,5 @@ class bot
     }
     return $server_list;
   }
-
-}
+}  
 ?>
