@@ -148,29 +148,22 @@ function init()
       $text = substr( $con['buffer']['all'], $start );
       $bufarray = explode( " ", $con['buffer']['all'] );
       $channel = $bufarray['2'];
-      $con['channel'] = $channel;
-      $con['bufarray'] = $bufarray;
       $hostmaskchunk = ltrim( $bufarray['0'], ":" );
       $hostmaskchunk = explode( "!", $hostmaskchunk );
       $hostmask = $hostmaskchunk['1'];
-      $con['hostmask'] = $hostmask;
       $name = $hostmaskchunk['0'];
-      $con['name'] = $name;
       $text = $bufarray;
       for( $i=0; $i<3; $i++ )
         unset( $text[$i] );
       $text = array_values( $text );
       $textarray = $text;
       $text = implode( " ", $text );
-      $con['text'] = $text;
-      $con['textarray'] = $textarray;
       if( stripos( $text, ":%" ) === FALSE )
         $text = ltrim( $text, ":" );
       else
       {
         unset( $textarray['0'] );
         $textarray = array_values( $textarray );
-        $con['textarray'] = $textarray;
       }
       if( $channel == $CONFIG[nick] )         //Private Message
         $channel = $name;
@@ -185,14 +178,11 @@ function init()
             break;
           }
         }
-        $con['chanid'] = $chanid;
         for( $i=0; $i<3; $i++ )
           unset( $bufarray[$i] );
         $command = ltrim( $bufarray['3'], ":%" );
-        $con['command'] = $command;
         unset( $bufarray['3'] );
         $bufarray = array_values( $bufarray );
-        $con['bufarray'] = $bufarray;
         if( $channels[$chanid]['cmds'] == FALSE && $command != "cmd" )		//hax
           continue;
         $bstatus['cmds']++;
