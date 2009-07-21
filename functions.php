@@ -1285,9 +1285,11 @@ class bot
         }
       }
     }
+    else if( stripos( $type, "text/html" ) !== FALSE && $type != "text/html" )
+      $type = "text/html";
     $type = rtrim( $type, ";" );
     $size = $head[ "Content-Length" ];
-    if( $size == NULL )
+    if( $size == NULL && $type != "text/html" )
       $size = "unknown";
     
     if( stripos( $head[0], "403" ) !== FALSE )
@@ -1302,7 +1304,7 @@ class bot
       $title[0] = "408, Request Timeout";
     else if( stripos( $type,  "text/html" ) === FALSE && stripos( $type, "text/xhtml" ) === FALSE && $size != "unknown" )
       $title[0] = $type." file (".$other->filesize_range( $size ).")";
-    else if( $size == "unknown" )
+    else if(  stripos( $type,  "text/html" ) === FALSE && stripos( $type, "text/xhtml" ) === FALSE && $size == "unknown" )
       $title[0] = $type." file (".$size.")";
     else
     {

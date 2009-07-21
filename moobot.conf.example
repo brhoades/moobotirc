@@ -55,7 +55,7 @@ $CONFIG[serverspam] = ':- '; // The lines we should parse out have this, general
 $CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
 $CONFIG[port] = 6667; // IRC port, 6667 should work
 $CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
-$CONFIG[version] = 'Moobot v.4 by Aaron5367'; //Eventually to be updated to the SVN revision
+$CONFIG[version] = 'Moobot v.5 by Aaron5367'; //Eventually to be updated to the SVN/HG revision
 $CONFIG[adminname][0] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
 $CONFIG[pathtoourself] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobotlog &"; //To reexecute ourselves for rehashing
 $CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
@@ -167,9 +167,11 @@ $CONFIG['servers']['A<3']['bakname'] = "^7A^1<3";
 //	DEFAULTS
 //	$channels[#]['name'] = NULL;
 //	$channels[#]['password'] = NULL;
-//	$channels[#]['svnmon'] = TRUE;
+//	$channels[#]['svnmon'] = FALSE;
+//	$channels[#]['hgmon'] = "";
 //	$channels[#]['log'] = TRUE;
 //	$channels[#]['cmds'] = TRUE;
+//  $channels[#]['autoopvoice'] = FALSE;
 //	
 ///////////////////////////
 //Channels we connect to go here
