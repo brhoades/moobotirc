@@ -147,6 +147,7 @@ function init()
       $text = substr( $con['buffer']['all'], $start );
       $bufarray = explode( " ", $con['buffer']['all'] );
       $channel = $bufarray['2'];
+      $con['channel'] = $channel;
       $hostmaskchunk = ltrim( $bufarray['0'], ":" );
       $hostmaskchunk = explode( "!", $hostmaskchunk );
       $hostmask = $hostmaskchunk['1'];
@@ -185,9 +186,26 @@ function init()
         if( $channels[$chanid]['cmds'] == FALSE && $command != "cmd" )		//hax
           continue;
         $bstatus['cmds']++;
-        //
-        //Command Handler Goes Here
-        //
+        $eval = FALSE;
+        
+        for( $i=0; $i<count($commandtree); $i++ )
+        {
+          if( $commandtree[$i][0] == $command )
+          {
+            if( $commandtree[$i][2] == TRUE && !$bot->check_admin( $hostmask ) )
+            {
+              $bot->talk( $channel, $name.": You do not have permission to use that command." );
+              $eval = TRUE;
+              break;
+            }
+            eval( $commandtree[$i][1] );
+            $eval = TRUE;
+            break;
+          }
+        }
+        
+        if( !$eval )
+          $bot->talk( $channel, "%$command is not known, try using %help." );
       }
       else if( stripos( $text, " is " ) !== FALSE || stripos( $text, " are " ) !== FALSE )
       {

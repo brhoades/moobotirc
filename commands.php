@@ -1,7 +1,7 @@
 <?php
 
 //brackets are required, parenthesis are optional
-$commands = 
+$commandtree = 
 array( 
     array
     ("rehash", "\$commands->rehash();", TRUE,
@@ -151,9 +151,6 @@ array(
 );
 
 $commands = new commands();
-//REMINDERS
-//Make all admin checks done in moobot.php before calling!
-//put channel in $con['channel']!
 
 class commands
 {
@@ -269,7 +266,7 @@ class commands
   
   function help( )
   {
-    //to do
+    
     return;
   }
   
