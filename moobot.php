@@ -22,6 +22,7 @@ along with Moobot.  If not, see <http://www.gnu.org/licenses/>.
 
 require( "moobot.conf" );
 require( "functions.php" );
+require( "commands.php" );
 
 $dbcnx = mysql_connect( "localhost", $CONFIG[dbuser], $CONFIG[dbpass] );
 mysql_select_db( $CONFIG[dbname], $dbcnx );
