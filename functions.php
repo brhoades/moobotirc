@@ -1283,17 +1283,12 @@ class bot
           $type = "text/html"; 
           break;
         }
-        else if( stripos( $type[$i], ";" ) !== FALSE )
-        {
-          $type = $type[$i];
-          break;
-        }
       }
     }
     $type = rtrim( $type, ";" );
     $size = $head[ "Content-Length" ];
     if( $size == NULL )
-      $size = "Unknown size";
+      $size = "unknown";
     
     if( stripos( $head[0], "403" ) !== FALSE )
       $title[0] = "403, Forbidden";
@@ -1305,9 +1300,9 @@ class bot
       $title[0] = "405, Method Not Allowed";
     else if( stripos( $head[0], "408" ) !== FALSE )
       $title[0] = "408, Request Timeout";
-    else if( stripos( $type,  "text/html" ) === FALSE && stripos( $type, "text/xhtml" ) === FALSE && is_int( $size ) )
+    else if( stripos( $type,  "text/html" ) === FALSE && stripos( $type, "text/xhtml" ) === FALSE && $size != "unknown" )
       $title[0] = $type." file (".$other->filesize_range( $size ).")";
-    else if( !is_int( $size ) )
+    else if( $size == "unknown" )
       $title[0] = $type." file (".$size.")";
     else
     {
