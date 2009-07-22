@@ -87,6 +87,7 @@ function init()
       {
         $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ) );
         $lasttime = time();
+        $con['cached'] = count( $bot->find_servers( ) );
       }
       
       if( $firsttime == "TRUE" && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
@@ -130,7 +131,7 @@ function init()
       //checks are here!
       //
       $bot->runbuffers( );
-      $bot->vote_check( );
+      //$bot->vote_check( );
       //
       //
       //
@@ -167,7 +168,9 @@ function init()
       }
       if( $channel == $CONFIG[nick] )         //Private Message
         $channel = $name;
-        
+
+      $bot->vote_check( $hostmask, $name, $channel, $text );
+
       if( stripos( $text, ":%" ) !== FALSE )
       {
         for( $i=0; $i<count($channels); $i++ )
@@ -187,7 +190,7 @@ function init()
           continue;
         $bstatus['cmds']++;
         $eval = FALSE;
-        
+
         for( $i=0; $i<count($commandtree); $i++ )
         {
           if( $commandtree[$i][0] == $command )
