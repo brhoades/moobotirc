@@ -432,11 +432,6 @@ class other
   
   function filesize_range( $filesize, $size = NULL )
   {
-    if( !is_int( $filesize ) )
-    {
-      echo "Error, a bad argument was inserted into filesize_range, ".$filesize;
-      return;
-    }
     if( $size != NULL )
     {
       $size = strtolower( $size );
@@ -454,7 +449,7 @@ class other
       return( $filesize / ( 1024^$size ) );
     }
     
-    if( $filesize > 0 && $filesize < 1024 )
+    if( $filesize >= 0 && $filesize < 1024 )
       $out = $filesize." B";
     else if( $filesize >= 1024 && $filesize < pow( 1024, 2 ) )
       $out = round( ( $filesize/1024 ), 2 )." KiB";
