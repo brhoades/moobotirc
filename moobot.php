@@ -334,25 +334,42 @@ function init()
         for( $i=0; $i<count($urls);$i++ )
         {
           $url = trim( $urls[$i], "\x00..\x1F" );
-          $url = ltrim( $urls[$i], ":" );
+          $url = ltrim( $url, ":" );
           if( stripos( $url, "@" ) !== FALSE )
             continue;
-          $titles[$i] = $bot->snarf_url( $url );
+          $urltest = explode( ".", $url );
+          if( count( $urltest ) < 2 )
+            continue;
+          
           $urlar = explode( "/", $url );
           
           for( $j=0; $j<count($urlar); $j++ )
           {
             if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|cz|es)/i", $urlar[$j] ) != NULL )
-              $url = $urlar[$j];
+              $urlb = $urlar[$j];
           }
+
+          exec( "ping -c1 -w1 $urlb", $out );
+
+          //don't try to contact sites that don't exist
+          $doit=FALSE;
+          for( $j=0; $j<count( $out ); $j++ )
+          {
+            if( stripos( $out[$j], "1 received" ) !==FALSE )
+              $doit = TRUE;
+          }
+          if( !$doit )
+            continue;
+          
+          $titles[$i] = $bot->snarf_url( $url );
             
           if( $url != NULL && $titles[$i] != NULL )
           {
             $bstatus['snarfs']++;
-            $bot->talk( $channel, "(".$url.") ".$titles[$i] );
+            $bot->talk( $channel, "(".$urlb.") ".$titles[$i] );
           }
         }
-        unset( $titles, $urlarray, $urls, $url );
+        unset( $titles, $urlarray, $urls, $url, $urlb, $out, $urltest, $doit );
       } //:Aaron5367!~Aaron5367@Aaron5367.users.quakenet.org INVITE Moobot5367 #kor-ao
       else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {

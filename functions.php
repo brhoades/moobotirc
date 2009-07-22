@@ -1283,7 +1283,7 @@ class bot
     
     if( stripos( $head[0], "403" ) !== FALSE )
       $title[0] = "403, Forbidden";
-    else if( stripos( $head[0], "404" ) !== FALSE )
+    else if( stripos( $head[0], "404" ) !== FALSE || $head == NULL || count( $head ) <= 2 )
       $title[0] = "404, File Not Found";
     else if( stripos( $head[0], "401" ) !== FALSE )
       $title[0] = "401, Unauthorized";
@@ -1311,7 +1311,8 @@ class bot
 
     //Our title will be the first value of $title
     $title = html_entity_decode( strip_tags( $title[0] ) );
-    unset( $i, $urlf, $url );
+    $other->replace( "&bull;", "•", $title );
+    
     return $title;
   }
   
