@@ -358,10 +358,10 @@ function init()
             if( stripos( $out[$j], "1 received" ) !==FALSE )
               $doit = TRUE;
           }
-          if( !$doit )
-            continue;
-          
-          $titles[$i] = $bot->snarf_url( $url );
+          if( !$doit )          
+            $titles[$i] = $bot->snarf_url( $url, TRUE );
+          else
+            $titles[$i] = $bot->snarf_url( $url );
             
           if( $url != NULL && $titles[$i] != NULL )
           {

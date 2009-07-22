@@ -1255,41 +1255,46 @@ class bot
     return $in;
   }
   
-  function snarf_url( $url )
+  function snarf_url( $url, $dead=FALSE )
   {
     global $other, $bot;
     if( stripos( $url, "http://" ) === FALSE && stripos( $url, "ftp://" ) === FALSE && stripos( $url, "https://" ) === FALSE )
       $url = "http://".$url;
     
-    $head = get_headers( $url, 1 );
-    $type = $head[ "Content-Type" ];
-    if( is_array( $type ) )
+    if( !$dead )
     {
-      for( $i = 0; $i < count( $type ); $i++ )
+      $head = get_headers( $url, 1 );
+      $type = $head[ "Content-Type" ];
+      if( is_array( $type ) )
       {
-        if( stripos( $type[$i], "text/html" ) !== FALSE )
+        for( $i = 0; $i < count( $type ); $i++ )
         {
-          $type = "text/html"; 
-          break;
+          if( stripos( $type[$i], "text/html" ) !== FALSE )
+          {
+            $type = "text/html"; 
+            break;
+          }
         }
       }
-    }
-    else if( stripos( $type, "text/html" ) !== FALSE && $type != "text/html" )
-      $type = "text/html";
-    $type = rtrim( $type, ";" );
-    $size = $head[ "Content-Length" ];
-    if( $size == NULL && $type != "text/html" )
-      $size = "unknown";
+      else if( stripos( $type, "text/html" ) !== FALSE && $type != "text/html" )
+        $type = "text/html";
+      $type = rtrim( $type, ";" );
+      $size = $head[ "Content-Length" ];
+      if( $size == NULL && $type != "text/html" )
+        $size = "unknown";
+      }
     
     if( stripos( $head[0], "403" ) !== FALSE )
       $title[0] = "403, Forbidden";
-    else if( stripos( $head[0], "404" ) !== FALSE || $head == NULL || count( $head ) <= 2 )
+    else if( stripos( $head[0], "404" ) !== FALSE )
       $title[0] = "404, File Not Found";
     else if( stripos( $head[0], "401" ) !== FALSE )
       $title[0] = "401, Unauthorized";
     else if( stripos( $head[0], "405" ) !== FALSE )
       $title[0] = "405, Method Not Allowed";
-    else if( stripos( $head[0], "408" ) !== FALSE )
+    else if( $head == NULL || count( $head ) <= 2 || $dead )
+      $title[0] = "Unable to connect";
+    else if( stripos( $head[0], "408" ) !== FALSE  )
       $title[0] = "408, Request Timeout";
     else if( stripos( $type,  "text/html" ) === FALSE && stripos( $type, "text/xhtml" ) === FALSE && $size != "unknown" )
       $title[0] = $type." file (".$other->filesize_range( $size ).")";
@@ -1311,7 +1316,7 @@ class bot
 
     //Our title will be the first value of $title
     $title = html_entity_decode( strip_tags( $title[0] ) );
-    $other->replace( "&bull;", "•", $title );
+    $title = $other->replace( "&bull;", "•", $title );
     
     return $title;
   }
