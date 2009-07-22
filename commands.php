@@ -152,6 +152,16 @@ array(
     ("weather", "\$commands->weather( \$channel, \$bufarray );", FALSE,
       "Returns a weather report from weatherunderground.",
       "[zipcode|cityname]"
+    ),
+    array
+    ("kick", "\$commands->kick( \$channel, \$bufarray, \$name );", TRUE,
+      "Kicks a user with an optional reason.",
+      "[target] (reason)"
+    ),
+    array
+    ("topic", "\$commands->topic( \$channel, \$bufarray );", TRUE,
+      "Changes the topic for a channel.",
+      "[topic]"
     )
 );
 
@@ -288,7 +298,7 @@ class commands
             $k++;
           }
         }
-        $out[0] = "You are currently allowed to use $alwcmds/$numcmds of all the commands.";
+        $out[0] = "You are currently allowed to use $alwcmds/$numcmds of the commands.";
         for( $i=0; $i<count( $cmdarray ); $i++ )
         {
           if( $i == 0 )
@@ -498,8 +508,7 @@ class commands
     global $con, $bot;
     
     $player = $bufarray[0];
-    $con['cached'] = count( $bot->find_servers() );
-    $bot->talk( $channel, "Searching ".$con['cached']." server(s) for \"$player\"..." );
+    $bot->talk( $channel, "Searching ".$con['cached']." server(s) for $player..." );
     $found = $bot->find_player( $player );
     
     if( count( $found ) > 10 )
@@ -532,7 +541,7 @@ class commands
   function clan( $channel )
   {
     global $con, $bot;
-    $con['cached'] = count( $bot->find_servers() );
+
     $bot->talk( $channel, "Searching ".$con['cached']." server(s) for clan members..." );
     $found = $bot->find_player( "|KoR|" );
     
@@ -807,6 +816,42 @@ class commands
       $channels[$chanid]['cmds'] = FALSE; 
       $bot->talk( $channel, "Commands disabled" );
     }
+  }
+  
+  function kick( $channel, $bufarray, $name )
+  {
+    global $bot;
+    //:Aaron5367!~Aaron5367@Aaron5367.users.quakenet.org KICK #kor-ao Aaron5367 :test
+    
+    $target = $bufarray[0];
+    
+    if( !$target )
+    {
+      $bot->talk( $channel, "$name: Please specify a target for your kick." );
+      return;
+    }
+    
+    unset( $bufarray[0] );
+    $message = implode( " ", $bufarray );
+    
+    if( !$message )
+      $message = "Kicked by $name";
+    else
+      $message = $name.": ".$message;
+    
+    $bot->cmd_send( "KICK $channel $target : $message" );
+  }
+  
+  function topic( $channel, $bufarray )
+  {
+    global $bot;
+    
+    $topic = implode( " ", $bufarray );
+
+    if( !$topic )
+      $topic = " ";
+    
+    $bot->cmd_send( "TOPIC $channel :$topic" );
   }
   
 }

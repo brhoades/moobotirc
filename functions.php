@@ -1172,7 +1172,7 @@ class bot
     
     unset( $con['vote'] );
     $con['vote']['starttime'] = time();
-    $con['vote']['endtime'] = time()+$CONFIG['maxvotetime'];
+    $con['vote']['endtime'] = time()+$CONFIG[maxvotetime];
     $con['vote']['inprogress'] = TRUE;
     $con['vote']['percenttopass'] = ".5";
     $con['vote']['channel'] = $channel;
@@ -1180,22 +1180,23 @@ class bot
     $con['vote']['no'] = 0;
   }
 
-  function vote_check( )
+  function vote_check( $hostmask, $name, $channel, $text )
   {
     global $CONFIG, $con, $bot, $other;
     
-    if( $con['vote']['inprogress'] != TRUE )
+    //If a vote isn't in progress or we're trying to vote
+    if( $con['vote']['inprogress'] != TRUE || $name == $CONFIG[nick] )
       return;
 
-    if( stripos( $con['buffer']['all'], "F1" ) || stripos( $con['buffer']['all'], "F2" ) )
+    if( stripos( $text, "F1" ) !== FALSE || stripos( $text, "F2" ) !== FALSE )
     {
-      $parts = explode( " ", $con['buffer']['all'] );
-      $hostmask = ltrim( $parts['0'], ":" );
-      $hostmaskchunk = explode( "!", $hostmask );
-      $hostmask = $hostmaskchunk['1'];
-      $name = $hostmaskchunk['0'];
-      $channel = $parts['2'];
-      if( stripos( $con['buffer']['all'], "F1" ) )
+      if( stripos( $text, "F1" ) !== FALSE && stripos( $text, "F2" ) !== FALSE )
+      {
+          $bot->talk( $name,  "A tad bit indecisive, aren't we?" );
+          return;
+      }
+       
+      if( stripos( $text, "F1" ) !== FALSE )
         $vote = "yes";
       else
         $vote = "no";
@@ -1203,26 +1204,20 @@ class bot
       //Run them through checks
       //
       //Have we already voted? 
-      $voted = "FALSE";
       for( $i=0;$i<count($con['vote']['voters']);$i++)
       {
         if( $con['vote']['voters'][$i] == $hostmask )
         {
-          $voted = TRUE;
-          break;
+          $bot->talk( $name,  "You've already voted" );
+          return;
         }
       }
-      if( $voted == TRUE )
-      {
-        $bot->talk( $channel, "$name: You've already voted" );
-        return;
-      }
-      $con['vote']['voters'][count($con['vote']['voters'])] = $hostmask;
+      $con['vote']['voters'][] = $hostmask;
       if( $vote == "yes" )
         $con['vote']['yes']++;
       else
         $con['vote']['no']++;
-      $bot->talk( $channel, "$name: Vote cast" );
+      $bot->talk( $name, "Vote cast" );
     }
     
     if( $con['vote']['endtime'] < time() )
@@ -1239,7 +1234,6 @@ class bot
         $bot->talk( $con['vote']['channel'], $bot->tremulous_replace_colors_irc("^1Vote Failed ^0(^2Y^0:$yeses ^1N^0:$noes, ".round(($yespercent*100))."%)"));
       $con['vote']['inprogress'] = FALSE;
     }
-    
   }
 
   function help_parser( )
