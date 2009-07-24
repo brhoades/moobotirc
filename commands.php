@@ -598,9 +598,9 @@ class commands
     }
     
     if( $command == "msgs" )
-      $message2 = $bot->tremulous_rcon( $ip, $port, "m $target ^2$message", $rcon, "FALSE" );
+      $message2 = $bot->tremulous_rcon( $ip, $port, "m $target ^2$message", $rcon );
     else if( $command == "says" )
-      $message2 = $bot->tremulous_rcon( $ip, $port, "!print ^7[IRC][$name^7]: ^2$message", $rcon, "FALSE" );
+      $message2 = $bot->tremulous_rcon( $ip, $port, "!print ^7[IRC][$name^7]: ^2$message", $rcon );
     else if( stripos( trim($message), "!" ) !== FALSE &&  stripos( trim($message), "!" ) == 0 )
       $message2 = $bot->tremulous_rcon( $ip, $port, $message, $rcon, "FALSE" );
     else
@@ -609,7 +609,7 @@ class commands
       return;
     }
     
-    if( count( $message2 ) > 5 )
+    if( count( $message2 ) > 5 && stripos( $channel, "#" ) !== FALSE )
     {
       $bot->talk( $channel, "That returned more than 5 lines of text. It was executed, however. Feel free to try a PM." );
       return;
@@ -617,7 +617,10 @@ class commands
     else
     {
       for( $i=0; $i<count($message2); $i++ )
-        $bot->talk( $channel, $message2[$i] );
+      {
+        if( $i != count( $message2 ) - 1 )
+          $bot->talk( $channel, $message2[$i] );
+      }
     }
   }
   
