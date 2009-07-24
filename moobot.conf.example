@@ -56,7 +56,7 @@ $CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
 $CONFIG[port] = 6667; // IRC port, 6667 should work
 $CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
 $CONFIG[version] = 'Moobot v.5b by Aaron5367'; //Eventually to be updated to the SVN/HG revision
-$CONFIG[adminname][0] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
+$CONFIG[adminname][] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
 $CONFIG[pathtoourself] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobotlog &"; //To reexecute ourselves for rehashing
 $CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
 $CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];
@@ -74,7 +74,7 @@ $CONFIG[checkservtimeout] = 10;
 $CONFIG[svnmontimeout] = 30;    //Time between SVN checks
 $nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as we start
 $CONFIG[maxvotetime] = 30; //How long votes last
-$CONFIG[servertimeout] = 360; // Max time after not receiving a command from the server to reconnect
+$CONFIG[servertimeout] = 10; // Max time after not receiving a command from the server to reconnect, in minutes
 $CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 //
 ///////////////////////////

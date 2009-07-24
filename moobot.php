@@ -285,11 +285,11 @@ function init()
 				 echo "Dying, nick collision.\r\n";
          return;
        }
-			 /*else if( $lasttime < ( time() - $CONFIG[servertimeout] ) )
+			 else if( $lasttime < ( time() - $CONFIG[servertimeout] ) )
 			 {
 				 echo "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n";
 				 return;
-			 }*/
+			 }
        else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
        {
          $nameend = strpos( $con['buffer']['all'], "!", 1 )-1;
@@ -349,7 +349,7 @@ function init()
               $urlb = $urlar[$j];
           }
 
-          exec( "ping -c1 -w1 $urlb", $out );
+          exec( "ping -c1 -w2 $urlb", $out );
 
           //don't try to contact sites that don't exist
           $doit=FALSE;
@@ -376,7 +376,6 @@ function init()
         $channel = $bufarray['3'];
         if( stripos( $channel, "#" ) !== FALSE )
           $bot->cmd_send( "JOIN $channel" );
-        echo "Invite to $channel recieved\n";
       }
     }
   }
