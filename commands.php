@@ -508,7 +508,7 @@ class commands
     global $con, $bot;
     
     $player = $bufarray[0];
-    $bot->talk( $channel, "Searching ".$con['cached']." server(s) for $player..." );
+    $bot->talk( $channel, "Searching ".$con['cached']." servers for $player..." );
     $found = $bot->find_player( $player );
     
     if( count( $found ) > 10 )
@@ -542,7 +542,7 @@ class commands
   {
     global $con, $bot;
 
-    $bot->talk( $channel, "Searching ".$con['cached']." server(s) for clan members..." );
+    $bot->talk( $channel, "Searching ".$con['cached']." servers for clan members..." );
     $found = $bot->find_player( "|KoR|" );
     
     if( count( $found ) > 0 )
