@@ -788,8 +788,6 @@ class bot
         continue;
       else
       {
-        echo $svnout[1]." != '$thissvnlog'";
-        print_r( $con['data'] );
         $svnout2 = $svnout;
         $svnlogout[$c] = $svnout[1];
         $con['data'][svnstuffs][$c] = $svnout[1];
@@ -1500,8 +1498,6 @@ class bot
     }
     else 
       $datavar = $newdata;
-    echo "\nNEW DATAZ\n";
-    print_r( $datavar );
 
     $con['data'] = $datavar;
     return( $datavar );
@@ -1516,19 +1512,14 @@ class bot
     fclose( $fh );
     
     if( $olddata == serialize( $datavar ) )
-    {
-      echo "Data is the same\n";
       return;
-    }
       
     $time = time();
     $datavar['time'] = $time;
     $fh = fopen( $CONFIG[datafilelocation], "w" );
     fwrite( $fh, serialize( $datavar ) );
     fclose( $fh );
-    echo "Wrote new data: \n";
     $con['data'] = $datavar;
-    print_r( $datavar );
   }
 
   function tremulous_getserverlist( )
