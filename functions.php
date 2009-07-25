@@ -1486,7 +1486,7 @@ class bot
     $newdata = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
     fclose( $fh );
     
-    if( $newdata == serialize( $datavar ) )
+    if( $newdata == serialize( $datavar ) || $newdata == NULL || !is_array( unserialize( $newdata ) ) )
       return( $datavar );
 
     $newdata = unserialize( $newdata );
@@ -1494,12 +1494,14 @@ class bot
     if( $datavar['time'] != NULL && $newdata['time'] != NULL )
     {
       if( $newdata['time'] <= $datavar['time'] )
-        echo "Our data is newer?";
+        echo "Our data is newer?\n";
       else
         $datavar = $newdata;
     }
     else 
       $datavar = $newdata;
+    echo "\nNEW DATAZ\n";
+    print_r( $datavar );
 
     $con['data'] = $datavar;
     return( $datavar );
@@ -1514,14 +1516,19 @@ class bot
     fclose( $fh );
     
     if( $olddata == serialize( $datavar ) )
+    {
+      echo "Data is the same\n";
       return;
+    }
       
     $time = time();
-    $con['data']['time'] = $time;
     $datavar['time'] = $time;
     $fh = fopen( $CONFIG[datafilelocation], "w" );
     fwrite( $fh, serialize( $datavar ) );
     fclose( $fh );
+    echo "Wrote new data: \n";
+    $con['data'] = $datavar;
+    print_r( $datavar );
   }
 
   function tremulous_getserverlist( )

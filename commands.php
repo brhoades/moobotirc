@@ -162,6 +162,11 @@ array(
     ("topic", "\$commands->topic( \$channel, \$bufarray );", TRUE,
       "Changes the topic for a channel.",
       "[topic]"
+    ),
+    array
+    ("tempadmin", "\$commands->topic( \$channel, \$bufarray );", TRUE,
+      "Grants someone temporary admin status.",
+      "[name]"
     )
 );
 
