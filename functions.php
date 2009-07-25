@@ -942,7 +942,7 @@ class bot
       $con['data'][hgstuffs][$i] = $whatitsays;
       $bot->writedata( $con['data'] );
       
-      for( $k = 0; $k < MAX_REPORT; $k++ )
+      for( $k = 1; $k < MAX_REPORT; $k++ )
       {
         unset( $stufftoreport );
         exec( "hg log -l$k -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}<cibr>\" ".$hgservers[$i]['loc'], $stufftoreport );
@@ -961,7 +961,7 @@ class bot
       //$stufftoreport = implode( "<br />", $stufftoreport );
       $stufftoreport = explode( "<cibr>", $stufftoreport );
       
-      for( $k = 0; $k < count( $stufftoreport )-1; $k++ )
+      for( $k = 0; $k < count( $stufftoreport )-2; $k++ )
       {
         $thiscommit = explode( " ||| ", $stufftoreport[$k] );
         $rev = $thiscommit[0];
