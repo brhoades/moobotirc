@@ -19,7 +19,7 @@ array(
       ""
     ),
     array
-    ("svnmon", "\$commands->svnmon( \$channel );", TRUE,
+    ("svnmon", "\$commands->svnmon( \$channel, \$chanid );", TRUE,
       "Enables or disables Moobot's svn monitor for the channel it is called in.",
       ""
     ),
@@ -80,8 +80,8 @@ array(
     ),
     array
     ("join", "\$commands->join( \$bufarray, \$channel, \$name );", TRUE,
-      "Makes this bot join a channel.",
-      "[channel]"
+      "Makes this bot join a channel, and join it in all future sessions.",
+      "[channel] (password)"
     ),
     array
     ("mute", "\$commands->mute( \$command, \$bufarray, \$channel );", TRUE,
@@ -110,7 +110,7 @@ array(
     ),
     array
     ("part", "\$commands->part( \$bufarray, \$name, \$channel );", TRUE,
-      "Causes this bot to leave a channel.",
+      "Causes this bot to leave a channel, and no longer automatically join it.",
       "[channel] (reason)"
     ),
     array
@@ -202,20 +202,28 @@ class commands
     $bot->talk( $channel, $bot->sysinfo() );
   }
   
-  function svnmon( $channel )
+  function svnmon( $channel, $chanid )
   {
-    global $bot, $CONFIG, $con;
+    global $bot, $con;
     
-    if( $CONFIG[svnmon] )
+    if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $CONFIG[svnmon] = FALSE;
-      $bot->talk( $channel, "SVN monitor is now off, globally." );
+      $bot->talk( $channel, "You can't turn svnmon off in a PM." );
+      return;     //Likely a PM or some weird bug
+    }
+    
+    if( $con['data'][channels][$chanid]['svnmon'] == TRUE )
+    {
+      $con['data'][channels][$chanid]['svnmon'] = FALSE;
+      $bot->talk( $channel, "SVN monitor is now off for this channel." );
     }
     else
     {
-      $CONFIG[svnmon] = TRUE;
-      $bot->talk( $channel, "SVN monitor is now on, globally." );
+      $con['data'][channels][$chanid]['svnmon']  = TRUE;
+      $bot->talk( $channel, "SVN monitor is now on for this channel." );
     }
+    
+    $bot->writedata( $con['data'] );
   }
   
   function rot13( $channel, $bufarray )
@@ -633,8 +641,36 @@ class commands
   {
     global $bot,  $con;
     
-    $bot->cmd_send("JOIN ".$bufarray[ 0 ] );
-    $bot->talk( $channel, $name.": ".$bufarray[0]." has been joined." );
+    if( stripos( $bufarray[0], "#" ) === FALSE )
+    {
+      $bot->talk( $channel, $name.": That doesn't appear to be a valid channel" );
+      return;
+    }
+
+    for( $i=0; $i<count( $con['data'][channels] ); $i++ )
+    {
+      if( $con['data'][channels][$i]['name'] == $bufarray[0] )
+      {
+        $bot->talk( $channel, "Erm... I'm already there ".$name );
+        return;
+      }
+    }
+    
+    if( $bufarray[1] != NULL )
+      $bot->cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
+    else
+      $bot->cmd_send( "JOIN ".$bufarray[0] );
+
+    $id = count( $con['data'][channels] );
+    $bot->talk( $channel, $name.": ".$bufarray[0]." has been joined, and will be automatically joined in the future." );
+    $con['data'][channels][$id]['name'] = $bufarray[0];
+    $con['data'][channels][$id]['password'] = $bufarray[1];
+    $con['data'][channels][$id]['svnmon'] = FALSE;
+    $con['data'][channels][$id]['hgmon'] = "";
+    $con['data'][channels][$id]['log'] = TRUE;
+    $con['data'][channels][$id]['cmds'] = TRUE;
+    $con['data'][channels][$id]['autoopvoice'] = FALSE;
+    $bot->writedata( $con['data'] );
   }
   
   function mute( $command, $bufarray, $channel )
@@ -688,17 +724,37 @@ class commands
   {
     global $bot, $con;
     
-    $name = $name;
-    $thischannel = $channel;
-    $channel = $bufarray[0];
+    $channeltopart = $bufarray[0];
+    for( $i=0; $i<count( $con['data'][channels] ); $i++ )
+    {
+      if( $con['data'][channels][$i]['name'] == $channeltopart )
+      {
+        $present = TRUE;
+        $id = $i;
+        break;
+      }
+      else
+        $present = FALSE;
+    }
+    
+    if( $present == FALSE )
+    {
+      $bot->talk( $channel, "I find it rather hard to part channels I'm not present in, $name." );
+      return;
+    }
     if( $bufarray[1] != NULL )
     {
       unset( $bufarray[0] );
       $pmessage = implode( " ", $bufarray );                
     }
-    $bot->cmd_send( "PART $channel :$pmessage" );
-    if( $channel != $bufarray[0] )
-      $bot->talk( $thischannel, $name.": I have parted ".$bufarray[0] );
+    
+    $bot->cmd_send( "PART $channeltopart :$pmessage" );
+    if( $channel != $channeltopart )
+      $bot->talk( $channel, $name.": I have parted ".$bufarray[0].", and will no longer join it at startup." );
+    
+    unset( $con['data'][channels][$id] );
+    $con['data'][channels] = array_values( $con['data'][channels] );
+    $bot->writedata( $con['data'] );
   }
   
   function msg( $bufarray, $channel )
@@ -796,34 +852,50 @@ class commands
   
   function autoop( $channel, $chanid )
   {
-    global $con, $bot, $channels;
-    
-    if( $channels[$chanid]['autoopvoice'] != TRUE )
+    global $con, $bot;
+
+    if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $channels[$chanid]['autoopvoice'] = TRUE; 
+      $bot->talk( $channel, "You can't turn autoop/autovoice off in a PM." );
+      return;     //Likely a PM or some weird bug
+    }
+
+    if( $con['data'][channels][$chanid]['autoopvoice'] != TRUE )
+    {
+      $con['data'][channels][$chanid]['autoopvoice'] = TRUE; 
       $bot->talk( $channel, "Auto Op and Voice enabled" );
     }
     else
     {
-      $channels[$chanid]['autoopvoice'] = FALSE; 
+      $con['data'][channels][$chanid]['autoopvoice'] = FALSE; 
       $bot->talk( $channel, "Auto Op and Voice disabled" );
     }
+    
+    $bot->writedata( $con['data'] );
   }
   
   function ccmds( $channel, $chanid )
   {
-    global $channels, $bot, $con;
+    global $bot, $con;
     
-    if( $channels[$chanid]['cmds'] != TRUE )
+    if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $channels[$chanid]['cmds'] = TRUE; 
+      $bot->talk( $channel, "You can't turn commands off in a PM." );
+      return;     //Likely a PM or some weird bug
+    }
+    
+    if( $con['data'][channels][$chanid]['cmds'] != TRUE )
+    {
+      $con['data'][channels][$chanid]['cmds'] = TRUE; 
       $bot->talk( $channel, "Commands enabled" );
     }
     else
     {
-      $channels[$chanid]['cmds'] = FALSE; 
+      $con['data'][channels][$chanid]['cmds'] = FALSE; 
       $bot->talk( $channel, "Commands disabled" );
     }
+    
+    $bot->writedata( $con['data'] );
   }
   
   function kick( $channel, $bufarray, $name )

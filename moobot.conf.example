@@ -45,8 +45,9 @@ define( "datafilelocation", 19 );
 define( "nickserv", 20 );
 
 //more constants, for the $con['data'] array
-define( "svnstuffs", 0 );
-define( "hgstuffs", 1 );
+define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
+define( "hgstuffs", 1 );        //Holds the HG (mercurial) monitoring stuff
+define( "xchannels", 2 );     //Holds the extra channels we have joined/been invited to in the past
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
@@ -174,10 +175,10 @@ $CONFIG['servers']['A<3']['bakname'] = "^7A^1<3";
 //  $channels[#]['autoopvoice'] = FALSE;
 //	
 ///////////////////////////
-//Channels we connect to go here
+//This is depreciated
 //
 
-$channels[0]['name'] = '#knightsofreason';
+/*$channels[0]['name'] = '#knightsofreason';
 //$channels[0]['svnmon'] = "FALSE";
 $channels[1]['name'] = '##Aaron5367';
 $channels[2]['name'] = '#KoRx';
@@ -197,7 +198,7 @@ $channels[8]['name'] = '#supersecretroom';
 $channels[8]['svnmon'] = "FALSE";
 $channels[8]['log'] = "FALSE";
 $channels[8]['password'] = "SSR";
-//$channels[0]['name'] = '##Aaron5367';
+//$channels[0]['name'] = '##Aaron5367';*/
 
 //$channels = array_values( $channels );
 //^^^ Uncomment if your array values (ie $channels[THESE] ) are out of order ^^^ //
