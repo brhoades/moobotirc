@@ -115,7 +115,7 @@ function init()
         $bot->svnmon();
         $bstatus['svnchecks']++;
         //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
-        //$bot->hgmon();
+        $bot->hgmon();
       }
 
       //
