@@ -169,7 +169,7 @@ array(
       ""
     ),
     array
-    ("listchannels", "\$commands->listchannels( \$channel );", TRUE,
+    ("listchannels", "\$commands->listchannels( \$channel );", FALSE,
       "Lists channels that this bot is on.",
       ""
     )
