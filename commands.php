@@ -164,9 +164,9 @@ array(
       "[topic]"
     ),
     array
-    ("tempadmin", "\$commands->topic( \$channel, \$bufarray );", TRUE,
-      "Grants someone temporary admin status.",
-      "[name]"
+    ("hgmon", "\$commands->hgmon( \$channel, \$chanid );", TRUE,
+      "Enables or disables Moobot's hg (mercurial) monitor for the channel it is called in.",
+      ""
     )
 );
 
@@ -221,6 +221,30 @@ class commands
     {
       $con['data'][channels][$chanid]['svnmon']  = TRUE;
       $bot->talk( $channel, "SVN monitor is now on for this channel." );
+    }
+    
+    $bot->writedata( $con['data'] );
+  }
+  
+  function hgmon( $channel, $chanid )
+  {
+    global $bot, $con;
+    
+    if( $channel != $con['data'][channels][$chanid]['name'] )
+    {
+      $bot->talk( $channel, "You can't turn hgmon off in a PM." );
+      return;     //Likely a PM or some weird bug
+    }
+    
+    if( $con['data'][channels][$chanid]['hgmon'] == TRUE )
+    {
+      $con['data'][channels][$chanid]['hgmon'] = FALSE;
+      $bot->talk( $channel, "HG monitor is now off for this channel." );
+    }
+    else
+    {
+      $con['data'][channels][$chanid]['hgmon']  = TRUE;
+      $bot->talk( $channel, "HG monitor is now on for this channel." );
     }
     
     $bot->writedata( $con['data'] );
@@ -666,7 +690,7 @@ class commands
     $con['data'][channels][$id]['name'] = $bufarray[0];
     $con['data'][channels][$id]['password'] = $bufarray[1];
     $con['data'][channels][$id]['svnmon'] = FALSE;
-    $con['data'][channels][$id]['hgmon'] = "";
+    $con['data'][channels][$id]['hgmon'] = FALSE;
     $con['data'][channels][$id]['log'] = TRUE;
     $con['data'][channels][$id]['cmds'] = TRUE;
     $con['data'][channels][$id]['autoopvoice'] = FALSE;

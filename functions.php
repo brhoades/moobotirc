@@ -947,7 +947,7 @@ class bot
         unset( $stufftoreport );
         exec( "hg log -l$k -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}<cibr>\" ".$hgservers[$i]['loc'], $stufftoreport );
         if( is_array( $stufftoreport ) )
-          $stufftoreport = implode( "<br />" );
+          $stufftoreport = implode( "<br />", $stufftoreport );
         echo "Searching for '$thisdata' in '$stufftoreport'...\n";
         if( stripos( $stufftoreport, $thisdata ) !== FALSE )
           break;
@@ -975,10 +975,8 @@ class bot
         
         //go through the channels and see if they want to hear from us
         for( $j = 0; $j < count( $con['data'][channels] ); $j++ )
-        {
-          $si = explode( ",", $con['data'][channels][$j]['hgmon'] );
-          if( $con['data'][channels][$j]['hgmon'] != $i
-              && array_search( $i, $si ) === FALSE )
+        {;
+          if( $con['data'][channels][$j]['hgmon'] != TRUE )
             continue;
           
           $bot->talk( $con['data'][channels][$j]['name'], $hgservers[$i]['name']." HG update:" );
