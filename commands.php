@@ -167,6 +167,11 @@ array(
     ("hgmon", "\$commands->hgmon( \$channel, \$chanid );", TRUE,
       "Enables or disables Moobot's hg (mercurial) monitor for the channel it is called in.",
       ""
+    ),
+    array
+    ("listchannels", "\$commands->listchannels( \$channel );", TRUE,
+      "Lists channels that this bot is on.",
+      ""
     )
 );
 
@@ -346,6 +351,7 @@ class commands
       }
       else
       {
+        $textarray[0] = ltrim( $textarray[0], "%" );
         for( $i=0; $i<count( $commandtree ); $i++ )
         {
           if( $commandtree[$i][0] == $textarray[0] )
@@ -956,6 +962,42 @@ class commands
       $topic = " ";
     
     $bot->cmd_send( "TOPIC $channel :$topic" );
+  }
+  
+  function listchannels( $channel )
+  {
+    global $bot, $con;
+    
+    if( count( $con['data'][channels] ) > 2 )
+    {
+      $bot->talk( $channel, "I am currently automatically joining the following channels:" );
+      for( $i=0; $i<count( $con['data'][channels] ); $i++ )
+      {
+        if( $i == 0 )
+          $chans = $con['data'][channels][$i]['name']." , ";
+        else if( $i == count( $con['data'][channels] )-1 )
+          $chans .= $con['data'][channels][$i]['name'].".";
+        else
+          $chans .= $con['data'][channels][$i]['name']." , ";
+      }
+      $bot->talk( $channel, $chans );
+    }
+    else if( count( $con['data'][channels] ) == 2 )
+    {
+      $bot->talk( $channel, "I am currently automatically joining the following channels:" );
+      for( $i=0; $i<count( $con['data'][channels] ); $i++ )
+      {
+        if( $i == 0 )
+          $chans = $con['data'][channels][$i]['name']." and ";
+        else
+          $chans .= $con['data'][channels][$i]['name'].".";
+      }
+      $bot->talk( $chanel, $chans );
+    }
+    else if( count( $con['data'][channels] ) == 1 )
+      $bot->talk( $channel, "I am currently only automatically joining ".$con['data'][channels][0]['name']."." );
+    else
+      $bot->talk( $channel, "I do not appear to be automatically joining any channels." );
   }
   
 }
