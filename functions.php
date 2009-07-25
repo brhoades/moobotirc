@@ -758,7 +758,7 @@ class bot
 
   function svnmon( )
   {
-    global $con, $CONFIG, $channels, $bot, $svnservers, $nextsvnmon;
+    global $con, $CONFIG, $bot, $svnservers;
 
     if( $CONFIG['svnmon'] == "FALSE" )
       return;
@@ -779,7 +779,7 @@ class bot
      if( count( $svnout ) == 0 )
      {
        echo "SVN: Couldn't check $svnurl\n"; 
-       $nextsvnmon += 60;
+       $con['nextsvnmontime'] += 60;
        continue;
      }
      $tries = 0;
@@ -891,17 +891,17 @@ class bot
           $string[1+$i] = $message[$i];
         }
         
-        for( $i=0; $i<count($channels); $i++ )
+        for( $i=0; $i<count( $con['data'][channels] ); $i++ )
         {
-          if( $channels[$i]['svnmon'] == "FALSE" )
+          if( $con['data'][channels][$i]['svnmon'] == FALSE )
             continue;
             
-          $bot->talk( $channels[$i]['name'], $svnservers[$c]['name']." SVN update:" );
+          $bot->talk( $con['data'][channels][$i]['name'], $svnservers[$c]['name']." SVN update:" );
           for( $j=0; $j<count($string); $j++ )
           {
             if( $string[$j] == "\n" || $string[$j] == NULL )
               continue;
-            $bot->talk( $channels[$i]['name'], $string[$j] );
+            $bot->talk( $con['data'][channels][$i]['name'], $string[$j] );
           }
         }
         /*for( $j=0; $j<count($CONFIG['servers']['KOR']); $j++ )
@@ -974,17 +974,17 @@ class bot
         $descr = explode( "<br />", $descr );
         
         //go through the channels and see if they want to hear from us
-        for( $j = 0; $j < count( $channels ); $j++ )
+        for( $j = 0; $j < count( $con['data'][channels] ); $j++ )
         {
-          $si = explode( ",", $channel[$j]['hgmon'] );
-          if( $channel[$j]['hgmon'] != $i
+          $si = explode( ",", $con['data'][channels][$j]['hgmon'] );
+          if( $con['data'][channels][$j]['hgmon'] != $i
               && array_search( $i, $si ) === FALSE )
             continue;
           
-          $bot->talk( $channel[$j]['name'], $hgservers[$i]['name']." HG update:" );
-          $bot->talk( $channel[$j]['name'], "$author * $branches * r$rev:$cset " );
+          $bot->talk( $con['data'][channels][$j]['name'], $hgservers[$i]['name']." HG update:" );
+          $bot->talk( $con['data'][channels][$j]['name'], "$author * $branches * r$rev:$cset " );
           for( $l = 0; $l < count( $descr ); $l++ )
-            $bot->talk( $channel[$j]['name'], $descr[$l] );
+            $bot->talk( $con['data'][channels][$j]['name'], $descr[$l] );
         }
       }
     }
@@ -1105,9 +1105,9 @@ class bot
     $channelz = stripos( $con['buffer']['all'], "KICK ")+5;
     $channellen = stripos( $con['buffer']['all'], " ".$CONFIG['name']." :")-$channelz;
     $channel = substr( $con['buffer']['all'], $channelz, $channellen );
-    for( $i=0; $i < count($channels); $i++ )
+    for( $i=0; $i < count( $con['data'][channels] ); $i++ )
     {
-      if( $channel == $channels[$i]['name'] )
+      if( $channel == $con['data'][channels][$i]['name'] )
       {
         $chanid = $i;
         break;
@@ -1115,7 +1115,7 @@ class bot
     }  
     if( stripos( $con['buffer']['all'], 'KICK '.$channel.' '.$CONFIG['name'].' :' ) !== FALSE )
     {
-      $bot->cmd_send( "JOIN :".$channels[$chanid]['name']." ".$channels[$chanid]['password'] );
+      $bot->cmd_send( "JOIN :".$con['data'][channels][$chanid]['name']." ".$con['data'][channels][$chanid]['password'] );
     }
   }
 

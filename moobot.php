@@ -38,7 +38,7 @@ while( $alive == "TRUE" )
 
 function init()
 {
-  global $con, $CONFIG, $servers, $channels, $nextsvnmontime, $other, $bot, $bstatus, $commandtree, $commands; 
+  global $con, $CONFIG, $servers, $other, $bot, $bstatus, $commandtree, $commands; 
   $firsttime = "TRUE";
   if( is_int( $CONFIG[server] ) )
   {
@@ -76,23 +76,21 @@ function init()
       if( $firsttime == "TRUE" && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
           || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE ) )
       {
-        $max = count( $channels );
+        //
+        //Loads data
+        //
+        $con['data'] = $bot->readdata( $con['data'] );
+        //
+        //
+        //
+        
+        $max = count( $con['data'][channels] );
         for( $i=0; $i<$max; $i++ )
         {
-          //might as well set the default here
-          if( $channels[$i]['svnmon'] == NULL )
-            $channels[$i]['svnmon']  = FALSE;
-          if( $channels[$i]['log'] == NULL )
-            $channels[$i]['log']  = TRUE;
-          if( $channels[$i]['cmds'] == NULL )
-            $channels[$i]['cmds']  = TRUE;
-          if( $channels[$i]['autoopvoice'] == NULL )
-            $channels[$i]['autoopvoice']  = FALSE;
-          
-          if( $channels[$i]['password'] != NULL )
-            $bot->cmd_send( "JOIN ". $channels[$i]['name'] ." ". $channels[$i]['password'] );
+          if( $con['data'][channels][$i]['password'] != NULL )
+            $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] ." ". $con['data'][channels][$i]['password'] );
           else
-            $bot->cmd_send( "JOIN ". $channels[$i]['name'] );
+            $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] );
         }
         $firsttime = "FALSE";
         if( $CONFIG[nickpass] != NULL )
@@ -108,20 +106,12 @@ function init()
             $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE );
         }
         //$bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
-        
-        //
-        //Loads data
-        //
-        $con['data'] = $bot->readdata( $con['data'] );
-        //
-        //
-        //
       }
 
 
-      if( $nextsvnmon <= time() && $firsttime == "FALSE" )
+      if( $con['nextsvnmontime'] <= time() && $firsttime == "FALSE" )
       {
-        $nextsvnmon = time() + $svnmontimeout; 
+        $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
         $bot->svnmon();
         $bstatus['svnchecks']++;
         //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
@@ -145,11 +135,10 @@ function init()
       //COMMANDS
       //
       //****************
-
       $start = strpos( $con['buffer']['all'], ":", 1 )+1;
       $text = substr( $con['buffer']['all'], $start );
       $bufarray = explode( " ", $con['buffer']['all'] );
-      $channel = $bufarray['2'];
+      $channel = strtolower( $bufarray['2'] );
       $hostmaskchunk = ltrim( $bufarray['0'], ":" );
       $hostmaskchunk = explode( "!", $hostmaskchunk );
       $hostmask = $hostmaskchunk['1'];
@@ -168,15 +157,20 @@ function init()
         $textarray = array_values( $textarray );
       }
       if( $channel == $CONFIG[nick] )         //Private Message
-        $channel = $name;
+      {
+        $channel = strtolower( $name );
+        $pm = TRUE;
+      }
+      else
+        $pm = FALSE;
 
       $bot->vote_check( $hostmask, $name, $channel, $text );
 
       if( stripos( $text, ":%" ) !== FALSE )
       {
-        for( $i=0; $i<count($channels); $i++ )
+        for( $i=0; $i<count($con['data'][channels]); $i++ )
         {
-          if( $channel == $channels[$i]['name'] )
+          if( strtolower( $channel ) == strtolower( $con['data'][channels][$i]['name'] ) )
           {
             $chanid = $i;
             break;
@@ -187,7 +181,8 @@ function init()
         $command = ltrim( $bufarray['3'], ":%" );
         unset( $bufarray['3'] );
         $bufarray = array_values( $bufarray );
-        if( $channels[$chanid]['cmds'] == FALSE && $command != "cmd" )		//hax
+        if(  $con['data'][channels][$chanid]['cmds'] == FALSE && $command != "ccmds" 
+              && $pm == FALSE )		//hax
           continue;
         $bstatus['cmds']++;
         $eval = FALSE;
@@ -299,12 +294,12 @@ function init()
        }
        else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
        {
-        for( $i=0; $i<count( $channels ); $i++ )
+        for( $i=0; $i<count( $con['data'][channels] ); $i++ )
         {
-          if( $channels[$i]['name'] == $channel )
+          if(  $con['data'][channels][$i]['name'] == $channel )
             $chanid = $i;
         }
-        if( $channels[$chanid]['autoopvoice'] == TRUE )
+        if( $con['data'][channels][$chanid]['autoopvoice'] == TRUE )
         {
            $parts = explode( " ", $con['buffer']['all'] );
            $name = explode( "!", $parts['0'] );
