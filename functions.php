@@ -931,7 +931,7 @@ class bot
       $thisdata = $con['data'][hgstuffs][$i];
   
       //check stuff
-      exec( "hg pull -u ".$hgservers[$i]['loc'] );
+      exec( "cd ".$hgservers[$i]['loc']." && hg pull -u" );
       exec( "hg log -l1 -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}\" ".$hgservers[$i]['loc'], $whatitsays );
       
       $whatitsays = implode( "<br />", $whatitsays );
@@ -942,24 +942,22 @@ class bot
       $con['data'][hgstuffs][$i] = $whatitsays;
       $bot->writedata( $con['data'] );
       
-      for( $k = 2; $k < MAX_REPORT+2; $k++ )
+      for( $k = 1; $k < MAX_REPORT; $k++ )
       {
         unset( $stufftoreport );
         exec( "hg log -l$k -M --template \"{rev} ||| {node|short} ||| {author} ||| {branches} ||| {desc}<cibr>\" ".$hgservers[$i]['loc'], $stufftoreport );
         if( is_array( $stufftoreport ) )
           $stufftoreport = implode( "<br />", $stufftoreport );
-        echo "Searching for '$thisdata' in '$stufftoreport'...\n";
         if( stripos( $stufftoreport, $thisdata ) !== FALSE )
           break;
       }
-      if( $k == MAX_REPORT + 2 )
+      if( $k == MAX_REPORT )
       {
         //this is our first time
         echo "Initial setup on hgmon detected.\n";
         continue;
       }
       
-      echo "HG UPDATE!!!\n";
       //$stufftoreport = implode( "<br />", $stufftoreport );
       $stufftoreport = explode( "<cibr>", $stufftoreport );
       
@@ -979,7 +977,8 @@ class bot
           if( $con['data'][channels][$j]['hgmon'] != TRUE )
             continue;
           
-          $bot->talk( $con['data'][channels][$j]['name'], $hgservers[$i]['name']." HG update:" );
+          if( $k == 0 )
+            $bot->talk( $con['data'][channels][$j]['name'], $hgservers[$i]['name']." HG update:" );
           $bot->talk( $con['data'][channels][$j]['name'], "$author * $branches * r$rev:$cset " );
           for( $l = 0; $l < count( $descr ); $l++ )
             $bot->talk( $con['data'][channels][$j]['name'], $descr[$l] );
