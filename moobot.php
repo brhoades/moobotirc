@@ -156,7 +156,7 @@ function init()
         unset( $textarray['0'] );
         $textarray = array_values( $textarray );
       }
-      if( $channel == $CONFIG[nick] )         //Private Message
+      if( $channel == strtolower( $CONFIG[nick] ) )         //Private Message
       {
         $channel = strtolower( $name );
         $pm = TRUE;
