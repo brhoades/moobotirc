@@ -968,20 +968,27 @@ class bot
         $cset = $thiscommit[1];
         $author = $thiscommit[2];
         $branches = $thiscommit[3];
+        if( $branches == NULL )
+          $branches = "default";
         $descr = $thiscommit[4];
         $descr = explode( "<br />", $descr );
         
         //go through the channels and see if they want to hear from us
         for( $j = 0; $j < count( $con['data'][channels] ); $j++ )
-        {;
+        {
           if( $con['data'][channels][$j]['hgmon'] != TRUE )
             continue;
           
           if( $k == 0 )
             $bot->talk( $con['data'][channels][$j]['name'], $hgservers[$i]['name']." HG update:" );
           $bot->talk( $con['data'][channels][$j]['name'], "$author * $branches * r$rev:$cset " );
-          for( $l = 0; $l < count( $descr ); $l++ )
-            $bot->talk( $con['data'][channels][$j]['name'], $descr[$l] );
+          if( is_array( $descr ) )
+          {
+            for( $l = 0; $l < count( $descr ); $l++ )
+              $bot->talk( $con['data'][channels][$j]['name'], $descr[$l] );
+          }
+          else
+            $bot->talk( $con['data'][channels][$j]['name'], $descr );
         }
       }
     }
