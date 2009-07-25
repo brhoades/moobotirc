@@ -63,25 +63,8 @@ function init()
       $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
       if( $con['buffer']['all'] != NULL )
         print date("[ d/m/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
-
-      //
-      //Loads data
-      //
-      $con['data'] = $bot->readdata( $con['data'] );
-      //
-      //
-      //
       
       $bstatus['lines']++;
-
-      if( $nextsvnmon <= time() && $firsttime == "FALSE" )
-      {
-        $nextsvnmon = time() + $svnmontimeout; 
-        //$bot->svnmon();
-        $bstatus['svnchecks']++;
-        //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
-        //$bot->hgmon();
-      }
       
       if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
       {
@@ -124,7 +107,25 @@ function init()
           else
             $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE );
         }
-        $bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
+        //$bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
+        
+        //
+        //Loads data
+        //
+        $con['data'] = $bot->readdata( $con['data'] );
+        //
+        //
+        //
+      }
+
+
+      if( $nextsvnmon <= time() && $firsttime == "FALSE" )
+      {
+        $nextsvnmon = time() + $svnmontimeout; 
+        $bot->svnmon();
+        $bstatus['svnchecks']++;
+        //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
+        //$bot->hgmon();
       }
 
       //
@@ -285,7 +286,7 @@ function init()
 				 echo "Dying, nick collision.\r\n";
          return;
        }
-			 else if( $lasttime < ( time() - $CONFIG[servertimeout] ) )
+			 else if( $lasttime < ( time() - ( $CONFIG[servertimeout] * 60 ) ) )
 			 {
 				 echo "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n";
 				 return;
