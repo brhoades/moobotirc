@@ -60,9 +60,16 @@ function init()
     $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
     while( !feof( $con['socket'] ) )
     {
-      $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
+      if( $con['buffer']['old'] != $con['buffer']['all'] )
+        $con['buffer']['old'] = $con['buffer']['all'];
+      else
+      {
+        $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
+        $con['buffer']['old'] = $con['buffer']['all'];
+      }
+        
       if( $con['buffer']['all'] != NULL )
-        print date("[ d/m/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
+        print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
       
       $bstatus['lines']++;
       
