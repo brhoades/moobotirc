@@ -43,6 +43,7 @@ define( "servertimeout", 17 );
 define( "svnmon", 18 );
 define( "datafilelocation", 19 );
 define( "nickserv", 20 );
+define( "sleeptime", 21 );
 
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
@@ -77,6 +78,8 @@ $nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as 
 $CONFIG[maxvotetime] = 30; //How long votes last
 $CONFIG[servertimeout] = 10; // Max time after not receiving a command from the server to reconnect, in minutes
 $CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
+$CONFIG[sleeptime] = 500; //Time in ms between cycles
+
 //
 ///////////////////////////
 //        Servers        //
