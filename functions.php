@@ -1009,7 +1009,7 @@ class bot
       $con['stimes']++;
       $con[lastspeaktime] = time();
       $bstatus['commandstoserv']++;
-      print ( date("[ d/m/y @ H:i:s ]") ."-> ". $command. "\n\r" );
+      print ( date("[ m/d/y @ H:i:s ]") ."-> ". $command. "\n\r" );
     }
     else
       $buffers[ count($buffers) ] = $command;
@@ -1024,7 +1024,7 @@ class bot
     {
       $buffers = array_values( $buffers );
       fputs( $con['socket'], $buffers[0]."\n\r" );
-      print ( date("[ d/m/y @ H:i:s ]") ."-> ".$buffers[0]."\n\r" );
+      print ( date("[ m/d/y @ H:i:s ]") ."-> ".$buffers[0]."\n\r" );
       unset( $buffers[0] );
       $con[lastspeaktime] = time();
       $con['stimes']++;
@@ -1593,6 +1593,22 @@ class bot
       }
     }
     return $server_list;
+  }
+  
+  function fetch_next_message( )
+  {
+    global $con, $bstatus;
+    
+      $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
+      if( $con['buffer']['all'] != NULL )
+      {
+        print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
+      }
+      else
+        return NULL;
+      
+      $bstatus['lines']++;
+      return( $con['buffer']['all'] );
   }
 }  
 ?>

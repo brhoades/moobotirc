@@ -76,7 +76,7 @@ $CONFIG[checkservtimeout] = 10;
 $CONFIG[svnmontimeout] = 30;    //Time between SVN checks
 $nextsvnmontime = time()+$svnmontimeout+30; //So we don't do a check as soon as we start
 $CONFIG[maxvotetime] = 30; //How long votes last
-$CONFIG[servertimeout] = 10; // Max time after not receiving a command from the server to reconnect, in minutes
+$CONFIG[servertimeout] = 25; // Max time after not receiving a command from the server to reconnect, in minutes
 $CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 $CONFIG[sleeptime] = 500; //Time in ms between cycles
 
