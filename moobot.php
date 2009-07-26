@@ -49,13 +49,13 @@ function init()
   }
   $CONFIG[server] = gethostbyname( $CONFIG[server] );
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
-  //stream_set_blocking( $con['socket'], 0 );
+  stream_set_blocking( $con['socket'], 0 );
+  stream_set_timeout( $con['socket'], 100 );
 	$lasttime = time();
   if ( !$con['socket'] ) 
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    stream_set_timeout( $con['socket'], 0, 100 );
     $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
     $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
     while( !feof( $con['socket'] ) )
@@ -373,6 +373,8 @@ function init()
         if( stripos( $channel, "#" ) !== FALSE )
           $bot->cmd_send( "JOIN $channel" );
       }
+      
+      usleep( $CONFIG[sleeptime]*100 );
     }
   }
 }
