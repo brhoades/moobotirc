@@ -144,7 +144,7 @@ array(
       ""
     ),
     array
-    ("ccmds", "\$commands->invite( \$channel, \$chanid \);", TRUE,
+    ("ccmds", "\$commands->ccmds( \$channel, \$chanid \);", TRUE,
       "Toggles command usage in this channel.",
       ""
     ),
@@ -714,7 +714,7 @@ class commands
     }
     
     if( $command == "mute" )
-      $bot->cmd_send( "MODE ".$channel." +v ".$bufarray[0] );
+      $bot->cmd_send( "MODE ".$channel." -v ".$bufarray[0] );
     else 
       $bot->cmd_send( "MODE ".$channel." +v ".$bufarray[0] );
   }
