@@ -1154,15 +1154,31 @@ class bot
     }
     
     if( $type == "poll" )
+    {
       $bot->talk( $channel, "$caller called a vote: [POLL] \"$string\"" );
+      $votestring = NULL;
+    }
     else if( $type == "kick" )
     {
       $stringex = explode( " ", $string );
-      $target = $tringex['0'];
+      $target = $stringex['0'];
       unset( $stringex['0'] );
       $string = implode( " ", $stringex );
       //Check to see if the target is in the channel
+      $bot->cmd_send( "NAMES $channel" );
+      $names = $bot->fetch_next_message( );
+      $votestring = "KICK $channel $target :vote kick: $string";
       
+      if( stripos( $names, $target ) === FALSE )
+      {
+        $bot->talk( $channel, "I don't believe $target is in this channel." );
+        return;
+      }
+      else if( stripos( $names, "@".$CONFIG[nick] ) === FALSE )
+      {
+        $bot->talk( $channel, "I don't have operator status in this channel." );
+        return;
+      }
     }
     
     $bot->talk( $channel, "Type F1 (yes) or F2 (no) in this channel, or send me it in a CTCP ping / private message to vote." );
@@ -1173,6 +1189,7 @@ class bot
     $con['vote']['inprogress'] = TRUE;
     $con['vote']['percenttopass'] = ".5";
     $con['vote']['channel'] = $channel;
+    $con['vote']['string'] = $votestring;
     $con['vote']['yes'] = 0;
     $con['vote']['no'] = 0;
   }
@@ -1230,6 +1247,8 @@ class bot
       else
         $bot->talk( $con['vote']['channel'], $bot->tremulous_replace_colors_irc("^1Vote Failed ^0(^2Y^0:$yeses ^1N^0:$noes, ".round(($yespercent*100))."%)"));
       $con['vote']['inprogress'] = FALSE;
+      if( $con['vote']['string'] != NULL )
+        $bot->cmd_send( $con['vote']['string'] );
     }
   }
 
@@ -1599,16 +1618,14 @@ class bot
   {
     global $con, $bstatus;
     
-      $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
-      if( $con['buffer']['all'] != NULL )
-      {
-        print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
-      }
-      else
-        return NULL;
-      
-      $bstatus['lines']++;
-      return( $con['buffer']['all'] );
+    sleep( 1 ); //Wait a second for any recently sent commands to set in
+    $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
+    if( $con['buffer']['all'] != NULL )
+      print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
+    else
+      return NULL;
+    
+    return( $con['buffer']['all'] );
   }
 }  
 ?>
