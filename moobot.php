@@ -39,7 +39,7 @@ while( $alive == "TRUE" )
 function init()
 {
   global $con, $CONFIG, $servers, $other, $bot, $bstatus, $commandtree, $commands; 
-  $firsttime = "TRUE";
+  $firsttime = TRUE;
   if( is_int( $CONFIG[server] ) )
   {
     if( $CONFIG[server] == 0 )
@@ -80,7 +80,7 @@ function init()
         $con['cached'] = count( $bot->find_servers( ) );
       }
       
-      if( $firsttime == "TRUE" && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
+      if( $firsttime == TRUE && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
           || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE ) )
       {
         //
@@ -99,7 +99,7 @@ function init()
           else
             $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] );
         }
-        $firsttime = "FALSE";
+        $firsttime = FALSE;
         if( $CONFIG[nickpass] != NULL )
         {
           if( is_int( $CONFIG[nickpass] ) )
@@ -116,7 +116,7 @@ function init()
       }
 
 
-      if( $con['nextsvnmontime'] <= time() && $firsttime == "FALSE" )
+      if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
       {
         $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
         $bot->svnmon();
