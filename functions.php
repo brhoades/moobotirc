@@ -1166,8 +1166,16 @@ class bot
       $string = implode( " ", $stringex );
       //Check to see if the target is in the channel
       $bot->cmd_send( "NAMES $channel" );
+      if( stripos( $target, $CONFIG['nick'] ) !== FALSE )
+      {
+        $target = $caller;
+        $string = "I guess the joke is on you ~".$CONFIG['nick'];
+      }
       $names = $bot->fetch_next_message( );
-      $votestring = "KICK $channel $target :vote kick: $string";
+      if( $string != NULL )
+        $votestring = "KICK $channel $target :vote kick: $string";
+      else
+        $votestring = "KICK $channel $target :vote kick: no reason";
       
       if( stripos( $names, $target ) === FALSE )
       {
@@ -1247,8 +1255,9 @@ class bot
       else
         $bot->talk( $con['vote']['channel'], $bot->tremulous_replace_colors_irc("^1Vote Failed ^0(^2Y^0:$yeses ^1N^0:$noes, ".round(($yespercent*100))."%)"));
       $con['vote']['inprogress'] = FALSE;
-      if( $con['vote']['string'] != NULL )
+      if( $con['vote']['string'] != NULL && $yespercent > $con['vote']['percenttopass'] )
         $bot->cmd_send( $con['vote']['string'] );
+      unset( $con['vote'] );
     }
   }
 
