@@ -24,8 +24,8 @@ require( "moobot.conf" );
 require( "functions.php" );
 require( "commands.php" );
 
-$dbcnx = mysql_connect( "localhost", $CONFIG[dbuser], $CONFIG[dbpass] );
-mysql_select_db( $CONFIG[dbname], $dbcnx );
+//$dbcnx = mysql_connect( "localhost", $CONFIG[dbuser], $CONFIG[dbpass] );
+//mysql_select_db( $CONFIG[dbname], $dbcnx );
 $con = array();
 $alive = "TRUE";
 $bstatus['scrstarttime'] = time();
@@ -216,7 +216,7 @@ function init()
         if( !$eval )
           $bot->talk( $channel, "%$command is not known, try using %help." );
       }
-      else if( stripos( $text, " is " ) !== FALSE || stripos( $text, " are " ) !== FALSE )
+      /*else if( stripos( $text, " is " ) !== FALSE || stripos( $text, " are " ) !== FALSE )
       {
         if( stripos( $text, " is " ) )
         {
@@ -269,7 +269,7 @@ function init()
           mysql_query( "UPDATE state SET queries=".$top['queries']." WHERE verb=\"".$top['verb']." AND this=\"".$top['this']."\" AND that=\"".$top['that']."\" " );
         }
         
-      }
+      }*/
       /*else if( stripos($con['buffer']['all'], " :", 10 ) !== FALSE )
       {
         $start = strpos( $con['buffer']['all'], ":", 1 )+1;
