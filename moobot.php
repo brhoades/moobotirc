@@ -137,6 +137,10 @@ function init()
       if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
         continue;        
 
+      //No text, so we skip everything else, as it is all dependant on text and causes warnings
+      if( $con['buffer']['all'] == NULL )
+        continue;
+
       //****************
       //
       //COMMANDS
