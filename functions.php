@@ -1166,10 +1166,10 @@ class bot
       $string = implode( " ", $stringex );
       //Check to see if the target is in the channel
       $bot->cmd_send( "NAMES $channel" );
-      if( stripos( $target, $CONFIG['nick'] ) !== FALSE )
+      if( stripos( $target, $CONFIG[nick] ) !== FALSE )
       {
         $target = $caller;
-        $string = "I guess the joke is on you ~".$CONFIG['nick'];
+        $string = "I guess the joke is on you ~".$CONFIG[nick];
       }
       $names = $bot->fetch_next_message( );
       if( $string != NULL )
