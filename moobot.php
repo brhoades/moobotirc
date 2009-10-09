@@ -138,7 +138,8 @@ function init()
         continue;        
 
       //No text, so we skip everything else, as it is all dependant on text and causes warnings
-      if( $con['buffer']['all'] == NULL )
+      if( $con['buffer']['all'] == NULL
+          && $con['buffer']['all'] != ":" )
         continue;
 
       //****************
@@ -377,7 +378,7 @@ function init()
           }
         }
         unset( $titles, $urlarray, $urls, $url, $urlb, $out, $urltest, $doit );
-      } //:Aaron5367!~Aaron5367@Aaron5367.users.quakenet.org INVITE Moobot5367 #kor-ao
+      }
       else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {
         $channel = $bufarray['3'];

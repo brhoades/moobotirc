@@ -48,7 +48,7 @@ define( "sleeptime", 21 );
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
 define( "hgstuffs", 1 );        //Holds the HG (mercurial) monitoring stuff
-define( "xchannels", 2 );     //Holds the extra channels we have joined/been invited to in the past
+define( "channels", 2 );     //Holds the extra channels we have joined/been invited to in the past
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
