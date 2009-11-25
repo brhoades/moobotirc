@@ -44,11 +44,13 @@ define( "svnmon", 18 );
 define( "datafilelocation", 19 );
 define( "nickserv", 20 );
 define( "sleeptime", 21 );
+define( "vhost", 22 );
 
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
 define( "hgstuffs", 1 );        //Holds the HG (mercurial) monitoring stuff
-define( "channels", 2 );     //Holds the extra channels we have joined/been invited to in the past
+define( "channels", 2 );       //Holds the extra channels we have joined/been invited to in the past
+define( "admins", 3 );          //Holds admin info
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
@@ -79,6 +81,7 @@ $CONFIG[maxvotetime] = 30; //How long votes last
 $CONFIG[servertimeout] = 25; // Max time after not receiving a command from the server to reconnect, in minutes
 $CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 $CONFIG[sleeptime] = 500; //Time in ms between cycles
+$CONFIG[vhost] = "localhost";
 
 //
 ///////////////////////////

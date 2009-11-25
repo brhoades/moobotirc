@@ -39,7 +39,7 @@ while( $alive == "TRUE" )
 function init()
 {
   global $con, $CONFIG, $servers, $other, $bot, $bstatus, $commandtree, $commands; 
-  $firsttime = "TRUE";
+  $firsttime = TRUE;
   if( is_int( $CONFIG[server] ) )
   {
     if( $CONFIG[server] == 0 )
@@ -56,8 +56,8 @@ function init()
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
-    $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
+    $bot->cmd_send("USER ". $CONFIG[nick] ." ".$CONFIG[vhost]." ".$CONFIG[vhost]." :". $CONFIG[name] );
+    $bot->cmd_send("NICK ". $CONFIG[nick] ." ".$CONFIG[vhost]);
     while( !feof( $con['socket'] ) )
     {
       if( $con['buffer']['old'] != $con['buffer']['all'] )
@@ -80,7 +80,7 @@ function init()
         $con['cached'] = count( $bot->find_servers( ) );
       }
       
-      if( $firsttime == "TRUE" && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
+      if( $firsttime == TRUE && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
           || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE ) )
       {
         //
@@ -99,7 +99,7 @@ function init()
           else
             $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] );
         }
-        $firsttime = "FALSE";
+        $firsttime = FALSE;
         if( $CONFIG[nickpass] != NULL )
         {
           if( is_int( $CONFIG[nickpass] ) )
@@ -116,7 +116,7 @@ function init()
       }
 
 
-      if( $con['nextsvnmontime'] <= time() && $firsttime == "FALSE" )
+      if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
       {
         $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
         $bot->svnmon();
@@ -187,14 +187,16 @@ function init()
             $chanid = $i;
             break;
           }
+          else if( $i == count( $con['data'][channels] ) - 1 )
+            $chanid = "-1";
         }
         for( $i=0; $i<3; $i++ )
           unset( $bufarray[$i] );
         $command = ltrim( $bufarray['3'], ":%" );
         unset( $bufarray['3'] );
         $bufarray = array_values( $bufarray );
-        if(  $con['data'][channels][$chanid]['cmds'] == FALSE && $command != "ccmds" 
-              && $pm == FALSE )		//hax
+        if( $chanid != -1 && $con['data'][channels][$chanid]['cmds'] == FALSE 
+            && $command != "ccmds" && $pm == FALSE )		//hax
           continue;
         $bstatus['cmds']++;
         $eval = FALSE;

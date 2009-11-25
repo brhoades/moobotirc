@@ -144,7 +144,7 @@ array(
       ""
     ),
     array
-    ("ccmds", "\$commands->ccmds( \$channel, \$chanid \);", TRUE,
+    ("ccmds", "\$commands->ccmds( \$channel, \$chanid );", TRUE,
       "Toggles command usage in this channel.",
       ""
     ),
@@ -884,6 +884,12 @@ class commands
   {
     global $con, $bot;
 
+    if( $chanid == -1 )
+    {
+      $bot->talk( $channel, "You can't change settings like those in a channel I was invited to." );
+      return;     //Likely a PM or some weird bug
+    }
+
     if( $channel != $con['data'][channels][$chanid]['name'] )
     {
       $bot->talk( $channel, "You can't turn autoop/autovoice off in a PM." );
@@ -893,12 +899,12 @@ class commands
     if( $con['data'][channels][$chanid]['autoopvoice'] != TRUE )
     {
       $con['data'][channels][$chanid]['autoopvoice'] = TRUE; 
-      $bot->talk( $channel, "Auto Op and Voice enabled" );
+      $bot->talk( $channel, "Auto Op and voice has been enabled in this channel." );
     }
     else
     {
       $con['data'][channels][$chanid]['autoopvoice'] = FALSE; 
-      $bot->talk( $channel, "Auto Op and Voice disabled" );
+      $bot->talk( $channel, "Auto Op and voice has been disabled in this channel." );
     }
     
     $bot->writedata( $con['data'] );
@@ -907,6 +913,12 @@ class commands
   function ccmds( $channel, $chanid )
   {
     global $bot, $con;
+    
+    if( $chanid == -1 )
+    {
+      $bot->talk( $channel, "You can't change settings like those in a channel I was invited to." );
+      return;     //Likely a PM or some weird bug
+    }
     
     if( $channel != $con['data'][channels][$chanid]['name'] )
     {
@@ -917,12 +929,12 @@ class commands
     if( $con['data'][channels][$chanid]['cmds'] != TRUE )
     {
       $con['data'][channels][$chanid]['cmds'] = TRUE; 
-      $bot->talk( $channel, "Commands enabled" );
+      $bot->talk( $channel, "Commands have been enabled in this channel." );
     }
     else
     {
       $con['data'][channels][$chanid]['cmds'] = FALSE; 
-      $bot->talk( $channel, "Commands disabled" );
+      $bot->talk( $channel, "Commands have been disabled in this channel." );
     }
     
     $bot->writedata( $con['data'] );
@@ -999,6 +1011,5 @@ class commands
     else
       $bot->talk( $channel, "I do not appear to be automatically joining any channels." );
   }
-  
 }
 ?>
