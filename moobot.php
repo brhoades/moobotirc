@@ -56,8 +56,8 @@ function init()
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    $bot->cmd_send("USER ". $CONFIG[nick] ." aaronh.servehttp.com aaronh.servehttp.com :". $CONFIG[name] );
-    $bot->cmd_send("NICK ". $CONFIG[nick] ." aaronh.servehttp.com");
+    $bot->cmd_send("USER ". $CONFIG[nick] ." knightsofreason.net knightsofreason.net :". $CONFIG[name] );
+    $bot->cmd_send("NICK ". $CONFIG[nick] ." knightsofreason.net");
     while( !feof( $con['socket'] ) )
     {
       if( $con['buffer']['old'] != $con['buffer']['all'] )
@@ -182,14 +182,16 @@ function init()
             $chanid = $i;
             break;
           }
+          else if( $i == count( $con['data'][channels]-1 ) )
+            $chanid = -1;
         }
         for( $i=0; $i<3; $i++ )
           unset( $bufarray[$i] );
         $command = ltrim( $bufarray['3'], ":%" );
         unset( $bufarray['3'] );
         $bufarray = array_values( $bufarray );
-        if(  $con['data'][channels][$chanid]['cmds'] == FALSE && $command != "ccmds" 
-              && $pm == FALSE )		//hax
+        if( $chanid != -1 && $con['data'][channels][$chanid]['cmds'] == FALSE 
+            && $command != "ccmds" && $pm == FALSE )		//hax
           continue;
         $bstatus['cmds']++;
         $eval = FALSE;
