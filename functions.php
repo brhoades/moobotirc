@@ -381,7 +381,7 @@ class other
         return TRUE;
       else if( $votetype == VIP_OP_VOTE
                 && ( $thislevel == MODERATOR || $thislevel == GLOBAL_MODERATOR 
-                     || $thislevel == ADMINISTRATOR ) )
+                     || $thislevel == ADMINISTRATOR || $thislevel == VIP_OPERATOR ) )
         return TRUE;
       else if( $votetype == TYPICAL_PROMOTION_VOTE
                 && ( $thislevel == GLOBAL_MODERATOR || $thislevel == ADMINISTRATOR ) )
@@ -461,6 +461,65 @@ class other
       $out = round( ( $filesize / pow( 1024, 4 ) ), 2 )." TiB";
     
     return( $out );
+  }
+  
+  function inactive_count( )
+  {
+    global $username, $groups, $other, $exist;
+    
+    //returns the number of inactive users in KoR
+    $query = mysql_query( "SELECT * FROM korps_view" );
+    $exist = FALSE;
+    $inactivenum = 0;
+    $times = 0;
+    while( $stats = mysql_fetch_array( $query ) )
+    {
+      if( $stats['name'] == $username )
+      {
+        $exist = TRUE;
+        continue;
+      }
+      
+      if( $other->is_inactive( $stats['uid'], $stats['time'] ) )
+        $inactivenum++;
+    }
+    return $inactivenum;
+  }
+  
+  function is_inactive( $uid, $lastview = NULL )
+  {
+    global $username, $other;
+
+    $inactivemark = time()-INACTIVE_TIME_MAX; //Everyone whose user_lastvisit time is less than or equal to this will be considered inactive
+    
+    //adjust the max idle time based upon the last vote they could vote on ended
+    $quer = mysql_query( "SELECT * FROM phpbb_user_group WHERE user_id=".$uid );
+    $k = 0;
+    unset( $groupz );
+    while( $group = mysql_fetch_array( $quer ) )
+    {
+      $groupz[$k] = $group['group_id'];
+      $k++;
+      unset( $group );
+    }
+
+    //find the offset now that we know what groups they are in
+    $quer = mysql_query( "SELECT * FROM invotes ORDER BY voteid" );
+    while( $vote = mysql_fetch_array( $quer ) )
+    {
+      if( $other->can_vote( $groupz, $vote['type'] ) )
+        $offset = $vote['endtime'];
+    }
+    
+    if( $offset - time() >= 0 )
+      $offset = 0;
+    else
+      $offset = time() - $offset;
+      
+    if( $lastview < $inactivemark - $offset )
+      return TRUE;
+    else
+      return FALSE;
   }
 }
 
@@ -698,7 +757,7 @@ class bot
     return(round($pingtotal/$count));
   }
 
-  function tremulous_rcon( $server, $port, $command, $rcon, $cbf = FALSE, $colors = TRUE ) 
+  function tremulous_rcon( $server, $port, $command, $rcon, $cbf = FALSE, $colors = TRUE, $lastline = FALSE ) 
   {
     global $bstatus, $bot;
     if( $server == NULL )
@@ -750,6 +809,9 @@ class bot
     $data_full = substr( $data_full, 10 );
 
     $data = explode( "\n", $data_full );
+    
+    if( !$lastline )
+      unset( $data[ count( $data ) - 1 ] );
     if( $colors )
       return $bot->tremulous_replace_colors_irc( $data );
     else
@@ -760,7 +822,7 @@ class bot
   {
     global $con, $CONFIG, $bot, $svnservers;
 
-    if( $CONFIG['svnmon'] == "FALSE" )
+    if( $CONFIG[svnmon] == "FALSE" || count( $svnservers ) <= 0 )
       return;
     
     for( $c=0; $c<count($svnservers); $c++ )
@@ -923,7 +985,10 @@ class bot
   function hgmon( )
   {
     global $bot, $con, $hgservers;
+    
     define( "MAX_REPORT", 10 );
+    if( count( $hgservers ) <= 0 )
+      return;
     //max number of commits at a time
     for( $i = 0; $i < count( $hgservers ); $i++ )
     {
@@ -1626,6 +1691,24 @@ class bot
       return NULL;
     
     return( $con['buffer']['all'] );
+  }
+  
+  function run_checks( )
+  {
+    global $con, $bot;
+    
+    if( count( $con['checks'] ) == 0 )
+      return;
+      
+    //run through our triggers and see if we meet any of them
+    for( $i=0; $i<count( $con['checks'] ); $i++ )
+    {
+      if( stripos( $con['buffer']['all'], $con['checks'][$i]['trigger'] ) !== FALSE )
+        eval( $con['checks'][$i]['command'] );
+      
+      
+    }
+    
   }
 }  
 ?>
