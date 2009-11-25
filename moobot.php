@@ -56,8 +56,8 @@ function init()
     print("Could not connect to: ". $CONFIG[server] ." on port ". $CONFIG[port] );
   else 
   {
-    $bot->cmd_send("USER ". $CONFIG[nick] ." knightsofreason.net knightsofreason.net :". $CONFIG[name] );
-    $bot->cmd_send("NICK ". $CONFIG[nick] ." knightsofreason.net");
+    $bot->cmd_send("USER ". $CONFIG[nick] ." ".$CONFIG[vhost]." ".$CONFIG[vhost]." :". $CONFIG[name] );
+    $bot->cmd_send("NICK ". $CONFIG[nick] ." ".$CONFIG[vhost]);
     while( !feof( $con['socket'] ) )
     {
       if( $con['buffer']['old'] != $con['buffer']['all'] )
@@ -182,8 +182,8 @@ function init()
             $chanid = $i;
             break;
           }
-          else if( $i == count( $con['data'][channels]-1 ) )
-            $chanid = -1;
+          else if( $i == count( $con['data'][channels] ) - 1 )
+            $chanid = "-1";
         }
         for( $i=0; $i<3; $i++ )
           unset( $bufarray[$i] );
