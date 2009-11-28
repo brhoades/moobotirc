@@ -175,8 +175,13 @@ array(
     ),
     array
     ("addadmin", "\$commands->addadmin( \$channel, \$bufarray );", TRUE,
-      "Adds an admin for a user name",
+      "Adds an admin for a user name.",
       "[hostmask]"
+    )
+    array
+    ("password", "\$commands->override_password( \$channel, \$hostmask, \$bufarray )", FALSE,
+      "Uses the admin password, defined in the config file, to grant the user admin status.",
+      "[password]"
     )
 );
 
@@ -1051,6 +1056,31 @@ class commands
     $con['data'][admins][] = $hostmask;
     $bot->writedata( $con['data'] );
     $bot->talk( $channel, $hostmaskcf[0]." successfully added." );
+  }
+  
+  function override_password( $channel, $hostmask, $bufarray )
+  {
+    global $CONFIG;
+
+    for( $i=0; $i<count($con['data'][admins]); $i++ )
+    {
+      if( $hostmask == $con['data'][admins][$i] )
+      {
+        $bot->talk( $channel, "You are already an admin." );
+        return;
+      }
+    }
+
+    if( $CONFIG[admin_pass] == NULL )
+      $bot->talk( $channel, "An admin password is not set." );
+    else if( $bufarray[0] == $CONFIG[admin_pass] )
+    {
+      $con['data'][admins][] = $hostmask;
+      $bot->writedata( $con['data'] );
+      $bot->talk( $channel, "You are now an Administrator." );
+    }
+    else
+      $bot->talk( $channel, "Permission Denied" );    //meant to be ambiguous
   }
 }
 ?>

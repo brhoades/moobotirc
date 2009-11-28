@@ -45,6 +45,7 @@ define( "datafilelocation", 19 );
 define( "nickserv", 20 );
 define( "sleeptime", 21 );
 define( "vhost", 22 );
+define( "admin_pass", 23 );
 
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
@@ -66,7 +67,7 @@ $CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
 $CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];
 $CONFIG[svnmon] = TRUE;
 $CONFIG[nickserv] = "nameofnickserver"; //Only needed if you aren't using a number for $CONFIG[server]
-
+$CONFIG[admin_pass] = md5( rand(0,100000000000) ); //CHANGE ME, this is used for getting bot admin access
 //MySQL info
 $CONFIG[dbuser] = "databaseusername";
 $CONFIG[dbname] = "databasename";
