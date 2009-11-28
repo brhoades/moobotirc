@@ -172,6 +172,11 @@ array(
     ("listchannels", "\$commands->listchannels( \$channel );", FALSE,
       "Lists channels that this bot is on.",
       ""
+    ),
+    array
+    ("addadmin", "\$commands->addadmin( \$channel, \$bufarray );", TRUE,
+      "Adds an admin for a user name",
+      "[hostmask]"
     )
 );
 
@@ -1010,6 +1015,42 @@ class commands
       $bot->talk( $channel, "I am currently only automatically joining ".$con['data'][channels][0]['name']."." );
     else
       $bot->talk( $channel, "I do not appear to be automatically joining any channels." );
+  }
+  
+  function addadmin( $channel, $bufarray )
+  {
+    global $con, $bot;
+    
+    $hostmask = $bufarray[0];
+    //begin overcomplicated hostmask verification
+    $hostmaskc = explode( "@", $hostmask );
+    if( count( $hostmaskc ) <= 1 )
+      $error = TRUE;
+    else
+    {
+      $hostmaskcf = explode( "!", $hostmaskc[0] );
+      if( count( $hostmaskcf ) <= 1 )
+        $error = TRUE;
+    }
+    
+    if( $error )
+    {
+      $bot->talk( $channel, "That doesn't appear to be a valid hostmask (ie use!likethis@hostmask.com)" );
+      return;
+    }
+      
+    for( $i=0; $i<count($con['data'][admins]); $i++ )
+    {
+      if( $hostmask == $con['data'][admins][$i] )
+      {
+        $bot->talk( $channel, "That hostmask is already an admin." );
+        return;
+      }
+    }
+    
+    $con['data'][admins][] = $hostmask;
+    $bot->writedata( $con['data'] );
+    $bot->talk( $channel, $hostmaskcf[0]." successfully added." );
   }
 }
 ?>
