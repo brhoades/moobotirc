@@ -51,6 +51,7 @@ define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
 define( "hgstuffs", 1 );        //Holds the HG (mercurial) monitoring stuff
 define( "channels", 2 );       //Holds the extra channels we have joined/been invited to in the past
 define( "admins", 3 );          //Holds admin info
+define( "ignore", 4 );          //Holds ignore list
 
 // server name, like irc.freenode.net
 //Use 0 for freenode, 1 for quakenet, and a server name for another
@@ -60,7 +61,6 @@ $CONFIG[nick] = 'Moobot5367'; // Nickname, what people will see in the IRC
 $CONFIG[port] = 6667; // IRC port, 6667 should work
 $CONFIG[name] = 'Moobot5367'; // Your offical name, like Aaron@hostname
 $CONFIG[version] = 'Moobot v.5b by Aaron5367'; //Eventually to be updated to the SVN/HG revision
-$CONFIG[adminname][] = '~Aaron5367@Aaron5367.users.quakenet.org'; //Admin hostnames, full
 $CONFIG[pathtoourself] = "/srv/http/moobot/moobot.php &> /srv/http/moobot/moobotlog &"; //To reexecute ourselves for rehashing
 $CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
 $CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];

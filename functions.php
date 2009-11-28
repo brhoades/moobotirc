@@ -1190,12 +1190,19 @@ class bot
 
   function check_admin( $hostmask )
   {
-    global $CONFIG;
-    $admins = $CONFIG[adminname];
+    global $con;
+    
+    $admins = $con['data'][admins];
     for( $i=0;$i<count($admins);$i++ )
     {
+      if( stripos( $admins[$i], "!" ) !== FALSE )
+      {
+        $admins[$i] = explode( "!", $admins[$i] );
+        $admins[$i] = $admins[$i][1];
+      }
       if( $hostmask == $admins[$i] )
         return TRUE;
+      //echo "Comparing $hostmask to ".$admins[$i]."\n";
     }
     
     return FALSE;
