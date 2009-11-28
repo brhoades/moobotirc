@@ -177,11 +177,16 @@ array(
     ("addadmin", "\$commands->addadmin( \$channel, \$bufarray );", TRUE,
       "Adds an admin for a user name.",
       "[hostmask]"
-    )
+    ),
     array
     ("password", "\$commands->override_password( \$channel, \$hostmask, \$bufarray )", FALSE,
       "Uses the admin password, defined in the config file, to grant the user admin status.",
       "[password]"
+    ),
+    array
+    ("snarf", "\$commands-> snarf_toggle( \$channel, \$chanid )", TRUE,
+      "Toggles snarfing in the current channel.",
+      ""
     )
 );
 
@@ -710,6 +715,7 @@ class commands
     $con['data'][channels][$id]['log'] = TRUE;
     $con['data'][channels][$id]['cmds'] = TRUE;
     $con['data'][channels][$id]['autoopvoice'] = FALSE;
+    $con['data'][channels][$id]['snarf'] = TRUE;
     $bot->writedata( $con['data'] );
   }
   
@@ -1060,7 +1066,7 @@ class commands
   
   function override_password( $channel, $hostmask, $bufarray )
   {
-    global $CONFIG;
+    global $CONFIG, $con;
 
     for( $i=0; $i<count($con['data'][admins]); $i++ )
     {
@@ -1081,6 +1087,24 @@ class commands
     }
     else
       $bot->talk( $channel, "Permission Denied" );    //meant to be ambiguous
+  }
+  
+  function snarf_toggle( $channel, $chanid )
+  {
+    global $con, $talk;
+    
+    if( $chanid == -1 )
+      $bot->talk( $channel, "This channel is not in my data file." );
+    else if( $con['data'][channels][$chanid]['snarf'] == FALSE )
+    {
+      $con['data'][channels][$chanid]['snarf'] = TRUE;
+      $bot->talk( $channel, "Snarfing is now enabled for this channel" );
+    }
+    else if( $con['data'][channels][$chanid]['snarf'] == TRUE )
+    {
+      $con['data'][channels][$chanid]['snarf'] = FALSE;
+      $bot->talk( $channel, "Snarfing is now disabled for this channel" );
+    }
   }
 }
 ?>

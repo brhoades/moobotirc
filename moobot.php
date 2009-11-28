@@ -331,6 +331,8 @@ function init()
        }
        else if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es|cz)/i", $text ) != NULL )
       {
+        if( $con['data'][channels][$chanid]['snarf'] == FALSE )
+          continue;
         $bufarray = explode( " ", $con['buffer']['all'] );
         $channel = $bufarray['2'];
         for( $i=0; $i<3; $i++ )
