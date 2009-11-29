@@ -184,7 +184,7 @@ array(
       "[password]"
     ),
     array
-    ("snarf", "\$commands-> snarf_toggle( \$channel, \$chanid )", TRUE,
+    ("snarf", "\$commands->snarf_toggle( \$channel, \$chanid )", TRUE,
       "Toggles snarfing in the current channel.",
       ""
     ),
