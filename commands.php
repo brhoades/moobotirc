@@ -187,7 +187,12 @@ array(
     ("snarf", "\$commands-> snarf_toggle( \$channel, \$chanid )", TRUE,
       "Toggles snarfing in the current channel.",
       ""
-    )
+    ),
+    /*array
+    ("ignore", "\$commands-> ignore( \$channel, \$chanid )", TRUE,
+      "Ignores regex that describes hostmasks to ignore.",
+      ""
+    )*/
 );
 
 $commands = new commands();
