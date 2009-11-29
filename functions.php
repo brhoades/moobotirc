@@ -1721,10 +1721,21 @@ class bot
     {
       if( stripos( $con['buffer']['all'], $con['checks'][$i]['trigger'] ) !== FALSE )
         eval( $con['checks'][$i]['command'] );
-      
-      
     }
+  }
+  
+  function add_ignore( $ignoree, $time, $hostmask )
+  {
+    global $bot, $con;
     
+    //this function assumes all entered data is correct
+    $c = count( $con['data'][ignore] );
+    
+    $exp = time()+$time;
+    $con['data'][ignore][$c]['hostmask'] = $ignoree;
+    $con['data'][ignore][$c]['expiration'] = $exp;
+    
+    $bot->writedata( $con['data'] );
   }
 }  
 ?>
