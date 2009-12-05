@@ -140,7 +140,10 @@ function init()
       //No text, so we skip everything else, as it is all dependant on text and causes warnings
       if( $con['buffer']['all'] == NULL
           && $con['buffer']['all'] != ":" )
+      {
+        usleep( $CONFIG[sleeptime]*1000 );
         continue;
+      }
 
       //****************
       //

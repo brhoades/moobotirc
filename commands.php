@@ -188,6 +188,10 @@ array(
       "Toggles snarfing in the current channel.",
       ""
     ),
+    ("listadmins", "\$commands->listadmins( \$channel, \$bufarray )", FALSE,
+      "Lists current admins",
+      "(offset)"
+    ),
     /*array
     ("ignore", "\$commands-> ignore( \$channel, \$chanid )", TRUE,
       "Ignores regex that describes hostmasks to ignore.",
@@ -1110,6 +1114,14 @@ class commands
       $con['data'][channels][$chanid]['snarf'] = FALSE;
       $bot->talk( $channel, "Snarfing is now disabled for this channel" );
     }
+  }
+  
+  function listadmins( $channel, $bufarray )
+  {
+    global $con, $bot;
+    
+    
+  
   }
 }
 ?>
