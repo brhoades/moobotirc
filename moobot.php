@@ -390,7 +390,7 @@ function init()
           $bot->cmd_send( "JOIN $channel" );
       }
       
-      usleep( $CONFIG[sleeptime]*100 );
+      usleep( $CONFIG[sleeptime]*1000 );
     }
   }
 }
