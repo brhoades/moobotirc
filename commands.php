@@ -964,8 +964,7 @@ class commands
   function kick( $channel, $bufarray, $name )
   {
     global $bot;
-    //:Aaron5367!~Aaron5367@Aaron5367.users.quakenet.org KICK #kor-ao Aaron5367 :test
-    
+        
     $target = $bufarray[0];
     
     if( !$target )
@@ -982,7 +981,7 @@ class commands
     else
       $message = $name.": ".$message;
     
-    $bot->cmd_send( "KICK $channel $target : $message" );
+    $bot->cmd_send( "KICK $channel $target :$message" );
   }
   
   function topic( $channel, $bufarray )
@@ -1096,15 +1095,12 @@ class commands
   
   function snarf_toggle( $channel, $chanid )
   {
-    global $con, $talk;
+    global $con, $bot;
     
     if( $chanid == -1 )
       $bot->talk( $channel, "This channel is not in my data file." );
     else if( $channel != $con['data'][channels][$chanid]['name'] )
-    {
       $bot->talk( $channel, "You can't turn commands off in a PM." );
-      return;     //Likely a PM or some weird bug
-    }
     else if( $con['data'][channels][$chanid]['snarf'] == FALSE )
     {
       $con['data'][channels][$chanid]['snarf'] = TRUE;
