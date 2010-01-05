@@ -188,10 +188,11 @@ array(
       "Toggles snarfing in the current channel.",
       ""
     ),
+    array
     ("listadmins", "\$commands->listadmins( \$channel, \$bufarray )", FALSE,
       "Lists current admins",
       "(offset)"
-    ),
+    )
 );
 
 $commands = new commands();
