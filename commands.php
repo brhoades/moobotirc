@@ -192,11 +192,6 @@ array(
       "Lists current admins",
       "(offset)"
     ),
-    /*array
-    ("ignore", "\$commands-> ignore( \$channel, \$chanid )", TRUE,
-      "Ignores regex that describes hostmasks to ignore.",
-      ""
-    )*/
 );
 
 $commands = new commands();
@@ -1104,6 +1099,11 @@ class commands
     
     if( $chanid == -1 )
       $bot->talk( $channel, "This channel is not in my data file." );
+    else if( $channel != $con['data'][channels][$chanid]['name'] )
+    {
+      $bot->talk( $channel, "You can't turn commands off in a PM." );
+      return;     //Likely a PM or some weird bug
+    }
     else if( $con['data'][channels][$chanid]['snarf'] == FALSE )
     {
       $con['data'][channels][$chanid]['snarf'] = TRUE;
