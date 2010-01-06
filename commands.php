@@ -179,17 +179,17 @@ array(
       "[hostmask]"
     ),
     array
-    ("password", "\$commands->override_password( \$channel, \$hostmask, \$bufarray )", FALSE,
+    ("password", "\$commands->override_password( \$channel, \$hostmask, \$bufarray );", FALSE,
       "Uses the admin password, defined in the config file, to grant the user admin status.",
       "[password]"
     ),
     array
-    ("snarf", "\$commands->snarf_toggle( \$channel, \$chanid )", TRUE,
+    ("snarf", "\$commands->snarf_toggle( \$channel, \$chanid );", TRUE,
       "Toggles snarfing in the current channel.",
       ""
     ),
     array
-    ("listadmins", "\$commands->listadmins( \$channel, \$bufarray )", FALSE,
+    ("listadmins", "\$commands->listadmins( \$channel, \$bufarray );", FALSE,
       "Lists current admins",
       "(offset)"
     )
@@ -642,18 +642,18 @@ class commands
     }
     $textarray = array_values( $textarray );
     $message = implode( " ", $textarray );
-    if( $serveralias != "korx1" && $serveralias != "korx2" )
+    if( $serveralias != "korx" && $serveralias != "layouts" )
     {
-      $bot->talk( $channel, "The alias $serveralias is not known, please use korx1 or korx2." );
+      $bot->talk( $channel, "The alias $serveralias is not known, please use korx or layouts." );
       return;
     }
-    else if( $serveralias == "korx1" )
+    else if( $serveralias == "korx" )
     {
       $ip = $CONFIG['servers']['KOR'][0]['ip'];
       $port = $CONFIG['servers']['KOR'][0]['port'];
       $rcon = $CONFIG['servers']['KOR'][0]['rcon'];
     }
-    else if( $serveralias == "korx2" )
+    else if( $serveralias == "layouts" )
     {
       $ip = $CONFIG['servers']['KOR'][1]['ip'];
       $port = $CONFIG['servers']['KOR'][1]['port'];
@@ -1105,20 +1105,15 @@ class commands
     {
       $con['data'][channels][$chanid]['snarf'] = TRUE;
       $bot->talk( $channel, "Snarfing is now enabled for this channel" );
+      $bot->writedata( $con['data'] );
     }
     else if( $con['data'][channels][$chanid]['snarf'] == TRUE )
     {
       $con['data'][channels][$chanid]['snarf'] = FALSE;
       $bot->talk( $channel, "Snarfing is now disabled for this channel" );
+      $bot->writedata( $con['data'] );
     }
   }
   
-  function listadmins( $channel, $bufarray )
-  {
-    global $con, $bot;
-    
-    
-  
-  }
 }
 ?>
