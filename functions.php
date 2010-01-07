@@ -546,7 +546,7 @@ class bot
     return $in;
   }
 
-  function tremulous_get_players( $server, $port, $cbf ) 
+  function tremulous_get_players( $server, $port, $cbf=FALSE ) 
   {
     global $bot, $other, $bstatus;
     $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
@@ -625,7 +625,7 @@ class bot
       );
   }
 
-  function get_server_settings( $server, $port, $cbf ) 
+  function get_server_settings( $server, $port, $cbf=FALSE ) 
   {
     global $bot, $other, $bstatus;
     $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
@@ -645,8 +645,14 @@ class bot
     for($i=0;$i<4;$i++) $status_str[ $i ] = pack("v", 0xff);
     fwrite( $fp, $status_str );
     socket_set_timeout( $fp, 1 );
-    stream_set_timeout( $fp, 1 );
-    $data_full = fread( $fp, 10000 );
+    do
+    {
+      $data = fread( $fp, 8192 );
+      if( strlen( $data ) == 0 )
+        break;
+      $packets[] = $data;
+    } while( true );
+    $data_full = implode( $packets );
     $data_full = substr( $data_full, 19 );
     if( $data_full == NULL && $cbf != "TRUE" )
     {
@@ -658,9 +664,10 @@ class bot
         $tries++;
       }
     }
-    //echo $data_full."<br /> <br />\n";
+    echo $data_full."<br /> <br />\n";
     $data_full = explode( "\\", $data_full );
     fclose( $fp );
+    $democlients = 0;
     for( $i=0; $i<count( $data_full ); $i++ )
     {
       if( $data_full[ $i ] == "sv_hostname" )
@@ -669,8 +676,10 @@ class bot
         $maxclients = $data_full[ $i + 1 ];
       if( $data_full[ $i ] == "sv_privateClients" || $data_full[ $i ] == "sv_privateclients" )
         $privateclients = $data_full[ $i + 1 ];
+      if( $data_full[ $i ] == "sv_democlients" )
+        $democlients = $data_full[ $i + 1 ];
     }
-    $info[ 'maxplayers' ] = $maxclients-$privateclients;
+    $info[ 'maxplayers' ] = $maxclients-$privateclients-$democlients;
     return $info;
   }
 
