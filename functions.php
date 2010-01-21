@@ -1222,7 +1222,7 @@ class bot
     global $CONFIG, $con, $bot, $other;
     
     //Check to see if we support this vote
-    if( $type != "poll" && $type != "kick" )
+    if( $type != "poll" && $type != "kick" && $type != "mute" )
     {
       $bot->talk( $channel, "$caller: Sorry, but I don't recognize the vote type '$type'." );
       return;
@@ -1268,6 +1268,38 @@ class bot
         $bot->talk( $channel, "I don't have operator status in this channel." );
         return;
       }
+      if( $string )
+        $bot->talk( $channel, "$caller called a vote: Kick $target with reason \"$string\"" );
+      else
+        $bot->talk( $channel, "$caller called a vote: Kick $target" );
+    }
+    else if( $type == "mute" )
+    {
+      $stringex = explode( " ", $string );
+      $target = $stringex['0'];
+      unset( $stringex['0'] );
+      $string = implode( " ", $stringex );
+      //Check to see if the target is in the channel
+      $bot->cmd_send( "NAMES $channel" );
+      if( stripos( $target, $CONFIG[nick] ) !== FALSE )
+        $target = $caller;
+      $names = $bot->fetch_next_message( );
+      $votestring = "MODE $channel -v $target";
+      
+      if( stripos( $names, $target ) === FALSE )
+      {
+        $bot->talk( $channel, "I don't believe $target is in this channel." );
+        return;
+      }
+      else if( stripos( $names, "@".$CONFIG[nick] ) === FALSE )
+      {
+        $bot->talk( $channel, "I don't have operator status in this channel." );
+        return;
+      }
+      if( $string )
+        $bot->talk( $channel, "$caller called a vote: Mute $target with reason \"$string\"" );
+      else
+        $bot->talk( $channel, "$caller called a vote: Mute $target" );
     }
     
     $bot->talk( $channel, "Type F1 (yes) or F2 (no) in this channel, or send me it in a CTCP ping / private message to vote." );
