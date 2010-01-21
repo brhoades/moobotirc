@@ -94,6 +94,8 @@ function init()
         $max = count( $con['data'][channels] );
         for( $i=0; $i<$max; $i++ )
         {
+          if( $con['data'][channels][$i]['active'] == FALSE )
+            continue;
           if( $con['data'][channels][$i]['password'] != NULL )
             $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] ." ". $con['data'][channels][$i]['password'] );
           else
