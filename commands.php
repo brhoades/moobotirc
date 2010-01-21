@@ -699,12 +699,26 @@ class commands
 
     for( $i=0; $i<count( $con['data'][channels] ); $i++ )
     {
-      if( $con['data'][channels][$i]['name'] == $bufarray[0] )
+      if( $con['data'][channels][$i]['name'] == $bufarray[0]
+          && $con['data'][channels][$i]['active'] == TRUE )
       {
         $bot->talk( $channel, "Erm... I'm already there ".$name );
         return;
       }
+      else if( $con['data'][channels][$i]['name'] == $bufarray[0]
+               && $con['data'][channels][$i]['active'] == TRUE )
+      {
+        $bot->talk( $channel, "That channel is now active again (rejoined)" );
+        if( $bufarray[1] != NULL )
+          $bot->cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
+        else
+          $bot->cmd_send( "JOIN ".$bufarray[0] );
+        $con['data'][channels][$i]['active'] = TRUE;
+        $bot->writedata( $con['data'] );
+        return;
+      }
     }
+    
     
     if( $bufarray[1] != NULL )
       $bot->cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
@@ -721,6 +735,7 @@ class commands
     $con['data'][channels][$id]['cmds'] = TRUE;
     $con['data'][channels][$id]['autoopvoice'] = FALSE;
     $con['data'][channels][$id]['snarf'] = TRUE;
+    $con['data'][channels][$id]['active'] = TRUE;
     $bot->writedata( $con['data'] );
   }
   
@@ -803,8 +818,7 @@ class commands
     if( $channel != $channeltopart )
       $bot->talk( $channel, $name.": I have parted ".$bufarray[0].", and will no longer join it at startup." );
     
-    unset( $con['data'][channels][$id] );
-    $con['data'][channels] = array_values( $con['data'][channels] );
+    $con['data'][channels][$id]['active'] = FALSE;
     $bot->writedata( $con['data'] );
   }
   
