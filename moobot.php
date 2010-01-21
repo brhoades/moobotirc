@@ -129,6 +129,7 @@ function init()
       //checks are here!
       //
       $bot->runbuffers( );
+      $bot->run_votes( );
       //$bot->vote_check( );
       //
       //
