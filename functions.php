@@ -1322,7 +1322,14 @@ class bot
         $con['vote']['no']++;
       $bot->talk( $name, "Vote cast" );
     }
+  }
+  
+  function run_votes( )
+  {
+    global $con, $bot;
     
+    if( !$con['vote']['inprogress'] )
+      return;
     if( $con['vote']['endtime'] < time() )
     {
       $totalvotes = $con['vote']['yes'] + $con['vote']['no'];
