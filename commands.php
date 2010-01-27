@@ -1084,7 +1084,7 @@ class commands
   
   function override_password( $channel, $hostmask, $bufarray )
   {
-    global $CONFIG, $con;
+    global $CONFIG, $con, $bot;
 
     for( $i=0; $i<count($con['data'][admins]); $i++ )
     {
