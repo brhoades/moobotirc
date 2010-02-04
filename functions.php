@@ -146,22 +146,14 @@ class other
   function get_server_settings( $server, $port ) 
   {
     global $bot, $other;
-    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );
+    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 0 );
     if( !$fp )
-    {
-      while( !$fp && $tries < 3 )
-      {
-        $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );
-        $tries++;
-      }
-      if( !$fp )
-        return;
-    }
+      return;
      
     $status_str = "xxxxgetstatus";
     for($i=0;$i<4;$i++) $status_str[ $i ] = pack("v", 0xff);
     fwrite( $fp, $status_str );
-    socket_set_timeout( $fp, 1 );
+    socket_set_timeout( $fp, 0 );
     $data_full = fread( $fp, 10000 );
     $data_full = substr( $data_full, 19 );
     //echo $data_full."<br /> <br />\n";
@@ -212,26 +204,17 @@ class other
   function tremulous_get_players( $server, $port ) 
   {
     global $bot, $other;
-    $fp = @fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
+    $fp = @fsockopen( "udp://".$server, $port, $errno, $errstr, 0 );
     if( !$fp )
-    {
-      while( !$fp && $tries < 3 )
-      {
-        $fp = @fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
-        $tries++;
-      }
-      if( !$fp )
-        return;
-    }
+      return;
          
     $status_str = "xxxxgetstatus";
     for($i=0;$i<4;$i++) $status_str[$i] = pack("v", 0xff);
     fwrite($fp, $status_str);
-    socket_set_timeout( $fp, 1 );
-    stream_set_timeout( $fp, 1 );
+    socket_set_timeout( $fp, 0 );
+    stream_set_timeout( $fp, 0 );
     $data_full = fread($fp, 10000);
     $data_full = substr( $data_full, 19 );
-    //echo $data_full;
     $data = explode("\n", $data_full);
     fclose($fp);
     $server_data = explode("\\", $data[0]);
@@ -549,39 +532,45 @@ class bot
   function tremulous_get_players( $server, $port, $cbf=FALSE ) 
   {
     global $bot, $other, $bstatus;
-    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
+    
+    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 0 );
     if( !$fp )
-    {
-      while( !$fp && $tries < 3 )
-      {
-        $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
-        $tries++;
-      }
-      if( !$fp )
-        return;
-    }
+      return;
     
     $bstatus['trem']++;
     $status_str = "xxxxgetstatus";
     for($i=0;$i<4;$i++) $status_str[$i] = pack("v", 0xff);
     fwrite($fp, $status_str);
-    socket_set_timeout( $fp, 1 );
-    stream_set_timeout( $fp, 1 );
-    $data_full = fread( $fp, 10000 );
+    socket_set_timeout( $fp, 0, 10000 );
+    do
+    {
+      $data = fread( $fp, 8192 );
+      if( strlen( $data ) == 0 )
+        break;
+      $packets[] = $data;
+    } while( true );
+    $data_full = implode( $packets );
     $data_full = substr( $data_full, 19 );
+    $server_data = explode( "\\", $data_full );
     $data = explode("\n", $data_full);
     fclose($fp);
-    $server_data = explode("\\", $data[0]);
-
-    for ($i=1; $i<count($server_data); $i+=2) {
+    for( $i=1; $i<count( $server_data ); $i+=2 )
+    {
       $server_status[$server_data[$i]] = $server_data[$i+1];
-      if($server_data[$i] == "mapname") {
+      if( $server_data[$i] == "mapname" )
         $map = $server_data[$i+1];
-      }
-      elseif($server_data[$i] == "P") {
-        $P = str_replace("-", "", $server_data[$i+1]);
-      }
+      else if( $server_data[$i] == "P" )
+        $P = str_replace( "-", "", $server_data[$i+1] );
+      else if( $server_data[$i] == "sv_hostname" )
+        $info[ 'servername' ] = trim( $bot->tremulous_replace_colors_irc( $server_data[ $i + 1 ] ) ); 
+      else if( $server_data[$i] == "sv_maxclients" )
+        $maxclients = $server_data[ $i + 1 ];
+      else if( $server_data[$i] == "sv_privateClients" || $server_data[$i] == "sv_privateclients" )
+        $privateclients = $server_data[ $i + 1 ];
+      else if( $server_data[$i] == "sv_democlients" )
+        $democlients = $data_full[ $i + 1 ];
     }
+    $info[ 'maxplayers' ] = $maxclients-$privateclients-$democlients;
 
     $i = 1;
     next($data); // skip settings
@@ -606,83 +595,15 @@ class bot
         $i++;
       }
     }
-    if( $map == "" && $cbf != "TRUE" )
-    {
-      while( $tries < 2 )
-      {
-        $out = $bot->tremulous_get_players( $ip, $port, "TRUE" );
-        if( $out['map'] != "" )
-          return $out;
-        $tries++;
-      }
-    }
-    
     return array(
       "alien_players" => $alien,
       "human_players" => $human,
       "spec_players" => $spec,
-      "map" => $map
+      "map" => $map,
+      "maxplayers" => $info[ 'maxplayers' ],
+      "servername" => $info[ 'servername' ]
       );
   }
-
-  function get_server_settings( $server, $port, $cbf=FALSE ) 
-  {
-    global $bot, $other, $bstatus;
-    $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
-    if( !$fp )
-    {
-      while( !$fp && $tries<3 )
-      {
-        $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 1 );
-        $tries++;
-      }
-      if( !$fp )
-        return;
-    }
-     
-    $bstatus['trem']++;
-    $status_str = "xxxxgetstatus";
-    for($i=0;$i<4;$i++) $status_str[ $i ] = pack("v", 0xff);
-    fwrite( $fp, $status_str );
-    socket_set_timeout( $fp, 1 );
-    do
-    {
-      $data = fread( $fp, 8192 );
-      if( strlen( $data ) == 0 )
-        break;
-      $packets[] = $data;
-    } while( true );
-    $data_full = implode( $packets );
-    $data_full = substr( $data_full, 19 );
-    if( $data_full == NULL && $cbf != "TRUE" )
-    {
-      while( $tries < 2 )
-      {
-        $out = $bot->get_server_settings( $ip, $port, "TRUE" );
-        if( $out != "" )
-          return $out;
-        $tries++;
-      }
-    }
-    echo $data_full."<br /> <br />\n";
-    $data_full = explode( "\\", $data_full );
-    fclose( $fp );
-    $democlients = 0;
-    for( $i=0; $i<count( $data_full ); $i++ )
-    {
-      if( $data_full[ $i ] == "sv_hostname" )
-        $info[ 'servername' ] = trim( $bot->tremulous_replace_colors_irc( $data_full[ $i + 1 ] ) ); 
-      if( $data_full[ $i ] == "sv_maxclients" )
-        $maxclients = $data_full[ $i + 1 ];
-      if( $data_full[ $i ] == "sv_privateClients" || $data_full[ $i ] == "sv_privateclients" )
-        $privateclients = $data_full[ $i + 1 ];
-      if( $data_full[ $i ] == "sv_democlients" )
-        $democlients = $data_full[ $i + 1 ];
-    }
-    $info[ 'maxplayers' ] = $maxclients-$privateclients-$democlients;
-    return $info;
-  }
-
   function find_player( $name )
   {
     global $bot, $other;
@@ -703,8 +624,7 @@ class bot
           $found[ $currid ]['kills'] = $server[ $i ][ alien_players ][ $h ][ 'kills' ];
           $found[ $currid ]['ping'] = $server[ $i ][ alien_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "aliens";
-          $serveri = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-          $found[ $currid ]['server'] = $serveri['servername'];
+          $found[ $currid ]['server'] = $server[ $i ]['servername'];
         }
       }
       for( $h=0; $h < count( $server[ $i ][ human_players ] ); $h++ )
@@ -716,8 +636,7 @@ class bot
           $found[ $currid ]['kills'] = $server[ $i ][ human_players ][ $h ][ 'kills' ];
           $found[ $currid ]['ping'] = $server[ $i ][ human_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "humans";
-          $serveri = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-          $found[ $currid ]['server'] = $serveri['servername'];
+          $found[ $currid ]['server'] = $server[ $i ]['servername'];
         }
       }
       for( $h=0; $h < count( $server[ $i ][ spec_players ] ); $h++ )
@@ -728,8 +647,7 @@ class bot
           $found[ $currid ]['name'] = $server[ $i ][ spec_players ][ $h ][ 'colored_name' ];
           $found[ $currid ]['ping'] = $server[ $i ][ spec_players ][ $h ][ 'ping' ];
           $found[ $currid ]['team'] = "spectators";
-          $serveri = $bot->get_server_settings( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
-          $found[ $currid ]['server'] = $serveri['servername'];
+          $found[ $currid ]['server'] = $server[ $i ]['servername'];
         }
       }
     }
