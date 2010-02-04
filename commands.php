@@ -187,12 +187,12 @@ array(
     ("snarf", "\$commands->snarf_toggle( \$channel, \$chanid );", TRUE,
       "Toggles snarfing in the current channel.",
       ""
-    ),
-    array
+    )
+    /*array
     ("listadmins", "\$commands->listadmins( \$channel, \$bufarray );", FALSE,
       "Lists current admins",
       "(offset)"
-    )
+    )*/
 );
 
 $commands = new commands();
@@ -459,7 +459,7 @@ class commands
     else if( $map == NULL && $servername != NULL )
     {
       $tries = 0;
-      while( $map == NULL && $tries < 10 )
+      while( $map == NULL && $tries < 3 )
       {
         $tries++;
         $server = $bot->tremulous_get_players( $ip, $port );
@@ -468,9 +468,9 @@ class commands
     }
     
     if( $status != "OFFLINE" )
-      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - $map - ($players/$maxplayers)" );
+      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - $map - ($players/$maxplayers)", TRUE );
     else
-      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - OFFLINE" );
+      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - OFFLINE", TRUE );
   }
   
   function servers( $bufarray, $channel, $name )
@@ -571,7 +571,12 @@ class commands
     global $con, $bot;
     
     $player = $bufarray[0];
-    $bot->talk( $channel, "Searching ".$con['cached']." servers for $player..." );
+    if( !$player )
+    {
+      $bot->talk( $channel, "Please specify someone to search for." );
+      return;
+    }
+    $bot->talk( $channel, "Searching ".$con['cached']." servers for $player...", TRUE );
     $found = $bot->find_player( $player );
     
     if( count( $found ) > 10 )
@@ -605,8 +610,8 @@ class commands
   {
     global $con, $bot;
 
-    $bot->talk( $channel, "Searching ".$con['cached']." servers for clan members..." );
-    $found = $bot->find_player( "|KoR|" );
+    $bot->talk( $channel, "Searching ".$con['cached']." servers for clan members...", TRUE );
+    $found = $bot->find_player( "KoR" );
     
     if( count( $found ) > 0 )
     {
