@@ -437,8 +437,7 @@ class commands
       return;
     }
     $server = $bot->tremulous_get_players( $ip, $port );
-    $serverinfo = $bot->get_server_settings( $ip, $port );
-    $servername = $serverinfo['servername'];
+    $servername = $server['servername'];
     if( ( $servername == NULL || $servername == "" ) && $set != NULL )
       $servername = $backupname;
     else if( $servername == NULL || $servername == "" )
@@ -448,23 +447,13 @@ class commands
     }
     $map = $server['map'];
     $players = count( $server[ alien_players ]  ) + count( $server[ spec_players ]  ) + count( $server[ human_players ]  );
-    $maxplayers = $serverinfo['maxplayers'];
+    $maxplayers = $server['maxplayers'];
     if( ( $map == NULL || $map == "" ) && $set != NULL )
       $status = "OFFLINE";
     else if( ( $map == NULL || $map == "" ) && $servername != NULL )
     {
       $bot->talk( $channel, "Unable to make further contact with $ip:$port, $servername" );
       return;
-    }
-    else if( $map == NULL && $servername != NULL )
-    {
-      $tries = 0;
-      while( $map == NULL && $tries < 3 )
-      {
-        $tries++;
-        $server = $bot->tremulous_get_players( $ip, $port );
-        $map = $server['map'];              
-      }
     }
     
     if( $status != "OFFLINE" )
@@ -497,13 +486,12 @@ class commands
     $port = $CONFIG['servers'][$set][$i]['port'];
     $server = $bot->tremulous_get_players( $ip, $port );
     $backupname = $CONFIG['servers'][$set][$i]['bakname'];
-    $serverinfo = $bot->get_server_settings( $ip, $port );
-    $servername = $serverinfo['servername'];
+    $servername = $server['servername'];
     if( $servername == NULL || $servername == "" )
       $servername = $backupname;
     $map = $server['map'];
     $players = count( $server[ alien_players ]  ) + count( $server[ spec_players ]  ) + count( $server[ human_players ]  );
-    $maxplayers = $serverinfo['maxplayers'];
+    $maxplayers = $server['maxplayers'];
     $averageping = $bot->average_ping( $server );
     if( $map == NULL || $map == "" )
       $status = "OFFLINE";
