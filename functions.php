@@ -149,7 +149,7 @@ class other
     $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );
     if( !$fp )
     {
-      while( !$fp && $tries<10 )
+      while( !$fp && $tries < 3 )
       {
         $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 2 );
         $tries++;
@@ -686,12 +686,14 @@ class bot
   function find_player( $name )
   {
     global $bot, $other;
+    
     $ipandport = $bot->find_servers( );
-    echo count( $ipandport );
     $name = preg_quote( $name ); //Search for everything
     for( $i=0; $i < count( $ipandport ); $i++ )
     {
       $server[ $i ] = $bot->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+      if( !$server )
+        continue;
       for( $h=0; $h < count( $server[ $i ][ alien_players ] ); $h++ )
       {
         if( preg_match( "/$name/i", $server[ $i ][ alien_players ][ $h ][ 'name' ] ) )
@@ -1068,7 +1070,7 @@ class bot
     }
   }
 
-  function cmd_send( $command, $end = FALSE )
+  function cmd_send( $command, $end = FALSE, $now = FALSE )
   {
     global $con, $time, $CONFIG, $buffers, $bstatus;
     
@@ -1109,11 +1111,11 @@ class bot
     return;
   }
 
-  function talk( $channel, $text ) 
+  function talk( $channel, $text, $now=FALSE ) 
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
-    if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] ) // || $con['stimes'] <= 3 )
+    if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] || $now ) // || $con['stimes'] <= 3 )
     {
       if( $con['name'] == $CONFIG[nick] )
         return; //lets not and say we did
@@ -1676,6 +1678,10 @@ class bot
 
   function tremulous_getserverlist( )
   {
+    global $con;
+    
+    if( $con && $con['serverlistcache']['time'] + 120 <= time() )
+      return( $con['serverlistcache']['con'] );
     $server = "master.tremulous.net";
     $port = 30710;
     $shortserver = "";

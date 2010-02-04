@@ -67,12 +67,9 @@ function init()
         $con['buffer']['all'] = trim( fgets( $con['socket'], 4096 ) );
         $con['buffer']['old'] = $con['buffer']['all'];
       }
-        
-      if( $con['buffer']['all'] != NULL )
-        print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
-      
+
       $bstatus['lines']++;
-      
+
       if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
       {
         $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ) );
@@ -117,36 +114,45 @@ function init()
         //$bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
       }
 
-
-      if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
+      if( $con['buffer']['all'] != NULL )
+        print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
+      else
       {
-        $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
-        $bot->svnmon();
-        $bstatus['svnchecks']++;
-        //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
-        $bot->hgmon();
+        if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
+        {
+          $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
+          $bot->svnmon( );
+          $bstatus['svnchecks']++;
+          //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
+          $bot->hgmon( );
+        }
+        
+        if( $con['serverlistcache']['time'] + 120 <= time() )
+        {
+          $con['serverlistcache']['con'] = $bot->tremulous_getserverlist( );
+          $con['serverlistcache']['time'] = time();
+        }
+
+        //
+        //checks are here!
+        //
+        $bot->runbuffers( );
+        $bot->run_votes( );
+        //$bot->vote_check( );
+        //
+        //
+        // 
+
+        //No text, so we skip everything else, as it is all dependant on text and causes warnings
+        if( $con['buffer']['all'] == NULL
+            && $con['buffer']['all'] != ":" )
+        {
+          usleep( $CONFIG[sleeptime]*1000 );
+          continue;
+        }
       }
-
-      //
-      //checks are here!
-      //
-      $bot->runbuffers( );
-      $bot->run_votes( );
-      //$bot->vote_check( );
-      //
-      //
-      //
-
-      if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
-        continue;        
-
-      //No text, so we skip everything else, as it is all dependant on text and causes warnings
-      if( $con['buffer']['all'] == NULL
-          && $con['buffer']['all'] != ":" )
-      {
-        usleep( $CONFIG[sleeptime]*1000 );
-        continue;
-      }
+        if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
+          continue;
 
       //****************
       //
@@ -392,6 +398,12 @@ function init()
       else if( stripos( $con['buffer']['all'], "INVITE ".$CONFIG[nick] ) !== FALSE )
       {
         $channel = $bufarray['3'];
+        if( stripos( $channel, "#" ) !== FALSE )
+          $bot->cmd_send( "JOIN $channel" );
+      }
+      else if( stripos( $con['buffer']['all'], "KICK ".$bufarray['2']." ".$CONFIG[nick] ) !== FALSE )
+      {
+        $channel = $bufarray['2'];
         if( stripos( $channel, "#" ) !== FALSE )
           $bot->cmd_send( "JOIN $channel" );
       }
