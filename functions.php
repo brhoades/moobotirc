@@ -1121,6 +1121,11 @@ class bot
         $admins[$i] = explode( "!", $admins[$i] );
         $admins[$i] = $admins[$i][1];
       }
+      else if( stripos( $admins[$i], "!" ) === FALSE && stripos( $hostmask, "!" ) !== FALSE )
+      {
+        $hostmask = explode( "!", $hostmask );
+        $hostmask = $hostmask[1];
+      }
       if( $hostmask == $admins[$i] )
         return TRUE;
       //echo "Comparing $hostmask to ".$admins[$i]."\n";
