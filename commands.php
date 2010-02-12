@@ -1048,16 +1048,10 @@ class commands
     $hostmaskc = explode( "@", $hostmask );
     if( count( $hostmaskc ) <= 1 )
       $error = TRUE;
-    else
-    {
-      $hostmaskcf = explode( "!", $hostmaskc[0] );
-      if( count( $hostmaskcf ) <= 1 )
-        $error = TRUE;
-    }
     
     if( $error )
     {
-      $bot->talk( $channel, "That doesn't appear to be a valid hostmask (ie use!likethis@hostmask.com)" );
+      $bot->talk( $channel, "That doesn't appear to be a valid hostmask (ie uselikethis@hostmask.com)" );
       return;
     }
       
