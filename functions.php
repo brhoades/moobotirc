@@ -143,37 +143,80 @@ class other
       
     return( $greet ); 
   }
-  function get_server_settings( $server, $port ) 
+  function tremulous_get_players( $server, $port, $cbf=FALSE ) 
   {
-    global $bot, $other;
+    global $bot, $other, $bstatus;
+    
     $fp = fsockopen( "udp://".$server, $port, $errno, $errstr, 0 );
     if( !$fp )
       return;
-     
+    
+    $bstatus['trem']++;
     $status_str = "xxxxgetstatus";
-    for($i=0;$i<4;$i++) $status_str[ $i ] = pack("v", 0xff);
-    fwrite( $fp, $status_str );
-    socket_set_timeout( $fp, 0 );
-    $data_full = fread( $fp, 10000 );
-    $data_full = substr( $data_full, 19 );
-    //echo $data_full."<br /> <br />\n";
-    $data_full = explode( "\\", $data_full );
-    for( $i=0; $i<count( $data_full ); $i++ )
+    for($i=0;$i<4;$i++) $status_str[$i] = pack("v", 0xff);
+    fwrite($fp, $status_str);
+    socket_set_timeout( $fp, 0, 10000 );
+    do
     {
-      //if( ( $i % 2 ) )
-      //  echo $data_full[ $i ]." = ";
-      //else
-      //  echo $data_full[ $i ]."<br />\n";
-      
-      if( $data_full[ $i ] == "sv_hostname" )
-        $info[ 'servername' ] = trim(  $other->tremulous_replace_colors_web( $data_full[ $i + 1 ] ) ); 
-      if( $data_full[ $i ] == "sv_maxclients" )
-        $maxclients = $data_full[ $i + 1 ];
-      if( $data_full[ $i ] == "sv_privateClients" || $data_full[ $i ] == "sv_privateclients" )
-        $privateclients = $data_full[ $i + 1 ];
+      $data = fread( $fp, 8192 );
+      if( strlen( $data ) == 0 )
+        break;
+      $packets[] = $data;
+    } while( true );
+    $data_full = @implode( $packets );
+    $data_full = substr( $data_full, 19 );
+    $server_data = explode( "\\", $data_full );
+    $data = explode("\n", $data_full);
+    fclose($fp);
+    for( $i=1; $i<count( $server_data ); $i+=2 )
+    {
+      $server_status[$server_data[$i]] = $server_data[$i+1];
+      if( $server_data[$i] == "mapname" )
+        $map = $server_data[$i+1];
+      else if( $server_data[$i] == "P" )
+        $P = str_replace( "-", "", $server_data[$i+1] );
+      else if( $server_data[$i] == "sv_hostname" )
+        $info[ 'servername' ] = trim( $other->tremulous_replace_colors_web( $server_data[ $i + 1 ] ) ); 
+      else if( $server_data[$i] == "sv_maxclients" )
+        $maxclients = $server_data[ $i + 1 ];
+      else if( $server_data[$i] == "sv_privateClients" || $server_data[$i] == "sv_privateclients" )
+        $privateclients = $server_data[ $i + 1 ];
+      else if( $server_data[$i] == "sv_democlients" )
+        $democlients = $data_full[ $i + 1 ];
     }
-    $info[ 'maxplayers' ] = $maxclients-$privateclients;
-    return $info;
+    $info[ 'maxplayers' ] = $maxclients-$privateclients-$democlients;
+
+    $i = 1;
+    next($data); // skip settings
+    while(list(,$p) = each($data)) {
+      if(preg_match("/^(-\d+|\d+) (\d+) \"(.*)\"$/", $p, $m)) {
+        $pinfo = array( 
+          "kills" => $m[1],
+          "ping" => $m[2],
+          "raw_name" => $m[3],
+          "name" => $bot->tremulous_strip_colors($m[3]),
+          "colored_name" => 
+            $other->tremulous_replace_colors_web($m[3]));
+        if($P[$i-1] == 2) {
+          $human[] = $pinfo;
+        }
+        elseif($P[$i-1] == 1) {
+          $alien[] = $pinfo;
+        }
+        else {
+          $spec[] = $pinfo;
+        }
+        $i++;
+      }
+    }
+    return array(
+      "alien_players" => $alien,
+      "human_players" => $human,
+      "spec_players" => $spec,
+      "map" => $map,
+      "maxplayers" => $info[ 'maxplayers' ],
+      "servername" => $info[ 'servername' ]
+      );
   }
   function tremulous_replace_colors_web( $in ) 
   {
@@ -200,76 +243,6 @@ class other
     for( $i=0; $i<$count; $i++ )
       $in = $in."</font>";
     return $in;
-  }
-  function tremulous_get_players( $server, $port ) 
-  {
-    global $bot, $other;
-    $fp = @fsockopen( "udp://".$server, $port, $errno, $errstr, 0 );
-    if( !$fp )
-      return;
-         
-    $status_str = "xxxxgetstatus";
-    for($i=0;$i<4;$i++) $status_str[$i] = pack("v", 0xff);
-    fwrite($fp, $status_str);
-    socket_set_timeout( $fp, 0 );
-    stream_set_timeout( $fp, 0 );
-    $data_full = fread($fp, 10000);
-    $data_full = substr( $data_full, 19 );
-    $data = explode("\n", $data_full);
-    fclose($fp);
-    $server_data = explode("\\", $data[0]);
-
-    for ($i=1; $i<count($server_data); $i+=2) {
-      $server_status[$server_data[$i]] = $server_data[$i+1];
-      if($server_data[$i] == "mapname") {
-        $map = $server_data[$i+1];
-      }
-      elseif($server_data[$i] == "P") {
-        $P = str_replace("-", "", $server_data[$i+1]);
-      }
-    }
-
-    $i = 1;
-    next($data); // skip settings
-    while(list(,$p) = each($data)) {
-      if(preg_match("/^(-\d+|\d+) (\d+) \"(.*)\"$/", $p, $m)) {
-        if( array( $m ) )
-          $pinfo = array( 
-            "kills" => $m[1],
-            "ping" => $m[2],
-            "raw_name" => $m[3],
-            "name" => $bot->tremulous_strip_colors($m[3]),
-            "colored_name" => 
-              $other->tremulous_replace_colors_web($m[3]));
-        if($P[$i-1] == 2) {
-          $human[] = $pinfo;
-        }
-        elseif($P[$i-1] == 1) {
-          $alien[] = $pinfo;
-        }
-        else {
-          $spec[] = $pinfo;
-        }
-        $i++;
-      }
-    }
-    if( $map == "" )
-    {
-      while( $tries < 2 )
-      {
-        $out = $other->tremulous_get_players( $ip, $port );
-        if( $out['map'] != "" )
-          return $out;
-        $tries++;
-      }
-    }
-
-    return array(
-      "alien_players" => $alien,
-      "human_players" => $human,
-      "spec_players" => $spec,
-      "map" => $map
-      );
   }
   function url_exists($url) 
   {
@@ -415,6 +388,21 @@ class other
   
   function filesize_range( $filesize, $size = NULL )
   {
+    if( is_array( $filesize ) )
+    {
+      //first non zero wins
+      //happens on sites like tinyurl in moobot
+      $i = 0;
+      for( $i=0; $i<count( $filesize ); $i++ )
+      {
+        if( is_int( $filesize ) && $filesize[$i] != 0 )
+          $filesize = $filesize[$i];
+        
+      }
+    }
+    
+    if( !is_int( $filesize ) )
+      $filesize = 0;
     if( $size != NULL )
     {
       $size = strtolower( $size );
@@ -432,9 +420,7 @@ class other
       return( $filesize / ( 1024^$size ) );
     }
     
-    if( $filesize >= 0 && $filesize < 1024 )
-      $out = $filesize." B";
-    else if( $filesize >= 1024 && $filesize < pow( 1024, 2 ) )
+    if( $filesize >= 1024 && $filesize < pow( 1024, 2 ) )
       $out = round( ( $filesize/1024 ), 2 )." KiB";
     else if( $filesize >= pow( 1024, 2 ) && $filesize < pow( 1024, 3 ) )
       $out = round( ( $filesize / pow( 1024, 2 ) ), 2 )." MiB";
@@ -442,7 +428,9 @@ class other
       $out = round( ( $filesize / pow( 1024, 3 ) ), 2 )." GiB";
     else if( $filesize >= pow( 1024, 4 ) )
       $out = round( ( $filesize / pow( 1024, 4 ) ), 2 )." TiB";
-    
+    else
+      $out = $filesize." B";   
+      
     return( $out );
   }
   
@@ -604,7 +592,7 @@ class bot
       "servername" => $info[ 'servername' ]
       );
   }
-  function find_player( $name )
+  function find_player( $name, $which="bot" )
   {
     global $bot, $other;
     
@@ -612,7 +600,11 @@ class bot
     $name = preg_quote( $name ); //Search for everything
     for( $i=0; $i < count( $ipandport ); $i++ )
     {
-      $server[ $i ] = $bot->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+      if( $which == "bot" )
+        $server[ $i ] = $bot->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+      else
+        $server[ $i ] = $other->tremulous_get_players( $ipandport[ $i ][ 0 ], $ipandport[ $i ][ 1 ] );
+
       if( !$server )
         continue;
       for( $h=0; $h < count( $server[ $i ][ alien_players ] ); $h++ )
@@ -1124,7 +1116,7 @@ class bot
     $admins = $con['data'][admins];
     for( $i=0;$i<count($admins);$i++ )
     {
-      if( stripos( $admins[$i], "!" ) !== FALSE )
+      if( stripos( $admins[$i], "!" ) !== FALSE && stripos( $hostmask, "!" ) === FALSE )
       {
         $admins[$i] = explode( "!", $admins[$i] );
         $admins[$i] = $admins[$i][1];
