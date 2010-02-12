@@ -1126,9 +1126,9 @@ class commands
     if( $textarray )
     {
       //possible integer offset or name
-      if( is_int( $textarray[0] ) )
+      if( (int)$textarray[0] > 0 )
       {
-        if( $textarray[0] >= count( $admins ) || $textarray[0] < 0 )
+        if( $textarray[0] > count( $admins ) || $textarray[0] < 0 )
         {
           $bot->talk( $channel, "That is not a valid offset." );
           return;
@@ -1175,13 +1175,18 @@ class commands
     $k = 0;
     for( $i=$start;$i<$start+5; $i++ )
     {
-      if( $admins[$i] )
+      if( is_string( $admins[$i] ) )
       {
         $k++;
-        $bot->talk( $i." ".$admins[$i] );
+        $bot->talk( $channel, $i." ".$admins[$i] );
       }
     }
-    $bot->talk( $channel, "Displaying admins #$start-#".($k+$start) );
+    if( $k > 1 )
+      $bot->talk( $channel, "Displaying admins #$start-#".($k+$start)." of ".count( $admins )." total." );
+    else if( $k == 1 )
+      $bot->talk( $channel, "Displaying admins #$start of ".count( $admins )." total." );
+    else
+      $bot->talk( $channel, "No admins were found." );
   }
 }
 ?>
