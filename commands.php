@@ -187,12 +187,12 @@ array(
     ("snarf", "\$commands->snarf_toggle( \$channel, \$chanid );", TRUE,
       "Toggles snarfing in the current channel.",
       ""
-    )
-    /*array
-    ("listadmins", "\$commands->listadmins( \$channel, \$bufarray );", FALSE,
+    ),
+    array
+    ("listadmins", "\$commands->list_admins( \$channel, \$textarray );", FALSE,
       "Lists current admins",
-      "(offset)"
-    )*/
+      "(offset|name)"
+    )
 );
 
 $commands = new commands();
@@ -1116,5 +1116,72 @@ class commands
     }
   }
   
+  function list_admins( $channel, $textarray )
+  {
+    global $bot, $con;
+    
+    $start = 0;
+    $admins = $con['data'][admins];
+    
+    if( $textarray )
+    {
+      //possible integer offset or name
+      if( is_int( $textarray[0] ) )
+      {
+        if( $textarray[0] >= count( $admins ) || $textarray[0] < 0 )
+        {
+          $bot->talk( $channel, "That is not a valid offset." );
+          return;
+        }
+        $start = $textarray[0];
+      }
+      else if( is_string( $textarray[0] ) )
+      {
+        for( $i=0; $i<count( $admins ); $i++ )
+        {
+          if( stripos( $admins[$i], $textarray[0] ) !== FALSE )
+          {
+            $k = count( $found );
+            $found[$k]['n'] = $admins[$i];
+            $found[$k]['#'] = $i;
+          }
+        }
+        if( !$found )
+        {
+          $bot->talk( $channel, "That username was not found." );
+          return;
+        }
+        else
+        {
+          if( count( $found ) > 5 )
+          {
+            $bot->talk( $channel, "More than 5 matches were found, please be more specific." );
+            return;
+          }
+          else
+          {
+            if( count( $found ) > 1 )
+              $bot->talk( $channel, "The following users (partially) matched your search:" );
+            else
+              $bot->talk( $channel, "The following user (partially) matched your search:" );
+            for( $i=0; $i<count( $found ); $i++ )
+              $bot->talk( $channel, $found[$i]['#']." ".$found[$i]['n'] );
+            return;
+          }
+          
+        }
+      }
+    }
+    $k = 0;
+    for( $i=$start;$i<$start+5; $i++ )
+    {
+      if( $admins[$i] )
+      {
+        $k++;
+        $bot->talk( $i." ".$admins[$i] );
+      }
+    }
+    $bot->talk( $channel, "Displaying admins #$start-#".($k+$start) );
+  }
 }
 ?>
