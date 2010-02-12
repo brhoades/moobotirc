@@ -1553,9 +1553,19 @@ class bot
     $newdata = fread( $fh, filesize( $CONFIG[datafilelocation] ) );
     fclose( $fh );
     
-    if( $newdata == serialize( $datavar ) || $newdata == NULL || !is_array( unserialize( $newdata ) ) )
+    if( $newdata == serialize( $datavar ) )
       return( $datavar );
 
+    if( !is_array( unserialize( $newdata ) ) )
+    {
+      echo "Error! Old datafile is no longer an array, please remove it!\n";
+      return( $datavar );
+    }
+    else if( $newdata == NULL )
+    {
+      echo "No old data file found, making new one...\n";
+      return( $datavar );
+    }
     $newdata = unserialize( $newdata );
     
     if( $datavar['time'] != NULL && $newdata['time'] != NULL )

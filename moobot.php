@@ -78,7 +78,8 @@ function init()
       }
       
       if( $firsttime == TRUE && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
-          || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE ) )
+          || stripos( $con['buffer']['all'], "MOTD File" ) !== FALSE )
+          || stripos( $con['buffer']['all'], "End of message of the day" ) !== FALSE )
       {
         //
         //Loads data
