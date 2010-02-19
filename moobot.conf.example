@@ -46,6 +46,7 @@ define( "nickserv", 20 );
 define( "sleeptime", 21 );
 define( "vhost", 22 );
 define( "admin_pass", 23 );
+define( "maxstringsize", 24 );
 
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
@@ -67,7 +68,7 @@ $CONFIG[nickpass] = "zI84kpzKzn"; //Our nickserv pass (or q) pass
 $CONFIG[nextservertime] = time()-$CONFIG[ 'servertimeout' ];
 $CONFIG[svnmon] = TRUE;
 $CONFIG[nickserv] = "nameofnickserver"; //Only needed if you aren't using a number for $CONFIG[server]
-$CONFIG[admin_pass] = md5( rand(0,100000000000) ); //CHANGE ME, this is used for getting bot admin access
+$CONFIG[admin_pass] = md5( rand(rand( 500, 1000 ),rand( 50000, 100000000000 ) ) ); //CHANGE ME, this is used for getting bot admin access
 //MySQL info
 $CONFIG[dbuser] = "databaseusername";
 $CONFIG[dbname] = "databasename";
@@ -83,6 +84,7 @@ $CONFIG[servertimeout] = 25; // Max time after not receiving a command from the 
 $CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 $CONFIG[sleeptime] = 500; //Time in ms between cycles
 $CONFIG[vhost] = "localhost";
+$CONFIG[maxstring] = 300;
 
 //
 ///////////////////////////
