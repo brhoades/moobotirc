@@ -984,6 +984,8 @@ class bot
   {
     global $con, $time, $CONFIG, $buffers, $bstatus;
     
+    if( strlen( $command ) > $CONFIG[maxstringsize] )
+      return;
     if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
       if( $con['name'] == $CONFIG[nick] )
@@ -1025,6 +1027,23 @@ class bot
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
+    if( strlen( $text ) > $CONFIG[maxstringsize] )
+    {
+      $text = str_split( $text, $CONFIG[maxstringsize] );
+            
+      if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] || $now )
+      {
+        for( $i=1; $i<count( $text ); $i++ )
+          $buffers[count($buffers)] = "PRIVMSG $channel :".$text[$i];
+        $text = $text[0];
+      }
+      else
+      {
+        for( $i=0; $i<count( $text ); $i++ )
+          $buffers[count($buffers)] = "PRIVMSG $channel :".$text[$i];
+      }
+    }
+      
     if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] || $now ) // || $con['stimes'] <= 3 )
     {
       if( $con['name'] == $CONFIG[nick] )
