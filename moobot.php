@@ -230,7 +230,7 @@ function init()
         }
       }
       
-      if( !$eval )
+      if( !$eval && $command != NULL )
         $bot->talk( $channel, "%$command is not known, try using %help." );
     }
     /*else if( stripos( $text, " is " ) !== FALSE || stripos( $text, " are " ) !== FALSE )
