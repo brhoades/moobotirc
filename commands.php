@@ -564,7 +564,7 @@ class commands
       $bot->talk( $channel, "Please specify someone to search for." );
       return;
     }
-    $bot->talk( $channel, "Searching ".$con['cached']." servers for $player...", TRUE );
+    $bot->talk( $channel, "Searching ".count($con['serverlistcache']['con'])." servers for $player...", TRUE );
     $found = $bot->find_player( $player );
     
     if( count( $found ) > 10 )
@@ -598,7 +598,7 @@ class commands
   {
     global $con, $bot;
 
-    $bot->talk( $channel, "Searching ".$con['cached']." servers for clan members...", TRUE );
+    $bot->talk( $channel, "Searching ".count($con['serverlistcache']['con'])." servers for clan members...", TRUE );
     $found = $bot->find_player( "KoR" );
     
     if( count( $found ) > 0 )
