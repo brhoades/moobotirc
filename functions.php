@@ -989,7 +989,7 @@ class bot
       echo "$command exceeded max string length\n";
       return;
     }
-    if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
+    if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] || !$CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
       if( $con['name'] == $CONFIG[nick] )
         return; //lets not and say we did
@@ -1047,7 +1047,7 @@ class bot
       }
     }
       
-    if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] || $now ) // || $con['stimes'] <= 3 )
+    if( ( $CONFIG[chatspeaktimeout] && time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] ) || $now || !$CONFIG[chatspeaktimeout] ) // || $con['stimes'] <= 3 )
     {
       if( $con['name'] == $CONFIG[nick] )
         return; //lets not and say we did
