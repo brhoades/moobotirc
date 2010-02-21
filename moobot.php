@@ -71,7 +71,6 @@ function init()
     {
       $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ) );
       $lasttime = time();
-      $con['cached'] = count( $bot->find_servers( ) );
     }
     
     if( $firsttime == TRUE && ( stripos( $con['buffer']['all'], "/motd" ) !== FALSE 
@@ -121,7 +120,7 @@ function init()
         $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
         $bot->svnmon( );
         $bstatus['svnchecks']++;
-        //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
+        $bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
         $bot->hgmon( );
       }
       
