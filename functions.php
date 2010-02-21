@@ -984,8 +984,11 @@ class bot
   {
     global $con, $time, $CONFIG, $buffers, $bstatus;
     
-    if( strlen( $command ) > $CONFIG[maxstringsize] )
+    if( strlen( $command ) > $CONFIG[maxstring] && !$now )
+    {
+      echo "$command exceeded max string length\n";
       return;
+    }
     if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
       if( $con['name'] == $CONFIG[nick] )
@@ -1027,9 +1030,9 @@ class bot
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
-    if( strlen( $text ) > $CONFIG[maxstringsize] )
+    if( strlen( $text ) > $CONFIG[maxstring] )
     {
-      $text = str_split( $text, $CONFIG[maxstringsize] );
+      $text = str_split( $text, $CONFIG[maxstring] );
             
       if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] || $now )
       {
