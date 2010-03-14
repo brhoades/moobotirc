@@ -857,9 +857,17 @@ class commands
     $uptime = $other->time_duration( time() - $bstatus['scrstarttime'] );
     $contime = $other->time_duration( time() - $bstatus['botstarttime'] );
     $servers = $bstatus['trem'];
+    if( $servers == NULL )
+      $servers = 0;
     $cmdstoserv = $bstatus['commandstoserv'];
+    if( $cmdstoserv == NULL )
+      $cmdstoserv = 0;
     $talked = $bstatus['talked'];
+    if( $talked == NULL )
+      $talked = 1;
     $cmds = $bstatus['cmds'];
+    if( $cmds == NULL )
+      $cmds = 1;
     $snarfs = $bstatus['snarfs'];
     if( $snarfs == NULL )
       $snarfs = 0;
@@ -877,10 +885,10 @@ class commands
     $out .= ", ran $cmds command";
     if( $out != 1 )
       $out .= "s";
-    $out = ", snarfed $snarfs url";
+    $out .= ", snarfed $snarfs url";
     if( $out != 1 )
       $out .= "s";
-    $out .= ", and contacted a tremulous server $servers time"
+    $out .= ", and contacted a tremulous server $servers time";
     if( $servers != 1 )
       $out .= "s";
     $out .= ".";

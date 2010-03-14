@@ -395,14 +395,11 @@ class other
       $i = 0;
       for( $i=0; $i<count( $filesize ); $i++ )
       {
-        if( is_int( $filesize ) && $filesize[$i] != 0 )
+        if( is_int( $filesize[$i] ) && $filesize[$i] != 0 )
           $filesize = $filesize[$i];
-        
       }
     }
     
-    if( !is_int( $filesize ) )
-      $filesize = 0;
     if( $size != NULL )
     {
       $size = strtolower( $size );
@@ -1120,9 +1117,7 @@ class bot
         }
     }  
     if( stripos( $con['buffer']['all'], 'KICK '.$channel.' '.$CONFIG['name'].' :' ) !== FALSE )
-    {
       $bot->cmd_send( "JOIN :".$con['data'][channels][$chanid]['name']." ".$con['data'][channels][$chanid]['password'] );
-    }
   }
 
   function check_admin( $hostmask )
