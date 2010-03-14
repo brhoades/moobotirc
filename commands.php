@@ -865,7 +865,27 @@ class commands
       $snarfs = 0;
     $lines = $bstatus['lines'];
     
-    $bot->talk( $channel, "I've been up for $uptime, sent $cmdstoserv command(s) to the server, processed $lines line(s) of text, talked $talked time(s), ran $cmds command(s), snarfed $snarfs url(s), and contacted a tremulous server $servers time(s)." );
+    $out = "I've been up for $uptime, sent $cmdstoserv command";
+    if( $cmdstoserv != 1 )
+      $out .= "s";
+    $out .= " to the server, processed $lines line";
+    if( $lines != 1 )
+      $out .= "s";
+    $out .= " of text, talked $talked time";
+    if( $talked != 1 )
+      $out .= "s";
+    $out .= ", ran $cmds command";
+    if( $out != 1 )
+      $out .= "s";
+    $out = ", snarfed $snarfs url";
+    if( $out != 1 )
+      $out .= "s";
+    $out .= ", and contacted a tremulous server $servers time"
+    if( $servers != 1 )
+      $out .= "s";
+    $out .= ".";
+    
+    $bot->talk( $channel, $out );
     return;
   }
   
