@@ -987,22 +987,17 @@ class bot
     
     if( strlen( $command ) > $CONFIG[maxstring] && !$now )
     {
-      echo "$command exceeded max string length\n";
+      echo "$command exceeded max string length\n\r";
       return;
     }
-    if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] || !$CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
-    {
-      if( !$end )
-        fputs( $con['socket'], $command."\n\r" );
-      else
-        fputs( $con['socket'], $command );
-      $con['stimes']++;
-      $con[lastspeaktime] = time();
-      $bstatus['commandstoserv']++;
-      print ( date("[ m/d/y @ H:i:s ]") ."-> ". $command. "\n\r" );
-    }
+    if( !$end )
+      fputs( $con['socket'], $command."\n\r" );
     else
-      $buffers[ count($buffers) ] = $command;
+      fputs( $con['socket'], $command );
+    $con['stimes']++;
+    $con[lastspeaktime] = time();
+    $bstatus['commandstoserv']++;
+    print ( date("[ m/d/y @ H:i:s ]") ."-> ". $command. "\n\r" );
     return;
   }
 
