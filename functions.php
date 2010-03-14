@@ -436,25 +436,26 @@ class other
   
   function inactive_count( )
   {
-    global $username, $groups, $other, $exist;
+    global $username, $groups, $other, $exist, $myuid;
     
     //returns the number of inactive users in KoR
     $query = mysql_query( "SELECT * FROM korps_view" );
     $exist = FALSE;
-    $inactivenum = 0;
+    $inactivenum = array();
     $times = 0;
     while( $stats = mysql_fetch_array( $query ) )
     {
-      if( $stats['name'] == $username )
+      if( $stats['uid'] == $myuid )
       {
         $exist = TRUE;
         continue;
       }
       
-      if( $other->is_inactive( $stats['uid'], $stats['time'] ) )
-        $inactivenum++;
+      if( $other->is_inactive( $stats['uid'], $stats['time'] )
+          && array_search( $stats['uid'], $inactivenum ) === FALSE )
+        $inactivenum[] = $stats['uid'];
     }
-    return $inactivenum;
+    return count( $inactivenum );
   }
   
   function is_inactive( $uid, $lastview = NULL )
@@ -991,8 +992,6 @@ class bot
     }
     if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] || !$CONFIG[chatspeaktimeout] ) //|| $con['stimes'] <= 3 )
     {
-      if( $con['name'] == $CONFIG[nick] )
-        return; //lets not and say we did
       if( !$end )
         fputs( $con['socket'], $command."\n\r" );
       else
@@ -1466,21 +1465,20 @@ class bot
       $ip = $serverarray[$i]['ip'];
       $port = $serverarray[$i]['port'];
       $backupname = $serverarray[$i]['bakname'];
-      $serverp = $bot->tremulous_get_players( $ip, $port );
-      $serveri = $bot->get_server_settings( $ip, $port );
-      $servername = $serveri['servername'];
-      $map = $serverp['map'];
-      $players = count( $serverp[ alien_players ]  ) + count( $serverp[ spec_players ]  ) + count( $serverp[ human_players ]  );
+      $server = $bot->tremulous_get_players( $ip, $port );
+      $servername = $server['servername'];
+      $map = $server['map'];
+      $players = count( $server[ alien_players ]  ) + count( $server[ spec_players ]  ) + count( $server[ human_players ]  );
       $aliens = count( $server[ alien_players ] );
       $humans = count( $server[ human_players ] );
       $specs = count( $server[ spec_players ] );
       $activeplayers = $aliens + $humans;
       $players = $aliens + $humans; $specs;
-      $maxplayers = $serveri[ 'maxplayers' ];
-      $averageping = $bot->average_ping( $serverp );
+      $maxplayers = $server[ 'maxplayers' ];
+      $averageping = $bot->average_ping( $server );
       if( $servername == "" )
         $servername = $backupname;
-      if( $map == NULL && $maxplayers == NULL && $serverp == NULL && $serveri == NULL )
+      if( $map == NULL && $maxplayers == NULL && $server == NULL )
       {
         $status[$i] = "^1OFFLINE";
       }
