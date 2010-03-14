@@ -65,11 +65,14 @@ function init()
       $con['buffer']['old'] = $con['buffer']['all'];
     }
 
+    if( $con['buffer']['all'] != NULL )
+      print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
+
     $bstatus['lines']++;
 
     if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
     {
-      $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ) );
+      $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ), FALSE, TRUE );
       $lasttime = time();
     }
     
@@ -98,30 +101,27 @@ function init()
       $firsttime = FALSE;
       if( $CONFIG[nickpass] != NULL )
       {
-        if( is_int( $CONFIG[nickpass] ) )
+        if( $CONFIG[nickserv] == "NickServ" || $CONFIG[nickserv] == "Q@CServe.quakenet.org" )
         {
-          if( $CONFIG[server] == 0 )
-            $bot->cmd_send( "PRIVMSG NickServ :AUTH ".$CONFIG[nickpass], TRUE );
-          else if( $CONFIG[server] == 1 )
-            $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE );
+          if( $CONFIG[server] == 0 || $CONFIG[nickserv] == "NickServ" )
+            $bot->cmd_send( "PRIVMSG NickServ :IDENTIFY ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+          else if( $CONFIG[server] == 1 || $CONFIG[nickserv] == "Q@CServe.quakenet.org" )
+            $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
         }
         else
-          $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE );
+          $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
       }
       //$bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
     }
 
-    if( $con['buffer']['all'] != NULL )
-      print date("[ m/d/y @ H:i:s ]")."<- ".$con['buffer']['all'] ."\n";
-    else
+    if( $con['buff']['array'] == NULL )
     {
       if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
       {
         $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
         $bot->svnmon( );
-        $bstatus['svnchecks']++;
-        $bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
         $bot->hgmon( );
+        $bstatus['svnchecks']++;
       }
       
       if( $con['serverlistcache']['time'] + 120 <= time() )
@@ -135,6 +135,7 @@ function init()
       //
       $bot->runbuffers( );
       $bot->run_votes( );
+      //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
       //$bot->vote_check( );
       //
       //
