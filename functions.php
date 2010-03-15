@@ -1726,5 +1726,13 @@ class bot
     
     $bot->writedata( $con['data'] );
   }
+  
+  function debug_message( $message, $force=FALSE )
+  {
+    global $CONFIG;
+    
+    if( $CONFIG[debug] || $force )
+      echo date("[ m/d/y @ H:i:s ]") ."<-DEBUG-> $message\n\r";
+  }
 }  
 ?>
