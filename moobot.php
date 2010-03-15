@@ -24,21 +24,24 @@ require( "moobot.conf" );
 require( "functions.php" );
 require( "commands.php" );
 
+$bot->debug_message( "Inital start of Moobot" );
 //$dbcnx = mysql_connect( "localhost", $CONFIG[dbuser], $CONFIG[dbpass] );
 //mysql_select_db( $CONFIG[dbname], $dbcnx );
 $con = array();
 $alive = "TRUE";
-$bstatus['scrstarttime'] = time();
 
 while( $alive == "TRUE" )
 {
   $bstatus['botstarttime'] = time();
   init();
+  $bot->debug_message( "Exited main moobot function, restarting." );
 }
 
 function init()
 {
   global $con, $CONFIG, $servers, $other, $bot, $bstatus, $commandtree, $commands; 
+  
+  $bot->debug_message( "Entering main moobot function." );
   $firsttime = TRUE;
   if( is_int( $CONFIG[server] ) )
   {
@@ -47,7 +50,9 @@ function init()
     else if( $CONFIG[server] == 1 )
       $CONFIG[server] = "irc.quakenet.org";
   }
+  $old = $CONFIG[server];
   $CONFIG[server] = gethostbyname( $CONFIG[server] );
+  $bot->debug_message( "Resolved $old to ".$CONFIG[server] );
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
   stream_set_blocking( $con['socket'], 0 );
   stream_set_timeout( $con['socket'], 100 );
@@ -55,6 +60,7 @@ function init()
   usleep( $CONFIG[sleeptime] );
   $bot->cmd_send( "USER ". $CONFIG[nick] ." ".$CONFIG[vhost]." ".$CONFIG[vhost]." :". $CONFIG[name], FALSE, TRUE );
   $bot->cmd_send( "NICK ". $CONFIG[nick] ." ".$CONFIG[vhost], FALSE, TRUE );
+  $bot->debug_message( "Connected to main server, starting socket read loop." );
   while( !feof( $con['socket'] ) )
   {
     if( $con['buffer']['old'] != $con['buffer']['all'] )
@@ -118,6 +124,7 @@ function init()
     {
       if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
       {
+        $bot->debug_message( "Time for a SVN/HG check" );
         $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
         $bot->svnmon( );
         $bot->hgmon( );
@@ -126,6 +133,7 @@ function init()
       
       if( $con['serverlistcache']['time'] + 120 <= time() )
       {
+        $bot->debug_message( "Server list cache refresh time" );
         $con['serverlistcache']['con'] = $bot->tremulous_getserverlist( );
         $con['serverlistcache']['time'] = time();
       }
@@ -223,6 +231,7 @@ function init()
           }
           else
           {
+            $bot->debug_message( "Evaluating command \"".$command."\"" );
             eval( $commandtree[$i][1] );
             $eval = TRUE;
             break;
@@ -302,19 +311,19 @@ function init()
      } */
      else if( stripos( $con['buffer']['all'], "(Nick collision from services.)" ) !== FALSE )
      {
-       echo "Dying, nick collision.\r\n";
+       $bot->debug_message( "Dying, nick collision.\r\n", TRUE );
        return;
      }
      else if( $lasttime < ( time() - ( $CONFIG[servertimeout] * 60 ) ) )
      {
-       echo "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n";
+       $bot->debug_message( "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n", TRUE );
        return;
      }
      else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
      {
        $nameend = strpos( $con['buffer']['all'], "!", 1 )-1;
        $name = substr( $con['buffer']['all'], 1, $nameend);
-       $bot->cmd_send("PRIVMSG ".$name." :".$CONFIG[version]."");
+       $bot->cmd_send( "PRIVMSG ".$name." :".$CONFIG[version]."" );
      }
      else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
      {
