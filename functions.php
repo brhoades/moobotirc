@@ -43,8 +43,19 @@ $CONFIG['servers']['KOR'][4]['bakname']  = "^0AAA ^2|KoR| KoRx Test";
 $bot = new bot();
 $other = new other();
 
+/*
+ * CLASS OTHER
+ * Primarily used for KnightsofReason's site stuff, since it shares 
+ * libraries with moobot. Some of the stuff in here is just a duplicate
+ * function of the moobot version, with HTML compatibility.
+*/
+
 class other
 {
+  /* FUNCTION
+   * void check( NULL );
+   * Not entirely sure where this is from... Some legacy moocode stuff?
+  */
   function check()
   {
     global $other, $bot;
@@ -69,6 +80,10 @@ class other
       //Back to the main page we go.
     }
   }
+  /* FUNCTION
+   * str sanatize2( str $input );
+   * Sanatizes a string before its use in a sql query, for example.
+  */
   function sanitize2($input) 
   {
       if (is_array($input)) 
@@ -88,7 +103,12 @@ class other
       }
       return $output;
   }
-
+  
+  /* FUNCTION
+   * str sanatize( str $input );
+   * Sanatizes a string before its use in a sql statement, for example.
+   * Needs to be merged with the above function.
+  */
 	function sanitize($input) //http://www.denhamcoote.com/php-howto-sanitize-database-inputs
   { 
     $search = array(
@@ -101,14 +121,23 @@ class other
     $output = preg_replace($search, '', $input);
     return $output;
   }
-
+  
+  /* FUNCTION
+   * str redirect( int $when, str $where );
+   * Returns a html refresh, with arguments $when minutes and to $where.
+  */
   function redirect($when, $where)
   {
     if( $when < 0 )
       die("Invalid time");
     return("<META HTTP-EQUIV=\"refresh\" CONTENT=\"$when;URL=$where\">"); 
   }
-
+  
+  /* FUNCTION
+   * str greet( array $userdata );
+   * More legacy moocode crap, I think... Used to print a nice little
+   * greeting for the moocode CP page.
+  */
   function greet( $userdata )
   {
     $TOD = date("G");
@@ -143,6 +172,14 @@ class other
       
     return( $greet ); 
   }
+  
+  /* FUNCTION
+   * mdarray tremulous_get_players( str $server, int $port [, bool $cbf] );
+   * Returns tremulous server info (not just players) from 
+   * $server:$port.
+   * $cbf is a function-used boolean (called by function), it's 
+   * deprecated.
+  */
   function tremulous_get_players( $server, $port, $cbf=FALSE ) 
   {
     global $bot, $other, $bstatus;
@@ -218,6 +255,14 @@ class other
       "servername" => $info[ 'servername' ]
       );
   }
+  
+  /* FUNCTION
+   * str tremulous_replace_colors_web( str $in );
+   * Replaces tremulous colors ^(0-8) with various web-friendly colors,
+   * nonblack and nonwhite. Poorly constructed statements happen often,
+   * this should be handled differently as it creates a mess with large
+   * paragraphs.
+  */
   function tremulous_replace_colors_web( $in ) 
   {
     $in = preg_replace( "/\^1/", "<font color=\"#ff040f\">", $in, -1, $c );
@@ -244,12 +289,19 @@ class other
       $in = $in."</font>";
     return $in;
   }
-  function url_exists($url) 
+  
+  /* FUNCTION
+   * bool url_exists( str $url );
+   * Totally not my function, from php.net I think/hope. Returns a bool
+   * after url validation regex is evaluated.
+  */
+  function url_exists( $url ) 
   {
     $hdrs = @get_headers( $url );
     return is_array( $hdrs ) ? preg_match( '/^HTTP\\/\\d+\\.\\d+\\s+2\\d\\d\\s+.*$/', $hdrs[0] ) : FALSE;
   }  
-  /**
+  /* FUNCTION
+   * str time_duration( int $seconds [, $use=NULL, $zeros=FALSE] );
    * A function for making time periods readable
    *
    * @author      Aidan Lister <aidan@php.net>
@@ -258,6 +310,7 @@ class other
    * @param       int     number of seconds elapsed
    * @param       string  which time periods to display
    * @param       bool    whether to show zero time periods
+   * Not my function either.
    */
   function time_duration($seconds, $use = null, $zeros = false)
   {
@@ -389,16 +442,7 @@ class other
   function filesize_range( $filesize, $size = NULL )
   {
     if( is_array( $filesize ) )
-    {
-      //first non zero wins
-      //happens on sites like tinyurl in moobot
-      $i = 0;
-      for( $i=0; $i<count( $filesize ); $i++ )
-      {
-        if( is_int( $filesize[$i] ) && $filesize[$i] != 0 )
-          $filesize = $filesize[$i];
-      }
-    }
+      retur( "UKNOWN" );
     
     if( $size != NULL )
     {
