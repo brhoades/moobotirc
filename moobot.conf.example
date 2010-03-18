@@ -47,6 +47,7 @@ define( "sleeptime", 21 );
 define( "vhost", 22 );
 define( "admin_pass", 23 );
 define( "maxstringsize", 24 );
+define( "maxstringsize", 25 );
 
 //more constants, for the $con['data'] array
 define( "svnstuffs", 0 );       //Holds the SVN monitoring stuff
@@ -85,6 +86,7 @@ $CONFIG[datafilelocation] = "/srv/http/moobot/datafile"; //serialized array
 $CONFIG[sleeptime] = 500; //Time in ms between cycles
 $CONFIG[vhost] = "localhost";
 $CONFIG[maxstring] = 300;
+$CONFIG[debug] = FALSE;
 
 //
 ///////////////////////////

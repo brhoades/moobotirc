@@ -320,25 +320,11 @@ function init()
        return;
      }
      else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
-     {
-       $nameend = strpos( $con['buffer']['all'], "!", 1 )-1;
-       $name = substr( $con['buffer']['all'], 1, $nameend);
        $bot->cmd_send( "PRIVMSG ".$name." :".$CONFIG[version]."" );
-     }
      else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
      {
-      for( $i=0; $i<count( $con['data'][channels] ); $i++ )
-      {
-        if(  $con['data'][channels][$i]['name'] == $channel )
-          $chanid = $i;
-      }
       if( $con['data'][channels][$chanid]['autoopvoice'] == TRUE )
       {
-         $parts = explode( " ", $con['buffer']['all'] );
-         $name = explode( "!", $parts['0'] );
-         $hostmask = $name[1];
-         $name = ltrim( $name['0'], ":" );
-         $channel = $parts['2'];
          if( $bot->check_admin( $hostmask ) && $name != $CONFIG[nick] )
          {
            $bot->cmd_send( "MODE $channel +v $name" );
