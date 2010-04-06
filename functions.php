@@ -534,6 +534,31 @@ class other
     else
       return FALSE;
   }
+  function server_status( $ip, $port, $prog )
+  {
+    global $other, $CONFIG, $bot;
+    
+    $server = $other->tremulous_get_players( $ip, $port );
+    $count = count( $server['spec_players'] ) + count( $server['alien_players'] ) + count( $server['human_players'] );
+    $map = $server[ 'map' ];
+    $maxplayers = $server[ 'maxplayers' ];
+    $servername = $server[ 'servername' ];
+    $ap = $bot->average_ping( $server );
+    $alive = trim( exec( "ps -A | grep ".$prog." -i" ) );
+    if( $alive != NULL )
+      $alive = TRUE;
+    else
+      $alive = FALSE;
+
+    if( $alive && $map != NULL && ( $ap < 999 || $count < 2 ) )
+      return( "ONLINE" );
+    else if( $map == NULL && !$alive && $maxplayers == NULL )
+      return( "OFFLINE" );
+    else if( $map == NULL && $alive )
+      return( "SWITCHING MAPS" );
+    else if( $bot->average_ping( $server ) >= 999 && $count > 2 )
+      return( "CRASHED" );
+  }
 }
 
 class bot
@@ -1777,6 +1802,41 @@ class bot
     
     if( $CONFIG[debug] || $force )
       echo date("[ m/d/y @ H:i:s ]") ."<-DEBUG-> $message\n\r";
+  }
+  
+  function check_file( $file, $shortname, $channel )
+  {
+    global $con, $bot;
+    if( !( time() % 5 ) )
+      return;
+    exec( "cat $file | tail", $contents );
+    
+    for( $i=0; $i<count( $contents ); $i++ )
+    {
+      if( $contents[$i] == $con['sess'][$shortname] )
+      {
+        $end = $i;
+        break;
+      }
+      else if( $i+1 == count( $contents ) )
+      {
+        $con['sess'][$shortname] = $contents[$i];
+        return;
+      }
+    }
+    
+    if( $i > 0 )
+    {
+      for( $i=0; $i<$end; $i++ )
+        unset( $contents[$i] );
+      $contents = array_values( $contents );
+    }
+    
+    if( !$contents )
+      return;
+    
+    for( $i=0; $i<count( $contents ); $i++ )
+      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $contents[$i] ) );
   }
 }  
 ?>

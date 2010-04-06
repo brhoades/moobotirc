@@ -143,6 +143,9 @@ function init()
       //
       $bot->runbuffers( );
       $bot->run_votes( );
+      //$bot->check_file( "/srv/http/logs/serverlog", "serverlog", "#knightsofreason" );
+      //$bot->check_file( "/srv/http/logs/adminlog", "adminlog", "#knightsofreason" );
+      //$bot->check_file( "/srv/http/logs/maplog", "maplog", "#knightsofreason" );
       //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
       //$bot->vote_check( );
       //
