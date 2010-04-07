@@ -1073,20 +1073,19 @@ class bot
     
     if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] && count( $buffers ) > 0 )
     {
-      $buffers = array_values( $buffers );
       fputs( $con['socket'], $buffers[0]."\n\r" );
-      print ( date("[ m/d/y @ H:i:s ]") ."-> ".$buffers[0]."\n\r" );
+      print ( date("[ m/d/y @ H:i:s ][ BUF ]") ."-> ".$buffers[0]."\n\r" );
       unset( $buffers[0] );
+      $buffers = array_values( $buffers );
       $con[lastspeaktime] = time();
-      $con['stimes']++;
+      $con[stimes]++;
       $bstatus['talked']++;
     }
-    //else if( time() - $con['3lastspeaktime'] >= $CONFIG[chatspeaktimeout] + 2  && $con['stimes'] > 0 )
-    //  $con['stimes'] = 0;
-    return;
+    else if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] + 3  && $con[stimes] > 0 )
+      $con[stimes] = 0;
   }
 
-  function talk( $channel, $text, $now=FALSE ) 
+  function talk( $channel, $text, $now=FALSE )
   {
     global $con, $CONFIG, $buffers, $bstatus;
     
@@ -1094,7 +1093,7 @@ class bot
     {
       $text = str_split( $text, $CONFIG[maxstring] );
             
-      if( time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] || $now )
+      if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] || $now )
       {
         for( $i=1; $i<count( $text ); $i++ )
           $buffers[count($buffers)] = "PRIVMSG $channel :".$text[$i];
@@ -1107,12 +1106,12 @@ class bot
       }
     }
       
-    if( ( $CONFIG[chatspeaktimeout] && time() - $con[lastspeaktime] < $CONFIG[chatspeaktimeout] ) || $now || !$CONFIG[chatspeaktimeout] ) // || $con['stimes'] <= 3 )
+    if( time() - $con[lastspeaktime] >= $CONFIG[chatspeaktimeout] || $con[stimes] < 3 || $now || !$CONFIG[chatspeaktimeout] )
     {
       if( $con['name'] == $CONFIG[nick] )
         return; //lets not and say we did
       fputs( $con['socket'], "PRIVMSG $channel :".$text."\n\r" );
-      $con['stimes']++;
+      $con[stimes]++;
       $con[lastspeaktime] = time();
       $bstatus['talked']++;
       print (date("[d/m/y @ H:i:s]") ."-> PRIVMSG $channel :".$text."\n\r");
