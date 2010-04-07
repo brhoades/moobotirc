@@ -442,7 +442,7 @@ class other
   function filesize_range( $filesize, $size = NULL )
   {
     if( is_array( $filesize ) )
-      retur( "UKNOWN" );
+      return;
     
     if( $size != NULL )
     {
