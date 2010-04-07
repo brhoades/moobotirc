@@ -372,16 +372,16 @@ function init()
         exec( "ping -c1 -w2 $urlb", $out );
 
         //don't try to contact sites that don't exist
-        $doit=FALSE;
+        $doit = FALSE;
         for( $j=0; $j<count( $out ); $j++ )
         {
           if( stripos( $out[$j], "1 received" ) !==FALSE )
             $doit = TRUE;
         }
-        if( !$doit )          
-          $titles[$i] = $bot->snarf_url( $url, TRUE );
-        else
-          $titles[$i] = $bot->snarf_url( $url );
+        if( !$doit ) 
+          return;
+          
+        $titles[$i] = $bot->snarf_url( $url );
           
         if( $url != NULL && $titles[$i] != NULL )
         {
