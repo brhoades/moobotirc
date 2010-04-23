@@ -379,7 +379,7 @@ function init()
             $doit = TRUE;
         }
         if( !$doit ) 
-          return;
+          continue;
           
         $titles[$i] = $bot->snarf_url( $url );
           
@@ -402,6 +402,36 @@ function init()
       $channel = $bufarray['2'];
       if( stripos( $channel, "#" ) !== FALSE )
         $bot->cmd_send( "JOIN $channel" );
+    }//terra.unvanquished.net 353 Moobot5367 = #aaron5367 
+    //$con['data'][channels][$chanid]['cmds']
+    else if( stripos( $con['buffer']['all'], "$username = #" ) !== FALSE )
+    {
+      $con['data'][channels][$chanid]['users'];
+      for( $i=0; $i<count( $textarray ); $i++ )
+      {
+        $con['data'][channels][$chanid]['users'][$i]['rawname'] = $textarray[$i];
+        //The lazy way, since I can't think of another:
+        if( trim( $textarray[$i], "+" ) != $textarray[$i] )
+        {
+          $con['data'][channels][$chanid]['users'][$i]['name'] = trim( $textarray[$i], "+" );
+          $con['data'][channels][$chanid]['users'][$i]['flags'] = "+";
+        }
+        else if( trim( $textarray[$i], "%" ) != $textarray[$i] )
+        {
+          $con['data'][channels][$chanid]['users'][$i]['name'] = trim( $textarray[$i], "%" );
+          $con['data'][channels][$chanid]['users'][$i]['flags'] = "%";
+        }
+        else if( trim( $textarray[$i], "@" ) != $textarray[$i] )
+        {
+          $con['data'][channels][$chanid]['users'][$i]['name'] = trim( $textarray[$i], "%" );
+          $con['data'][channels][$chanid]['users'][$i]['flags'] = "@";
+        }
+        else
+        {
+          $con['data'][channels][$chanid]['users'][$i]['name'] = $textarray[$i];
+          $con['data'][channels][$chanid]['users'][$i]['flags'] = "";
+        }
+      }
     }
     
     usleep( $CONFIG[sleeptime]*1000 );
