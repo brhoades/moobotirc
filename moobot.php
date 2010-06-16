@@ -24,7 +24,7 @@ require( "moobot.conf" );
 require( "functions.php" );
 require( "commands.php" );
 
-$bot->debug_message( "Inital start of Moobot" );
+debug_message( "Inital start of Moobot" );
 //$dbcnx = mysql_connect( "localhost", $CONFIG[dbuser], $CONFIG[dbpass] );
 //mysql_select_db( $CONFIG[dbname], $dbcnx );
 $con = array();
@@ -34,14 +34,14 @@ while( $alive == "TRUE" )
 {
   $bstatus['botstarttime'] = time();
   init();
-  $bot->debug_message( "Exited main moobot function, restarting." );
+  debug_message( "Exited main moobot function, restarting." );
 }
 
 function init()
 {
   global $con, $CONFIG, $servers, $other, $bot, $bstatus, $commandtree, $commands; 
   
-  $bot->debug_message( "Entering main moobot function." );
+  debug_message( "Entering main moobot function." );
   $firsttime = TRUE;
   if( is_int( $CONFIG[server] ) )
   {
@@ -52,15 +52,15 @@ function init()
   }
   $old = $CONFIG[server];
   $CONFIG[server] = gethostbyname( $CONFIG[server] );
-  $bot->debug_message( "Resolved $old to ".$CONFIG[server] );
+  debug_message( "Resolved $old to ".$CONFIG[server] );
   $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
   stream_set_blocking( $con['socket'], 0 );
   stream_set_timeout( $con['socket'], 100 );
 	$lasttime = time();
   usleep( $CONFIG[sleeptime] );
-  $bot->cmd_send( "USER ". $CONFIG[nick] ." ".$CONFIG[vhost]." ".$CONFIG[vhost]." :". $CONFIG[name], FALSE, TRUE );
-  $bot->cmd_send( "NICK ". $CONFIG[nick] ." ".$CONFIG[vhost], FALSE, TRUE );
-  $bot->debug_message( "Connected to main server, starting socket read loop." );
+  cmd_send( "USER ". $CONFIG[nick] ." ".$CONFIG[vhost]." ".$CONFIG[vhost]." :". $CONFIG[name], FALSE, TRUE );
+  cmd_send( "NICK ". $CONFIG[nick] ." ".$CONFIG[vhost], FALSE, TRUE );
+  debug_message( "Connected to main server, starting socket read loop." );
   while( !feof( $con['socket'] ) )
   {
     if( $con['buffer']['old'] != $con['buffer']['all'] )
@@ -78,7 +78,7 @@ function init()
 
     if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
     {
-      $bot->cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ), FALSE, TRUE );
+      cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ), FALSE, TRUE );
       $lasttime = time();
     }
     
@@ -89,7 +89,7 @@ function init()
       //
       //Loads data
       //
-      $con['data'] = $bot->readdata( $con['data'] );
+      $con['data'] = readdata( $con['data'] );
       //
       //
       //
@@ -100,9 +100,9 @@ function init()
         if( $con['data'][channels][$i]['active'] == FALSE )
           continue;
         if( $con['data'][channels][$i]['password'] != NULL )
-          $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] ." ". $con['data'][channels][$i]['password'] );
+          cmd_send( "JOIN ". $con['data'][channels][$i]['name'] ." ". $con['data'][channels][$i]['password'] );
         else
-          $bot->cmd_send( "JOIN ". $con['data'][channels][$i]['name'] );
+          cmd_send( "JOIN ". $con['data'][channels][$i]['name'] );
       }
       $firsttime = FALSE;
       if( $CONFIG[nickpass] != NULL )
@@ -110,44 +110,44 @@ function init()
         if( $CONFIG[nickserv] == "NickServ" || $CONFIG[nickserv] == "Q@CServe.quakenet.org" )
         {
           if( $CONFIG[server] == 0 || $CONFIG[nickserv] == "NickServ" )
-            $bot->cmd_send( "PRIVMSG NickServ :IDENTIFY ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+            cmd_send( "PRIVMSG NickServ :IDENTIFY ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
           else if( $CONFIG[server] == 1 || $CONFIG[nickserv] == "Q@CServe.quakenet.org" )
-            $bot->cmd_send( "PRIVMSG Q@CServe.quakenet.org :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+            cmd_send( "PRIVMSG Q@CServe.quakenet.org :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
         }
         else
-          $bot->cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+          cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
       }
-      //$bot->cmd_send( "MODE ".$CONFIG[nick]." +x " );
+      //cmd_send( "MODE ".$CONFIG[nick]." +x " );
     }
 
     if( $con['buff']['array'] == NULL )
     {
       if( $con['nextsvnmontime'] <= time() && $firsttime == FALSE )
       {
-        $bot->debug_message( "Time for a SVN/HG check" );
+        debug_message( "Time for a SVN/HG check" );
         $con['nextsvnmontime'] = time() + $CONFIG[svnmontimeout]; 
-        $bot->svnmon( );
-        $bot->hgmon( );
+        svnmon( );
+        hgmon( );
         $bstatus['svnchecks']++;
       }
       
       if( $con['serverlistcache']['time'] + 120 <= time() )
       {
-        $bot->debug_message( "Server list cache refresh time" );
-        $con['serverlistcache']['con'] = $bot->tremulous_getserverlist( );
+        debug_message( "Server list cache refresh time" );
+        $con['serverlistcache']['con'] = tremulous_getserverlist( );
         $con['serverlistcache']['time'] = time();
       }
 
       //
       //checks are here!
       //
-      $bot->runbuffers( );
-      $bot->run_votes( );
-      //$bot->check_file( "/srv/http/logs/serverlog", "serverlog", "#knightsofreason" );
-      //$bot->check_file( "/srv/http/logs/adminlog", "adminlog", "#knightsofreason" );
-      //$bot->check_file( "/srv/http/logs/maplog", "maplog", "#knightsofreason" );
-      //$bot->server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
-      //$bot->vote_check( );
+      runbuffers( );
+      run_votes( );
+      //check_file( "/srv/http/logs/serverlog", "serverlog", "#knightsofreason" );
+      //check_file( "/srv/http/logs/adminlog", "adminlog", "#knightsofreason" );
+      //check_file( "/srv/http/logs/maplog", "maplog", "#knightsofreason" );
+      //server_check( $CONFIG['servers']['KOR'], "#knightsofreason", "KOR" );
+      //vote_check( );
       //
       //
       // 
@@ -197,7 +197,7 @@ function init()
     else
       $pm = FALSE;
 
-    $bot->vote_check( $hostmask, $name, $channel, $text );
+    vote_check( $hostmask, $name, $channel, $text );
 
     if( stripos( $text, ":%" ) !== FALSE )
     {
@@ -226,15 +226,15 @@ function init()
       {
         if( $commandtree[$i][0] == $command )
         {
-          if( $commandtree[$i][2] == TRUE && !$bot->check_admin( $hostmask ) )
+          if( $commandtree[$i][2] == TRUE && !check_admin( $hostmask ) )
           {
-            $bot->talk( $channel, $name.": You do not have permission to use that command." );
+            talk( $channel, $name.": You do not have permission to use that command." );
             $eval = TRUE;
             break;
           }
           else
           {
-            $bot->debug_message( "Evaluating command \"".$command."\"" );
+            debug_message( "Evaluating command \"".$command."\"" );
             eval( $commandtree[$i][1] );
             $eval = TRUE;
             break;
@@ -243,7 +243,7 @@ function init()
       }
       
       if( !$eval && $command != NULL )
-        $bot->talk( $channel, "%$command is not known, try using %help." );
+        talk( $channel, "%$command is not known, try using %help." );
     }
     /*else if( stripos( $text, " is " ) !== FALSE || stripos( $text, " are " ) !== FALSE )
     {
@@ -292,7 +292,7 @@ function init()
           }
         }
         //Okay, we know the top and now we are going to update the times quiered and say it!
-        $bot->talk( $channel, "I think ".$top['this']." ".$top['verb']." ".$top['that'] );
+        talk( $channel, "I think ".$top['this']." ".$top['verb']." ".$top['that'] );
         
         $top['quieries']++;
         mysql_query( "UPDATE state SET queries=".$top['queries']." WHERE verb=\"".$top['verb']." AND this=\"".$top['this']."\" AND that=\"".$top['that']."\" " );
@@ -302,7 +302,7 @@ function init()
     /*else if( stripos($con['buffer']['all'], " :", 10 ) !== FALSE )
     {
       $start = strpos( $con['buffer']['all'], ":", 1 )+1;
-      $text = $other->sanitize2($other->sanitize(substr( $con['buffer']['all'], $start )));
+      $text = sanitize2(sanitize(substr( $con['buffer']['all'], $start )));
       $time = time();
       if( $channels[$chanid]['log'] == "TRUE" )
       {
@@ -314,27 +314,27 @@ function init()
      } */
      else if( stripos( $con['buffer']['all'], "(Nick collision from services.)" ) !== FALSE )
      {
-       $bot->debug_message( "Dying, nick collision.\r\n", TRUE );
+       debug_message( "Dying, nick collision.\r\n", TRUE );
        return;
      }
      else if( $lasttime < ( time() - ( $CONFIG[servertimeout] * 60 ) ) )
      {
-       $bot->debug_message( "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n", TRUE );
+       debug_message( "Dying, haven't recived a response in ".$CONFIG[servertimeout]." minutes.\r\n", TRUE );
        return;
      }
      else if( stripos( $con['buffer']['all'], ' :VERSION' ) !== FALSE )
-       $bot->cmd_send( "PRIVMSG ".$name." :".$CONFIG[version]."" );
+       cmd_send( "PRIVMSG ".$name." :".$CONFIG[version]."" );
      else if( stripos( $con['buffer']['all'], 'JOIN #' ) )
      {
       if( $con['data'][channels][$chanid]['autoopvoice'] == TRUE )
       {
-         if( $bot->check_admin( $hostmask ) && $name != $CONFIG[nick] )
+         if( check_admin( $hostmask ) && $name != $CONFIG[nick] )
          {
-           $bot->cmd_send( "MODE $channel +v $name" );
-           $bot->cmd_send( "MODE $channel +o $name" );
+           cmd_send( "MODE $channel +v $name" );
+           cmd_send( "MODE $channel +o $name" );
          }
          else if( $name != $CONFIG[nick] )
-           $bot->cmd_send( "MODE $channel +v $name" );
+           cmd_send( "MODE $channel +v $name" );
       }
      }
      else if( preg_match( "/.{1,500}\.(com|org|net|co\.uk|us|tk|rs|uk|gov|de|es|cz)/i", $text ) != NULL )
@@ -381,12 +381,12 @@ function init()
         if( !$doit ) 
           continue;
           
-        $titles[$i] = $bot->snarf_url( $url );
+        $titles[$i] = snarf_url( $url );
           
         if( $url != NULL && $titles[$i] != NULL )
         {
           $bstatus['snarfs']++;
-          $bot->talk( $channel, "(".$urlb.") ".$titles[$i] );
+          talk( $channel, "(".$urlb.") ".$titles[$i] );
         }
       }
       unset( $titles, $urlarray, $urls, $url, $urlb, $out, $urltest, $doit );
@@ -395,13 +395,13 @@ function init()
     {
       $channel = $bufarray['3'];
       if( stripos( $channel, "#" ) !== FALSE )
-        $bot->cmd_send( "JOIN $channel" );
+        cmd_send( "JOIN $channel" );
     }
     else if( stripos( $con['buffer']['all'], "KICK ".$bufarray['2']." ".$CONFIG[nick] ) !== FALSE )
     {
       $channel = $bufarray['2'];
       if( stripos( $channel, "#" ) !== FALSE )
-        $bot->cmd_send( "JOIN $channel" );
+        cmd_send( "JOIN $channel" );
     }//terra.unvanquished.net 353 Moobot5367 = #aaron5367 
     //$con['data'][channels][$chanid]['cmds']
     else if( stripos( $con['buffer']['all'], "$username = #" ) !== FALSE )

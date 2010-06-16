@@ -202,9 +202,9 @@ class commands
   
   function rehash( $name )
   {
-    global $bot, $con, $CONFIG;
+    global $con, $CONFIG;
     
-    $bot->cmd_send( "QUIT :Killed by ".$name );
+    cmd_send( "QUIT :Killed by ".$name );
     exec( "php ".$CONFIG[pathtoourself] );
     sleep( 1 );
     die( "Restart time" );
@@ -212,137 +212,137 @@ class commands
   
   function uptime( $channel )
   { 
-    global $con, $bot;
+    global $con;
 
     exec( "uptime", $uptime );
-    $bot->talk( $channel, "The server I am hosted on has the following uptime:" );
-    $bot->talk( $channel, $uptime[0] );
+    talk( $channel, "The server I am hosted on has the following uptime:" );
+    talk( $channel, $uptime[0] );
   }
   
   function sysinfo( $channel )
   {
-    global $con, $bot;
+    global $con;
     
     //I wish all functions were like this
-    $bot->talk( $channel, $bot->sysinfo() );
+    talk( $channel, sysinfo() );
   }
   
   function svnmon( $channel, $chanid )
   {
-    global $bot, $con;
+    global $con;
     
     if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $bot->talk( $channel, "You can't turn svnmon off in a PM." );
+      talk( $channel, "You can't turn svnmon off in a PM." );
       return;     //Likely a PM or some weird bug
     }
     
     if( $con['data'][channels][$chanid]['svnmon'] == TRUE )
     {
       $con['data'][channels][$chanid]['svnmon'] = FALSE;
-      $bot->talk( $channel, "SVN monitor is now off for this channel." );
+      talk( $channel, "SVN monitor is now off for this channel." );
     }
     else
     {
       $con['data'][channels][$chanid]['svnmon']  = TRUE;
-      $bot->talk( $channel, "SVN monitor is now on for this channel." );
+      talk( $channel, "SVN monitor is now on for this channel." );
     }
     
-    $bot->writedata( $con['data'] );
+    writedata( $con['data'] );
   }
   
   function hgmon( $channel, $chanid )
   {
-    global $bot, $con;
+    global $con;
     
     if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $bot->talk( $channel, "You can't turn hgmon off in a PM." );
+      talk( $channel, "You can't turn hgmon off in a PM." );
       return;     //Likely a PM or some weird bug
     }
     
     if( $con['data'][channels][$chanid]['hgmon'] == TRUE )
     {
       $con['data'][channels][$chanid]['hgmon'] = FALSE;
-      $bot->talk( $channel, "HG monitor is now off for this channel." );
+      talk( $channel, "HG monitor is now off for this channel." );
     }
     else
     {
       $con['data'][channels][$chanid]['hgmon']  = TRUE;
-      $bot->talk( $channel, "HG monitor is now on for this channel." );
+      talk( $channel, "HG monitor is now on for this channel." );
     }
     
-    $bot->writedata( $con['data'] );
+    writedata( $con['data'] );
   }
   
   function rot13( $channel, $bufarray )
   {
-    global $bot, $con;
+    global $con;
     
     $newtext = str_rot13( trim( implode( " ", $bufarray ) ) );
-    $bot->talk( $channel, $newtext );
+    talk( $channel, $newtext );
   }
   
   function google( $channel, $textarray )
   {
-    global $con, $bot;
+    global $con;
     
     $url = trim( implode( "+", $textarray ) );
-    $bot->talk( $channel, "http://letmegooglethatforyou.com/?q=$url" );
+    talk( $channel, "http://letmegooglethatforyou.com/?q=$url" );
   }
   
   function urban( $channel, $bufarray )
   {
-    global $bot, $con;
+    global $con;
     
     if( $bufarray[0] == NULL )
     {
-      $bot->talk( $channel, "Please use the following syntax:" );
-      $bot->talk( $channel, "%urban term" );
+      talk( $channel, "Please use the following syntax:" );
+      talk( $channel, "%urban term" );
       return;
     }
     
     if( $bufarray[1] == NULL )
     {
       $term = $bufarray[0];
-      $def = $bot->urban_lookup( $term, 1 );
+      $def = urban_lookup( $term, 1 );
       if( count( $def ) > 5 )
       {
-        $bot->talk( $channel, "The definition is too long, you can view it at http://urbandictionary.com/define.php?term=$term" );
+        talk( $channel, "The definition is too long, you can view it at http://urbandictionary.com/define.php?term=$term" );
         return;
       }
-      $bot->talk( $channel, "Definition of $term:" );
+      talk( $channel, "Definition of $term:" );
       for( $i=0; $i<count( $def ); $i++ )
-        $bot->talk( $channel, trim($def[$i]) );
+        talk( $channel, trim($def[$i]) );
     }
     else
     {
       $num = 1;
       $term = implode( " ", $bufarray );
-      $def = $bot->urban_lookup( $term, $num );
+      $def = urban_lookup( $term, $num );
       if( count( $def ) > 5 )
       {
         $max = 4;
-        $bot->talk( $channel, "Definition of $term:" );
+        talk( $channel, "Definition of $term:" );
         $page = ceil( $num/7 );
         for( $i=0; $i<$max; $i++ )
-          $bot->talk( $channel, $def[$i] );
-        $bot->talk( $channel, "[...]" );
+          talk( $channel, $def[$i] );
+        talk( $channel, "[...]" );
         if( $page > 1 )
-          $bot->talk( $channel, "You can view the rest of the definition here: http://urbandictionary.com/define.php?page=$page&term=$term" );
+          talk( $channel, "You can view the rest of the definition here: http://urbandictionary.com/define.php?page=$page&term=$term" );
         else
-          $bot->talk( $channel, "You can view the rest of the definition here: http://urbandictionary.com/define.php?term=$term" );
+          talk( $channel, "You can view the rest of the definition here: http://urbandictionary.com/define.php?term=$term" );
           return;
       }
-      $bot->talk( $channel, "Definition of $term:" );
+      talk( $channel, "Definition of $term:" );
       for( $i=0; $i<count($def); $i++ )
-        $bot->talk( $channel, trim($def[$i]) );
+        talk( $channel, trim($def[$i]) );
     }
   }
   
   function help( $hostmask, $name, $textarray )
   {
-    global $commandtree, $con, $bot;
+    global $commandtree, $con;
     
     if( !$textarray[0] )
     {
@@ -352,7 +352,7 @@ class commands
         $k=0;
         for( $i=0; $i<count( $commandtree ); $i++ )
         {
-          if( ( $commandtree[$i][2] == TRUE && $bot->check_admin( $hostmask ) )
+          if( ( $commandtree[$i][2] == TRUE && check_admin( $hostmask ) )
                 || $commandtree[$i][2] != TRUE )
           {
             $alwcmds++;
@@ -389,16 +389,16 @@ class commands
       }
       
       for( $i=0; $i<count( $out ); $i++ )
-        $bot->talk( $name, $out[$i] );
+        talk( $name, $out[$i] );
   }
   
   function server( $bufarray, $channel, $name )
   {
-    global $con, $bot, $CONFIG;
+    global $con, $CONFIG;
     
     if( count( $bufarray ) <= 0 )
     {
-      $bot->talk( $channel, $name.": Please specify a server and port or an alias with this command." );
+      talk( $channel, $name.": Please specify a server and port or an alias with this command." );
       return;
     }
     else if( count( $bufarray ) == 1 && stripos( $bufarray[0], ":" ) === FALSE )
@@ -406,8 +406,8 @@ class commands
       $set = $bufarray[0];
       if( !array_key_exists( strtoupper($set), $CONFIG['servers'] ) )
       {
-        $bot->talk( $channel, "I don't have any server stored for the alias $set, try one of the following:" );
-        $bot->talk( $channel, "X, AA, A<3, uBP, or SoH" );
+        talk( $channel, "I don't have any server stored for the alias $set, try one of the following:" );
+        talk( $channel, "X, AA, A<3, uBP, or SoH" );
         return;
       }
       $set = strtoupper($set);
@@ -428,21 +428,21 @@ class commands
     }
     else if( count( $bufarray ) > 2 )
     {
-      $bot->talk( $channel, "Too many arguments (".count($bufarray).")." );
+      talk( $channel, "Too many arguments (".count($bufarray).")." );
       return;
     }
     else
     {
-      $bot->talk( $channel, "Unknown arguments" );
+      talk( $channel, "Unknown arguments" );
       return;
     }
-    $server = $bot->tremulous_get_players( $ip, $port );
+    $server = tremulous_get_players( $ip, $port );
     $servername = $server['servername'];
     if( ( $servername == NULL || $servername == "" ) && $set != NULL )
       $servername = $backupname;
     else if( $servername == NULL || $servername == "" )
     {
-      $bot->talk( $channel, "Unable to get a valid server name from $ip:$port" );
+      talk( $channel, "Unable to get a valid server name from $ip:$port" );
       return;
     }
     $map = $server['map'];
@@ -452,19 +452,19 @@ class commands
       $status = "OFFLINE";
     else if( ( $map == NULL || $map == "" ) && $servername != NULL )
     {
-      $bot->talk( $channel, "Unable to make further contact with $ip:$port, $servername" );
+      talk( $channel, "Unable to make further contact with $ip:$port, $servername" );
       return;
     }
     
     if( $status != "OFFLINE" )
-      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - $map - ($players/$maxplayers)", TRUE );
+      talk( $channel, tremulous_replace_colors_irc( $servername )." - $map - ($players/$maxplayers)", TRUE );
     else
-      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $servername )." - OFFLINE", TRUE );
+      talk( $channel, tremulous_replace_colors_irc( $servername )." - OFFLINE", TRUE );
   }
   
   function servers( $bufarray, $channel, $name )
   {
-    global $con, $bot, $CONFIG;
+    global $con, $CONFIG;
     
     if( $bufarray[0] == NULL || $bufarray[0] == "" )
       $set = "KOR";
@@ -473,8 +473,8 @@ class commands
       $pset = $bufarray[0];
       if( !array_key_exists( strtoupper( $pset ), $CONFIG['servers'] ) )
       {
-        $bot->talk( $channel, "I don't have any servers stored for $pset, try one of the following:" );
-        $bot->talk( $channel, "KoR, MG, or RK" );
+        talk( $channel, "I don't have any servers stored for $pset, try one of the following:" );
+        talk( $channel, "KoR, MG, or RK" );
         return;
       }
       $set = strtoupper($pset);
@@ -484,7 +484,7 @@ class commands
   {
     $ip = $CONFIG['servers'][$set][$i]['ip'];
     $port = $CONFIG['servers'][$set][$i]['port'];
-    $server = $bot->tremulous_get_players( $ip, $port );
+    $server = tremulous_get_players( $ip, $port );
     $backupname = $CONFIG['servers'][$set][$i]['bakname'];
     $servername = $server['servername'];
     if( $servername == NULL || $servername == "" )
@@ -492,7 +492,7 @@ class commands
     $map = $server['map'];
     $players = count( $server[ alien_players ]  ) + count( $server[ spec_players ]  ) + count( $server[ human_players ]  );
     $maxplayers = $server['maxplayers'];
-    $averageping = $bot->average_ping( $server );
+    $averageping = average_ping( $server );
     if( $map == NULL || $map == "" )
       $status = "OFFLINE";
     else if( $averageping >= 999 && $players > 1 )
@@ -543,33 +543,33 @@ class commands
     if( $status == "ONLINE" )
     {
       if( $playernum > 0 )
-        $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $name )." - $map - ($playernum/$maxplayers) - $averageping" );
+        talk( $channel, tremulous_replace_colors_irc( $name )." - $map - ($playernum/$maxplayers) - $averageping" );
       else
-        $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $name )." - $map - ($playernum/$maxplayers)" );
+        talk( $channel, tremulous_replace_colors_irc( $name )." - $map - ($playernum/$maxplayers)" );
     }
     else if( $status == "OFFLINE" )
-      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $name )." - OFFLINE" );
+      talk( $channel, tremulous_replace_colors_irc( $name )." - OFFLINE" );
     else if( $status == "CRASHED" )
-      $bot->talk( $channel, $bot->tremulous_replace_colors_irc( $name )." - CRASHED" );
+      talk( $channel, tremulous_replace_colors_irc( $name )." - CRASHED" );
     }
   }
   
   function find( $bufarray, $channel )
   {
-    global $con, $bot;
+    global $con;
     
     $player = $bufarray[0];
     if( !$player )
     {
-      $bot->talk( $channel, "Please specify someone to search for." );
+      talk( $channel, "Please specify someone to search for." );
       return;
     }
-    $bot->talk( $channel, "Searching ".count($con['serverlistcache']['con'])." servers for $player...", TRUE );
-    $found = $bot->find_player( $player );
+    talk( $channel, "Searching ".count($con['serverlistcache']['con'])." servers for $player...", TRUE );
+    $found = find_player( $player );
     
     if( count( $found ) > 10 )
     {
-      $bot->talk( $channel, "Your search returned ".count( $found )." results, please be more specific with your search." );
+      talk( $channel, "Your search returned ".count( $found )." results, please be more specific with your search." );
       return;
     }
     
@@ -583,23 +583,23 @@ class commands
         $kills = $found[$i]['kills'];
         $team = $found[$i]['team'];
         if( $team == "humans" )
-          $bot->talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the humans. " );
+          talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the humans. " );
         else if( $team == "spectators" )
-          $bot->talk( $channel, "Found $name on $server, with a ping of $ping, on the spectators. " );
+          talk( $channel, "Found $name on $server, with a ping of $ping, on the spectators. " );
         else
-          $bot->talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the aliens. " );
+          talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the aliens. " );
       }
     }
     else
-      $bot->talk( $channel, "No players with ".$player." in their name." );
+      talk( $channel, "No players with ".$player." in their name." );
   }
   
   function clan( $channel )
   {
-    global $con, $bot;
+    global $con;
 
-    $bot->talk( $channel, "Searching ".count($con['serverlistcache']['con'])." servers for clan members...", TRUE );
-    $found = $bot->find_player( "KoR" );
+    talk( $channel, "Searching ".count($con['serverlistcache']['con'])." servers for clan members...", TRUE );
+    $found = find_player( "KoR" );
     
     if( count( $found ) > 0 )
     {
@@ -611,20 +611,20 @@ class commands
         $kills = $found[$i]['kills'];
         $ping = $found[$i]['ping'];
         if( $team == "humans" )
-          $bot->talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the humans. " );
+          talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the humans. " );
         else if( $team == "spectators" )
-          $bot->talk( $channel, "Found $name on $server, with a ping of $ping, on the spectators. " );
+          talk( $channel, "Found $name on $server, with a ping of $ping, on the spectators. " );
         else
-          $bot->talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the aliens. " );
+          talk( $channel, "Found $name on $server, with a ping of $ping, $kills kills, on the aliens. " );
       }
     }
     else
-      $bot->talk( $channel, "No clan members were found." );
+      talk( $channel, "No clan members were found." );
   }
   
   function server_command( $name, $textarray, $command, $channel )
   {
-    global $bot, $CONFIG;
+    global $CONFIG;
     
     $serveralias = $textarray['0'];
     unset( $textarray['0'] );
@@ -637,7 +637,7 @@ class commands
     $message = implode( " ", $textarray );
     if( $serveralias != "korx" && $serveralias != "layouts" )
     {
-      $bot->talk( $channel, "The alias $serveralias is not known, please use korx or layouts." );
+      talk( $channel, "The alias $serveralias is not known, please use korx or layouts." );
       return;
     }
     else if( $serveralias == "korx" )
@@ -654,20 +654,20 @@ class commands
     }
     
     if( $command == "msgs" )
-      $message2 = $bot->tremulous_rcon( $ip, $port, "m $target ^2$message", $rcon );
+      $message2 = tremulous_rcon( $ip, $port, "m $target ^2$message", $rcon );
     else if( $command == "says" )
-      $message2 = $bot->tremulous_rcon( $ip, $port, "!print ^7[IRC][$name^7]: ^2$message", $rcon );
+      $message2 = tremulous_rcon( $ip, $port, "!print ^7[IRC][$name^7]: ^2$message", $rcon );
     else if( stripos( trim($message), "!" ) !== FALSE &&  stripos( trim($message), "!" ) == 0 )
-      $message2 = $bot->tremulous_rcon( $ip, $port, $message, $rcon, "FALSE" );
+      $message2 = tremulous_rcon( $ip, $port, $message, $rcon, "FALSE" );
     else
     {
-      $bot->talk( $channel, "$name: Please use commands, no variable modifications please." );
+      talk( $channel, "$name: Please use commands, no variable modifications please." );
       return;
     }
     
     if( count( $message2 ) > 5 && stripos( $channel, "#" ) !== FALSE )
     {
-      $bot->talk( $channel, "That returned more than 5 lines of text. It was executed, however. Feel free to try a PM." );
+      talk( $channel, "That returned more than 5 lines of text. It was executed, however. Feel free to try a PM." );
       return;
     }
     else
@@ -675,18 +675,18 @@ class commands
       for( $i=0; $i<count($message2); $i++ )
       {
         if( $i != count( $message2 ) - 1 )
-          $bot->talk( $channel, $message2[$i] );
+          talk( $channel, $message2[$i] );
       }
     }
   }
   
   function join( $bufarray, $channel, $name )
   {
-    global $bot,  $con;
+    global $con;
     
     if( stripos( $bufarray[0], "#" ) === FALSE )
     {
-      $bot->talk( $channel, $name.": That doesn't appear to be a valid channel" );
+      talk( $channel, $name.": That doesn't appear to be a valid channel" );
       return;
     }
 
@@ -695,31 +695,31 @@ class commands
       if( $con['data'][channels][$i]['name'] == $bufarray[0]
           && $con['data'][channels][$i]['active'] == TRUE )
       {
-        $bot->talk( $channel, "Erm... I'm already there ".$name );
+        talk( $channel, "Erm... I'm already there ".$name );
         return;
       }
       else if( $con['data'][channels][$i]['name'] == $bufarray[0]
                && $con['data'][channels][$i]['active'] == TRUE )
       {
-        $bot->talk( $channel, "That channel is now active again (rejoined)" );
+        talk( $channel, "That channel is now active again (rejoined)" );
         if( $bufarray[1] != NULL )
-          $bot->cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
+          cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
         else
-          $bot->cmd_send( "JOIN ".$bufarray[0] );
+          cmd_send( "JOIN ".$bufarray[0] );
         $con['data'][channels][$i]['active'] = TRUE;
-        $bot->writedata( $con['data'] );
+        writedata( $con['data'] );
         return;
       }
     }
     
     
     if( $bufarray[1] != NULL )
-      $bot->cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
+      cmd_send ("JOIN ".$bufarray[0]." ".$bufarray[1] );
     else
-      $bot->cmd_send( "JOIN ".$bufarray[0] );
+      cmd_send( "JOIN ".$bufarray[0] );
 
     $id = count( $con['data'][channels] );
-    $bot->talk( $channel, $name.": ".$bufarray[0]." has been joined, and will be automatically joined in the future." );
+    talk( $channel, $name.": ".$bufarray[0]." has been joined, and will be automatically joined in the future." );
     $con['data'][channels][$id]['name'] = $bufarray[0];
     $con['data'][channels][$id]['password'] = $bufarray[1];
     $con['data'][channels][$id]['svnmon'] = FALSE;
@@ -729,59 +729,59 @@ class commands
     $con['data'][channels][$id]['autoopvoice'] = FALSE;
     $con['data'][channels][$id]['snarf'] = TRUE;
     $con['data'][channels][$id]['active'] = TRUE;
-    $bot->writedata( $con['data'] );
+    writedata( $con['data'] );
   }
   
   function mute( $command, $bufarray, $channel )
   {
-    global $bot, $con;
+    global $con;
     
     if( $bufarray[0] == NULL )
     {
-      $bot->talk( $channel, "Please specify a valid target." );
+      talk( $channel, "Please specify a valid target." );
       return;
     }
     
     if( $command == "mute" )
-      $bot->cmd_send( "MODE ".$channel." -v ".$bufarray[0] );
+      cmd_send( "MODE ".$channel." -v ".$bufarray[0] );
     else 
-      $bot->cmd_send( "MODE ".$channel." +v ".$bufarray[0] );
+      cmd_send( "MODE ".$channel." +v ".$bufarray[0] );
   }
   
   function op( $command, $bufarray, $channel )
   {
-    global $con, $bot; 
+    global $con; 
     
     if( $bufarray[0] == NULL )
     {
-      $bot->talk( $channel, "Please specify a valid target." );
+      talk( $channel, "Please specify a valid target." );
       return;
     }
     
     if( $command == "op" )
-      $bot->cmd_send( "MODE $channel +o ".$bufarray[0] );
+      cmd_send( "MODE $channel +o ".$bufarray[0] );
     else
-      $bot->cmd_send( "MODE $channel -o ".$bufarray[0] );
+      cmd_send( "MODE $channel -o ".$bufarray[0] );
   }
   
   function callvote( $bufarray, $channel, $name )
   {
-    global $con, $bot;
+    global $con;
     
     $type = $bufarray['0'];
     unset( $bufarray['0'] );
     $string = implode( " ", $bufarray );
     if( stripos( $channel, "#" ) === FALSE )
     {
-      $bot->talk( $channel, "Sorry, but please only use callvote in a channel." );
+      talk( $channel, "Sorry, but please only use callvote in a channel." );
       return;
     } 
-    $bot->call_vote( $string, $type, $name, $channel );
+    call_vote( $string, $type, $name, $channel );
   }
   
   function part( $bufarray, $name, $channel )
   {
-    global $bot, $con;
+    global $con;
     
     $channeltopart = $bufarray[0];
     for( $i=0; $i<count( $con['data'][channels] ); $i++ )
@@ -798,7 +798,7 @@ class commands
     
     if( $present == FALSE )
     {
-      $bot->talk( $channel, "I find it rather hard to part channels I'm not present in, $name." );
+      talk( $channel, "I find it rather hard to part channels I'm not present in, $name." );
       return;
     }
     if( $bufarray[1] != NULL )
@@ -807,32 +807,32 @@ class commands
       $pmessage = implode( " ", $bufarray );                
     }
     
-    $bot->cmd_send( "PART $channeltopart :$pmessage" );
+    cmd_send( "PART $channeltopart :$pmessage" );
     if( $channel != $channeltopart )
-      $bot->talk( $channel, $name.": I have parted ".$bufarray[0].", and will no longer join it at startup." );
+      talk( $channel, $name.": I have parted ".$bufarray[0].", and will no longer join it at startup." );
     
     $con['data'][channels][$id]['active'] = FALSE;
-    $bot->writedata( $con['data'] );
+    writedata( $con['data'] );
   }
   
   function msg( $bufarray, $channel )
   {
-    global $con, $bot;
+    global $con;
     
     $target = $bufarray['0'];
     unset( $bufarray['0'] );
     $text = implode( " ", $bufarray );
-    $bot->talk( $target, $text );
-    $bot->talk( $channel, "Message sent to $target" );
+    talk( $target, $text );
+    talk( $channel, "Message sent to $target" );
   }
   
   function finishvote( $command, $channel )
   {
-    global $con, $bot;
+    global $con;
     
     if( $con['vote']['inprogress'] == FALSE )
     {
-      $bot->talk( $channel, "There is no vote currently in progress." );
+      talk( $channel, "There is no vote currently in progress." );
       return;
     }
     
@@ -852,10 +852,10 @@ class commands
   
   function status( $channel )
   {
-    global $other, $bot, $bstatus;
+    global $bstatus;
     
-    $uptime = $other->time_duration( time() - $bstatus['scrstarttime'] );
-    $contime = $other->time_duration( time() - $bstatus['botstarttime'] );
+    $uptime = time_duration( time() - $bstatus['scrstarttime'] );
+    $contime = time_duration( time() - $bstatus['botstarttime'] );
     $servers = $bstatus['trem'];
     if( $servers == NULL )
       $servers = 0;
@@ -893,16 +893,16 @@ class commands
       $out .= "s";
     $out .= ".";
     
-    $bot->talk( $channel, $out );
+    talk( $channel, $out );
     return;
   }
   
   function weather( $channel, $bufarray )
   {
-    global $bot, $con;
+    global $con;
     
     $lugar = implode( " ", $bufarray );
-    $out = $bot->weather( $lugar );
+    $out = weather( $lugar );
     $wind = $out['wind'];
     $pressure = $out['pressure'];
     $advisories = $out['advisories'];
@@ -913,98 +913,96 @@ class commands
     
     if( $place != NULL && $wind != NULL && $humidity != NULL )
     {
-      $bot->talk( $channel, "Weather report for: $place" );
-      $bot->talk( $channel, "Temp: $temp | Humidity: $humidity | Clouds: $clouds | Pressure: $pressure | Wind: $wind " );
+      talk( $channel, "Weather report for: $place" );
+      talk( $channel, "Temp: $temp | Humidity: $humidity | Clouds: $clouds | Pressure: $pressure | Wind: $wind " );
       if( $advisories != NULL )
-        $bot->talk( $channel, "Advisories: $advisories" );
+        talk( $channel, "Advisories: $advisories" );
     }
     else
-      $bot->talk( $channel, "That zip code/location was not found or was ambiguous." );
+      talk( $channel, "That zip code/location was not found or was ambiguous." );
   }
   
   function invite( $channel, $bufarray )
   {
-    global $con, $bot;
+    global $con;
     
     if( $bufarray[0] == NULL )
     {
-      $bot->talk( $channel, "Please specify a valid target for this command." );
+      talk( $channel, "Please specify a valid target for this command." );
       return;
     }
 
-    $bot->cmd_send( "INVITE ".$bufarray[0]." ".$channel );
-    $bot->talk( $channel, "Invited" );
+    cmd_send( "INVITE ".$bufarray[0]." ".$channel );
+    talk( $channel, "Invited" );
   }
   
   function autoop( $channel, $chanid )
   {
-    global $con, $bot;
+    global $con;
 
     if( $chanid == -1 )
     {
-      $bot->talk( $channel, "You can't change settings like those in a channel I was invited to." );
+      talk( $channel, "You can't change settings like those in a channel I was invited to." );
       return;     //Likely a PM or some weird bug
     }
 
     if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $bot->talk( $channel, "You can't turn autoop/autovoice off in a PM." );
+      talk( $channel, "You can't turn autoop/autovoice off in a PM." );
       return;     //Likely a PM or some weird bug
     }
 
     if( $con['data'][channels][$chanid]['autoopvoice'] != TRUE )
     {
       $con['data'][channels][$chanid]['autoopvoice'] = TRUE; 
-      $bot->talk( $channel, "Auto Op and voice has been enabled in this channel." );
+      talk( $channel, "Auto Op and voice has been enabled in this channel." );
     }
     else
     {
       $con['data'][channels][$chanid]['autoopvoice'] = FALSE; 
-      $bot->talk( $channel, "Auto Op and voice has been disabled in this channel." );
+      talk( $channel, "Auto Op and voice has been disabled in this channel." );
     }
     
-    $bot->writedata( $con['data'] );
+    writedata( $con['data'] );
   }
   
   function ccmds( $channel, $chanid )
   {
-    global $bot, $con;
+    global $con;
     
     if( $chanid == -1 )
     {
-      $bot->talk( $channel, "You can't change settings like those in a channel I was invited to." );
+      talk( $channel, "You can't change settings like those in a channel I was invited to." );
       return;     //Likely a PM or some weird bug
     }
     
     if( $channel != $con['data'][channels][$chanid]['name'] )
     {
-      $bot->talk( $channel, "You can't turn commands off in a PM." );
+      talk( $channel, "You can't turn commands off in a PM." );
       return;     //Likely a PM or some weird bug
     }
     
     if( $con['data'][channels][$chanid]['cmds'] != TRUE )
     {
       $con['data'][channels][$chanid]['cmds'] = TRUE; 
-      $bot->talk( $channel, "Commands have been enabled in this channel." );
+      talk( $channel, "Commands have been enabled in this channel." );
     }
     else
     {
       $con['data'][channels][$chanid]['cmds'] = FALSE; 
-      $bot->talk( $channel, "Commands have been disabled in this channel." );
+      talk( $channel, "Commands have been disabled in this channel." );
     }
     
-    $bot->writedata( $con['data'] );
+    writedata( $con['data'] );
   }
   
   function kick( $channel, $bufarray, $name )
-  {
-    global $bot;
-        
+  {        
     $target = $bufarray[0];
     
     if( !$target )
     {
-      $bot->talk( $channel, "$name: Please specify a target for your kick." );
+      talk( $channel, "$name: Please specify a target for your kick." );
       return;
     }
     
@@ -1016,28 +1014,26 @@ class commands
     else
       $message = $name.": ".$message;
     
-    $bot->cmd_send( "KICK $channel $target :$message" );
+    cmd_send( "KICK $channel $target :$message" );
   }
   
   function topic( $channel, $bufarray )
-  {
-    global $bot;
-    
+  {    
     $topic = implode( " ", $bufarray );
 
     if( !$topic )
       $topic = " ";
     
-    $bot->cmd_send( "TOPIC $channel :$topic" );
+    cmd_send( "TOPIC $channel :$topic" );
   }
   
   function listchannels( $channel )
   {
-    global $bot, $con;
+    global $con;
     
     if( count( $con['data'][channels] ) > 2 )
     {
-      $bot->talk( $channel, "I am currently automatically joining the following channels:" );
+      talk( $channel, "I am currently automatically joining the following channels:" );
       for( $i=0; $i<count( $con['data'][channels] ); $i++ )
       {
         if( $i == 0 )
@@ -1047,11 +1043,11 @@ class commands
         else
           $chans .= $con['data'][channels][$i]['name']." , ";
       }
-      $bot->talk( $channel, $chans );
+      talk( $channel, $chans );
     }
     else if( count( $con['data'][channels] ) == 2 )
     {
-      $bot->talk( $channel, "I am currently automatically joining the following channels:" );
+      talk( $channel, "I am currently automatically joining the following channels:" );
       for( $i=0; $i<count( $con['data'][channels] ); $i++ )
       {
         if( $i == 0 )
@@ -1059,17 +1055,17 @@ class commands
         else
           $chans .= $con['data'][channels][$i]['name'].".";
       }
-      $bot->talk( $chanel, $chans );
+      talk( $chanel, $chans );
     }
     else if( count( $con['data'][channels] ) == 1 )
-      $bot->talk( $channel, "I am currently only automatically joining ".$con['data'][channels][0]['name']."." );
+      talk( $channel, "I am currently only automatically joining ".$con['data'][channels][0]['name']."." );
     else
-      $bot->talk( $channel, "I do not appear to be automatically joining any channels." );
+      talk( $channel, "I do not appear to be automatically joining any channels." );
   }
   
   function addadmin( $channel, $bufarray )
   {
-    global $con, $bot;
+    global $con;
     
     $hostmask = $bufarray[0];
     //begin overcomplicated hostmask verification
@@ -1079,7 +1075,7 @@ class commands
     
     if( $error )
     {
-      $bot->talk( $channel, "That doesn't appear to be a valid hostmask (ie uselikethis@hostmask.com)" );
+      talk( $channel, "That doesn't appear to be a valid hostmask (ie uselikethis@hostmask.com)" );
       return;
     }
       
@@ -1087,66 +1083,66 @@ class commands
     {
       if( $hostmask == $con['data'][admins][$i] )
       {
-        $bot->talk( $channel, "That hostmask is already an admin." );
+        talk( $channel, "That hostmask is already an admin." );
         return;
       }
     }
     
     $con['data'][admins][] = $hostmask;
-    $bot->writedata( $con['data'] );
-    $bot->talk( $channel, $hostmaskcf[0]." successfully added." );
+    writedata( $con['data'] );
+    talk( $channel, $hostmaskcf[0]." successfully added." );
   }
   
   function override_password( $channel, $hostmask, $bufarray )
   {
-    global $CONFIG, $con, $bot;
+    global $CONFIG, $con;
 
     for( $i=0; $i<count($con['data'][admins]); $i++ )
     {
       if( $hostmask == $con['data'][admins][$i] )
       {
-        $bot->talk( $channel, "You are already an admin." );
+        talk( $channel, "You are already an admin." );
         return;
       }
     }
 
     if( $CONFIG[admin_pass] == NULL )
-      $bot->talk( $channel, "An admin password is not set." );
+      talk( $channel, "An admin password is not set." );
     else if( $bufarray[0] == $CONFIG[admin_pass] )
     {
       $con['data'][admins][] = $hostmask;
-      $bot->writedata( $con['data'] );
-      $bot->talk( $channel, "You are now an Administrator." );
+      writedata( $con['data'] );
+      talk( $channel, "You are now an Administrator." );
     }
     else
-      $bot->talk( $channel, "Permission Denied" );    //meant to be ambiguous
+      talk( $channel, "Permission Denied" );    //meant to be ambiguous
   }
   
   function snarf_toggle( $channel, $chanid )
   {
-    global $con, $bot;
+    global $con;
     
     if( $chanid == -1 )
-      $bot->talk( $channel, "This channel is not in my data file." );
+      talk( $channel, "This channel is not in my data file." );
     else if( $channel != $con['data'][channels][$chanid]['name'] )
-      $bot->talk( $channel, "You can't turn commands off in a PM." );
+      talk( $channel, "You can't turn commands off in a PM." );
     else if( $con['data'][channels][$chanid]['snarf'] == FALSE )
     {
       $con['data'][channels][$chanid]['snarf'] = TRUE;
-      $bot->talk( $channel, "Snarfing is now enabled for this channel" );
-      $bot->writedata( $con['data'] );
+      talk( $channel, "Snarfing is now enabled for this channel" );
+      writedata( $con['data'] );
     }
     else if( $con['data'][channels][$chanid]['snarf'] == TRUE )
     {
       $con['data'][channels][$chanid]['snarf'] = FALSE;
-      $bot->talk( $channel, "Snarfing is now disabled for this channel" );
-      $bot->writedata( $con['data'] );
+      talk( $channel, "Snarfing is now disabled for this channel" );
+      writedata( $con['data'] );
     }
   }
   
   function list_admins( $channel, $textarray )
   {
-    global $bot, $con;
+    global $con;
     
     $start = 0;
     $admins = $con['data'][admins];
@@ -1158,7 +1154,7 @@ class commands
       {
         if( $textarray[0] > count( $admins ) || $textarray[0] < 0 )
         {
-          $bot->talk( $channel, "That is not a valid offset." );
+          talk( $channel, "That is not a valid offset." );
           return;
         }
         $start = $textarray[0];
@@ -1176,24 +1172,24 @@ class commands
         }
         if( !$found )
         {
-          $bot->talk( $channel, "That username was not found." );
+          talk( $channel, "That username was not found." );
           return;
         }
         else
         {
           if( count( $found ) > 5 )
           {
-            $bot->talk( $channel, "More than 5 matches were found, please be more specific." );
+            talk( $channel, "More than 5 matches were found, please be more specific." );
             return;
           }
           else
           {
             if( count( $found ) > 1 )
-              $bot->talk( $channel, "The following users (partially) matched your search:" );
+              talk( $channel, "The following users (partially) matched your search:" );
             else
-              $bot->talk( $channel, "The following user (partially) matched your search:" );
+              talk( $channel, "The following user (partially) matched your search:" );
             for( $i=0; $i<count( $found ); $i++ )
-              $bot->talk( $channel, $found[$i]['#']." ".$found[$i]['n'] );
+              talk( $channel, $found[$i]['#']." ".$found[$i]['n'] );
             return;
           }
           
@@ -1206,15 +1202,15 @@ class commands
       if( is_string( $admins[$i] ) )
       {
         $k++;
-        $bot->talk( $channel, $i." ".$admins[$i] );
+        talk( $channel, $i." ".$admins[$i] );
       }
     }
     if( $k > 1 )
-      $bot->talk( $channel, "Displaying admins #$start-#".($k+$start)." of ".count( $admins )." total." );
+      talk( $channel, "Displaying admins #$start-#".($k+$start)." of ".count( $admins )." total." );
     else if( $k == 1 )
-      $bot->talk( $channel, "Displaying admins #$start of ".count( $admins )." total." );
+      talk( $channel, "Displaying admins #$start of ".count( $admins )." total." );
     else
-      $bot->talk( $channel, "No admins were found." );
+      talk( $channel, "No admins were found." );
   }
 }
 ?>
