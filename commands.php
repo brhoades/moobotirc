@@ -174,11 +174,6 @@ array(
       ""
     ),
     array
-    ("addadmin", "\$commands->addadmin( \$channel, \$bufarray );", TRUE,
-      "Adds an admin for a user name.",
-      "[hostmask]"
-    ),
-    array
     ("password", "\$commands->override_password( \$channel, \$hostmask, \$bufarray );", FALSE,
       "Uses the admin password, defined in the config file, to grant the user admin status.",
       "[password]"
@@ -189,9 +184,19 @@ array(
       ""
     ),
     array
+    ("addadmin", "\$commands->addadmin( \$channel, \$bufarray );", TRUE,
+      "Adds an admin for a user name.",
+      "[hostmask]"
+    ),
+    array
     ("listadmins", "\$commands->list_admins( \$channel, \$textarray );", FALSE,
       "Lists current admins",
       "(offset|name)"
+    ),
+    array
+    ("rmadmin", "\$commands->rmadmin( \$channel, \$textarray );", FALSE,
+      "Removes an admin by number",
+      "[number]"
     )
 );
 
@@ -1211,6 +1216,14 @@ class commands
       talk( $channel, "Displaying admins #".($start+1)." of ".count( $admins )." total." );
     else
       talk( $channel, "No admins were found (at that offset)." );
+  }
+  
+  function rmadmin( $channel, $textarray ) 
+  {
+    if( (int)$textarray[0] > 0 )
+      talk( $channel, delete_admin( $textarray[0] ) );
+    else if( (int)$textarray[0] == NULL )
+      talk( $channel, "You must provide an admin number" );
   }
 }
 ?>
