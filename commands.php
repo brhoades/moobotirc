@@ -1185,11 +1185,11 @@ class commands
           else
           {
             if( count( $found ) > 1 )
-              talk( $channel, "The following users (partially) matched your search:" );
+              talk( $channel, "The following admins (partially) matched your search:" );
             else
-              talk( $channel, "The following user (partially) matched your search:" );
+              talk( $channel, "The following admin (partially) matched your search:" );
             for( $i=0; $i<count( $found ); $i++ )
-              talk( $channel, $found[$i]['#']." ".$found[$i]['n'] );
+              talk( $channel, ($found[$i]['#']+1)." ".$found[$i]['n'] );
             return;
           }
           
@@ -1197,20 +1197,20 @@ class commands
       }
     }
     $k = 0;
-    for( $i=$start;$i<$start+5; $i++ )
+    for( $i=$start;$i<=$start+5; $i++ )
     {
       if( is_string( $admins[$i] ) )
       {
         $k++;
-        talk( $channel, $i." ".$admins[$i] );
+        talk( $channel, ($i+1)." ".$admins[$i] );
       }
     }
     if( $k > 1 )
-      talk( $channel, "Displaying admins #$start-#".($k+$start)." of ".count( $admins )." total." );
+      talk( $channel, "Displaying admins #".($start+1)."-#".($k+$start)." of ".count( $admins )." total." );
     else if( $k == 1 )
-      talk( $channel, "Displaying admins #$start of ".count( $admins )." total." );
+      talk( $channel, "Displaying admins #".($start+1)." of ".count( $admins )." total." );
     else
-      talk( $channel, "No admins were found." );
+      talk( $channel, "No admins were found (at that offset)." );
   }
 }
 ?>
