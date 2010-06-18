@@ -1317,4 +1317,52 @@ function replace( $replacewhat, $withwhat, $inwhat )
   return( $inwhat );
 }
 
+function connect_to_irc( )
+{
+  global $CONFIG, $con, $lasttime;
+  if( is_int( $CONFIG[server] ) )
+  {
+    if( $CONFIG[server] == 0 )
+      $CONFIG[server] = "irc.freenode.net";
+    else if( $CONFIG[server] == 1 )
+      $CONFIG[server] = "irc.quakenet.org";
+  }
+  $old = $CONFIG[server];
+  $CONFIG[server] = gethostbyname( $CONFIG[server] );
+  debug_message( "Resolved $old to ".$CONFIG[server] );
+  $con['socket'] = fsockopen( $CONFIG[server], $CONFIG[port], $errno, $errstr, 1 );
+  // Eh, I did this crud a long time ago... I doubt it's highly necessary
+  stream_set_blocking( $con['socket'], 0 );
+  stream_set_timeout( $con['socket'], 100 );
+  //FIXME: this should be in $con
+	$lasttime = time();
+  usleep( $CONFIG[sleeptime] );
+  cmd_send( "USER ". $CONFIG[nick] ." ".$CONFIG[vhost]." ".$CONFIG[vhost]." :". $CONFIG[name], FALSE, TRUE );
+  cmd_send( "NICK ". $CONFIG[nick] ." ".$CONFIG[vhost], FALSE, TRUE );
+}
+
+function ping_server( )
+{
+  global $lasttime;
+  if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
+  {
+    cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ), FALSE, TRUE );
+    $lasttime = time();
+  }
+}
+
+function identify( )
+{
+  global $CONFIG;
+  
+  if( $CONFIG[nickserv] == "NickServ" || $CONFIG[nickserv] == "Q@CServe.quakenet.org" )
+  {
+    if( $CONFIG[server] == 0 || $CONFIG[nickserv] == "NickServ" )
+      cmd_send( "PRIVMSG NickServ :IDENTIFY ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+    else if( $CONFIG[server] == 1 || $CONFIG[nickserv] == "Q@CServe.quakenet.org" )
+      cmd_send( "PRIVMSG Q@CServe.quakenet.org :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+  }
+  else
+    cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
+}
 ?>
