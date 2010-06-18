@@ -1365,4 +1365,20 @@ function identify( )
   else
     cmd_send( "PRIVMSG ".$CONFIG[nickserv]." :AUTH ".$CONFIG[nick]." ".$CONFIG[nickpass], TRUE, TRUE );
 }
+
+function delete_admin( $offset )
+{
+  global $con;
+  
+  $offset--;
+  if( $offset >= count( $con['data'][admins] || $offset < 1 || $offset == NULL ) 
+    return "Invalid admin number.";
+  else if( $con['data'][admins][$offset] == NULL )
+    return "Invalid admin (???).";
+  
+  return "Admin at hostmask ".$con['data'][admins][$offset]." was removed";
+  unset( $con['data'][admins][$offset] );
+  $con['data'][admins][$offset] = array_values( $con['data'][admins][$offset] );
+  writedata( $con['data'] );
+}
 ?>
