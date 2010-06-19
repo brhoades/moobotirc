@@ -859,8 +859,7 @@ class commands
   {
     global $bstatus;
     
-    $uptime = time_duration( time() - $bstatus['scrstarttime'] );
-    $contime = time_duration( time() - $bstatus['botstarttime'] );
+    $uptime = time_duration( time() - $bstatus['botstarttime'] );
     $servers = $bstatus['trem'];
     if( $servers == NULL )
       $servers = 0;
