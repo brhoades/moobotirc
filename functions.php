@@ -1343,7 +1343,7 @@ function connect_to_irc( )
 
 function ping_server( )
 {
-  global $lasttime;
+  global $lasttime, $con;
   if( substr( $con['buffer']['all'], 0, 6 ) == 'PING :' )
   {
     cmd_send( 'PONG :'.substr( $con['buffer']['all'], 6 ), FALSE, TRUE );
@@ -1371,7 +1371,7 @@ function delete_admin( $offset )
   global $con;
   
   $offset--;
-  if( $offset >= count( $con['data'][admins] || $offset < 1 || $offset == NULL ) 
+  if( $offset >= count( $con['data'][admins] ) || $offset < 0 || $offset == NULL )
     return "Invalid admin number.";
   else if( $con['data'][admins][$offset] == NULL )
     return "Invalid admin (???).";
