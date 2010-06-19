@@ -132,6 +132,8 @@ function init()
       if( stripos( $con['buffer']['all'], $CONFIG[serverspam] ) !== FALSE )
         continue;
 
+    ping_server( );
+
     //****************
     //
     //COMMANDS

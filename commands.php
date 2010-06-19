@@ -194,7 +194,7 @@ array(
       "(offset|name)"
     ),
     array
-    ("rmadmin", "\$commands->rmadmin( \$channel, \$textarray );", FALSE,
+    ("rmadmin", "\$commands->rmadmin( \$channel, \$textarray );", TRUE,
       "Removes an admin by number",
       "[number]"
     )
