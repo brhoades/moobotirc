@@ -1,0 +1,24 @@
+New changes to moobot:
+
+- One global, data var
+  * Will contain the following:
+    - Config data from data
+    - Status information
+      * Session status stored seperately from all time.
+    - Command tree
+      * Flag for each command/command set
+      * Flag checks for 
+    - Buffer from current and the last time.
+    - Channels all have their own array
+      * Users on channels kept up to date
+      * Users have their flags stored
+      * Users have an admin flag
+      * Users have their hostmasks stored
+- Admin rewrite
+  * Admins decided by hostmask 'regex'
+  * Admins levels
+- More modularized main function, try to fit it on one or two screens.
+- Find/ifind function instead of stripos
+- Trigger checks, for commands, pings, joins etc
+- Updated, readable log
+- 

@@ -17,19 +17,28 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with Moobot.  If not, see <http://www.gnu.org/licenses/>.  
- 
 */
 
-// ESSENTIAL, EDIT //
-$CONFIG['server'] = 'irc.unvanquished.net'; 
-$CONFIG['port'] = 6667; //IRC Port, default is 6667
-$CONFIG['nick'] = 'Moobot0.6'; //Nickname, what people will see in the IRC
-$CONFIG['name'] = 'moobot'; //Ident name
-$CONFIG['datafn'] = 'data'; //Datafile name, will be created if it doesn't exist. Make sure we can write to it!
-$CONFIG['datapath'] = '/home/moobot/moobot/'; //Datafile's folder
-$CONFIG['vhost'] = 'knightsofreason.net'; //Hostname if you have one (localhost if you don't)
+//Basic includes
+require( "functions.php" );
 
-// OPTIONAL //
-$CONFIG['sleeptime'] = 500; //Time in ms between frames
+//main loop
+while( $alive )
+  main();
+  
+function main( )
+{
+  global $con;
+  
+  $con = conSetup( );
+  
+  while( !feof( $con['socket'] )
+  {
+    loadFrame( );
+    runTriggers( );
+    
+    nextFrame( );
+  }
+}
 
 ?>
