@@ -1,0 +1,1 @@
+Moobotirc is a PHP IRC bot meant to act as an assistant for Tremulous server monitoring, and SVN monitoring. It is, as of the first revision, new to the show. It has been running for a little over half a year with several modifications. It needs lots of love (modifying) to get to work for you.
